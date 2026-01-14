@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,8 +10,10 @@ import { repairData, actors } from "@/lib/data"
 import { Wrench, ShoppingBag, ArrowRight, Leaf, Coins, Clock } from "lucide-react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
+import { calculatorCopy } from "@/content/no"
 
 type DeviceType = "phone" | "laptop" | "clothing"
+
 type IssueType = string
 
 interface Result {
@@ -30,29 +32,6 @@ export function Calculator() {
   const [issue, setIssue] = useState<IssueType>("")
   const [result, setResult] = useState<Result | null>(null)
 
-  const deviceOptions = [
-    { value: "phone", label: "Telefon / Mobil" },
-    { value: "laptop", label: "PC / Laptop" },
-    { value: "clothing", label: "Klær" },
-  ]
-
-  const issueOptions: Record<DeviceType, { value: string; label: string }[]> = {
-    phone: [
-      { value: "screen", label: "Knust skjerm" },
-      { value: "battery", label: "Dårlig batteri" },
-      { value: "slow", label: "Treg ytelse" },
-    ],
-    laptop: [
-      { value: "screen", label: "Knust skjerm" },
-      { value: "battery", label: "Dårlig batteri" },
-      { value: "slow", label: "Treg ytelse" },
-    ],
-    clothing: [
-      { value: "zipper", label: "Ødelagt glidelås" },
-      { value: "seam", label: "Revet søm" },
-    ],
-  }
-
   const calculateResult = () => {
     if (!deviceType || !issue) return
 
@@ -66,26 +45,28 @@ export function Calculator() {
     let title: string
     let description: string
 
-    // Decision logic
     if (repairCostAvg < usedPriceAvg * 0.7) {
       recommendation = "repair"
-      title = "Reparer!"
-      description = `Reparasjon er det beste valget. Du sparer penger og miljøet ved å forlenge levetiden på ${estimate.deviceType.toLowerCase()}.`
+      title = calculatorCopy.decisionCopy.repairTitle
+      description = calculatorCopy.decisionCopy.repairDescription.replace(
+        "{device}",
+        estimate.deviceType.toLowerCase(),
+      )
     } else if (repairCostAvg > estimate.newPrice * 0.6) {
       recommendation = "buy_used"
-      title = "Kjøp brukt!"
-      description = `Reparasjon kan bli dyrt. Vurder å kjøpe brukt i stedet – det er ofte billigere og bedre for miljøet enn å kjøpe nytt.`
+      title = calculatorCopy.decisionCopy.buyUsedTitle
+      description = calculatorCopy.decisionCopy.buyUsedDescription
     } else {
       recommendation = "repair"
-      title = "Reparer!"
-      description = `Reparasjon er fortsatt et godt valg. Du får beholde enheten din og sparer ressurser.`
+      title = calculatorCopy.decisionCopy.fallbackTitle
+      description = calculatorCopy.decisionCopy.fallbackDescription
     }
 
     const savingsMin = estimate.newPrice - estimate.repairCostMax
     const savingsMax = estimate.newPrice - estimate.repairCostMin
 
-    const relevantActors = actors.filter((a) =>
-      recommendation === "repair" ? a.category === "reparasjon" : a.category === "brukt",
+    const relevantActors = actors.filter((actor) =>
+      recommendation === "repair" ? actor.category === "reparasjon" : actor.category === "brukt",
     )
 
     setResult({
@@ -120,29 +101,27 @@ export function Calculator() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Wrench className="h-5 w-5 text-primary" />
-                  Reparer eller kjøp?
+                  {calculatorCopy.cardTitle}
                 </CardTitle>
-                <CardDescription>
-                  Fyll inn hva du har og hva som er problemet – vi hjelper deg å ta det beste valget.
-                </CardDescription>
+                <CardDescription>{calculatorCopy.cardDescription}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="device">Hva slags enhet/ting?</Label>
+                  <Label htmlFor="device">{calculatorCopy.deviceLabel}</Label>
                   <Select
                     value={deviceType}
-                    onValueChange={(v) => {
-                      setDeviceType(v as DeviceType)
+                    onValueChange={(value) => {
+                      setDeviceType(value as DeviceType)
                       setIssue("")
                     }}
                   >
                     <SelectTrigger id="device">
-                      <SelectValue placeholder="Velg type..." />
+                      <SelectValue placeholder={calculatorCopy.devicePlaceholder} />
                     </SelectTrigger>
                     <SelectContent>
-                      {deviceOptions.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
+                      {calculatorCopy.deviceOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -155,15 +134,15 @@ export function Calculator() {
                     animate={{ opacity: 1, height: "auto" }}
                     className="space-y-2"
                   >
-                    <Label htmlFor="issue">Hva er problemet?</Label>
+                    <Label htmlFor="issue">{calculatorCopy.issueLabel}</Label>
                     <Select value={issue} onValueChange={setIssue}>
                       <SelectTrigger id="issue">
-                        <SelectValue placeholder="Velg problem..." />
+                        <SelectValue placeholder={calculatorCopy.issuePlaceholder} />
                       </SelectTrigger>
                       <SelectContent>
-                        {issueOptions[deviceType].map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
+                        {calculatorCopy.issueOptions[deviceType].map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -172,7 +151,7 @@ export function Calculator() {
                 )}
 
                 <Button onClick={calculateResult} disabled={!deviceType || !issue} className="w-full" size="lg">
-                  Beregn anbefaling
+                  {calculatorCopy.actionLabel}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </CardContent>
@@ -200,7 +179,7 @@ export function Calculator() {
                   )}
                 </div>
                 <Badge className="mx-auto mb-2" variant={result.recommendation === "repair" ? "default" : "secondary"}>
-                  Anbefaling
+                  {calculatorCopy.recommendationBadge}
                 </Badge>
                 <CardTitle className="text-3xl">{result.title}</CardTitle>
                 <CardDescription className="text-base">{result.description}</CardDescription>
@@ -211,15 +190,15 @@ export function Calculator() {
                   <div className="p-4 rounded-lg bg-muted text-center">
                     <Coins className="h-6 w-6 mx-auto mb-2 text-primary" />
                     <p className="text-2xl font-bold text-primary">
-                      {result.savingsMin}–{result.savingsMax} kr
+                      {result.savingsMin}-{result.savingsMax} kr
                     </p>
-                    <p className="text-sm text-muted-foreground">mulig besparelse</p>
+                    <p className="text-sm text-muted-foreground">{calculatorCopy.savingsLabel}</p>
                   </div>
 
                   <div className="p-4 rounded-lg bg-muted text-center">
                     <Leaf className="h-6 w-6 mx-auto mb-2 text-primary" />
                     <p className="text-2xl font-bold text-primary">~{result.co2Saved} kg</p>
-                    <p className="text-sm text-muted-foreground">CO₂ spart</p>
+                    <p className="text-sm text-muted-foreground">{calculatorCopy.co2Label}</p>
                   </div>
 
                   <div className="p-4 rounded-lg bg-muted text-center">
@@ -227,27 +206,27 @@ export function Calculator() {
                     <p className="text-2xl font-bold text-primary">
                       ~{result.estimate.repairDays} dag{result.estimate.repairDays > 1 ? "er" : ""}
                     </p>
-                    <p className="text-sm text-muted-foreground">estimert tid</p>
+                    <p className="text-sm text-muted-foreground">{calculatorCopy.timeLabel}</p>
                   </div>
                 </div>
 
                 <div className="p-4 rounded-lg bg-muted/50 space-y-3">
-                  <p className="font-medium">Prissammenligning:</p>
+                  <p className="font-medium">{calculatorCopy.priceComparisonLabel}</p>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Reparasjon</span>
+                      <span>{calculatorCopy.priceLabels.repair}</span>
                       <span className="font-medium">
-                        {result.estimate.repairCostMin}–{result.estimate.repairCostMax} kr
+                        {result.estimate.repairCostMin}-{result.estimate.repairCostMax} kr
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Kjøpe brukt</span>
+                      <span>{calculatorCopy.priceLabels.used}</span>
                       <span className="font-medium">
-                        {result.estimate.usedPriceMin}–{result.estimate.usedPriceMax} kr
+                        {result.estimate.usedPriceMin}-{result.estimate.usedPriceMax} kr
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Kjøpe nytt</span>
+                      <span>{calculatorCopy.priceLabels.new}</span>
                       <span className="font-medium text-muted-foreground">~{result.estimate.newPrice} kr</span>
                     </div>
                   </div>
@@ -255,8 +234,8 @@ export function Calculator() {
 
                 {result.actors.length > 0 && (
                   <div>
-                    <p className="font-medium mb-3">Anbefalt aktør i Hamar:</p>
-                    <div className="flex gap-2">
+                    <p className="font-medium mb-3">{calculatorCopy.recommendedActorsLabel}</p>
+                    <div className="flex gap-2 flex-wrap">
                       {result.actors.map((actor) => (
                         <Button key={actor.id} asChild variant="outline">
                           <Link href={`/aktorer/${actor.slug}`}>
@@ -270,7 +249,7 @@ export function Calculator() {
                 )}
 
                 <Button onClick={reset} variant="ghost" className="w-full">
-                  Beregn på nytt
+                  {calculatorCopy.resetLabel}
                 </Button>
               </CardContent>
             </Card>

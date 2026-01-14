@@ -1,21 +1,24 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { quizQuestions, challenges } from "@/lib/data"
+import { challenges, quizQuestions, quizResults } from "@/lib/data"
 import { CheckCircle2, ArrowRight, Share2, RotateCcw, Trophy, Target } from "lucide-react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
+import { quizCopy, site } from "@/content/no"
 
 type QuizState = "intro" | "playing" | "result"
+
+type QuizLevel = keyof typeof quizResults
 
 interface QuizResult {
   score: number
   maxScore: number
-  level: "starter" | "på_vei" | "gjenbrukshelt"
+  level: QuizLevel
   title: string
   description: string
   tips: string[]
@@ -49,46 +52,27 @@ export function Quiz() {
     const score = finalAnswers.reduce((sum, pts) => sum + pts, 0)
     const maxScore = quizQuestions.length * 2
 
-    let level: QuizResult["level"]
-    let title: string
-    let description: string
-    let tips: string[]
-    let badge: string
+    let level: QuizLevel
 
     if (score <= 4) {
       level = "starter"
-      title = "Sirkulær Starter"
-      description =
-        "Du er på begynnelsen av din sirkulære reise! Det er et flott utgangspunkt – her er noen enkle steg for å komme i gang."
-      tips = [
-        "Prøv å besøke en bruktbutikk denne uka",
-        'Før du kjøper noe nytt, spør deg selv: "Trenger jeg dette?"',
-        "Lær hvor du leverer e-avfall i Hamar",
-      ]
-      badge = "🌱"
     } else if (score <= 8) {
-      level = "på_vei"
-      title = "På God Vei"
-      description = "Du gjør allerede mye bra! Med noen små justeringer kan du bli en ekte gjenbrukshelt."
-      tips = [
-        "Utfordring: Få noe reparert i stedet for å kjøpe nytt",
-        "Del dine bruktfunn med venner",
-        "Prøv å selge ting du ikke bruker på Finn eller Tise",
-      ]
-      badge = "♻️"
+      level = "pa_vei"
     } else {
       level = "gjenbrukshelt"
-      title = "Gjenbrukshelt!"
-      description = "Wow! Du er en inspirasjon. Nå kan du hjelpe andre å bli mer sirkulære!"
-      tips = [
-        "Ta med en venn til bruktbutikk",
-        "Del tips på sosiale medier",
-        'Vurder å bli "sirkulær ambassadør" blant vennene dine',
-      ]
-      badge = "🏆"
     }
 
-    setResult({ score, maxScore, level, title, description, tips, badge })
+    const config = quizResults[level]
+
+    setResult({
+      score,
+      maxScore,
+      level,
+      title: config.title,
+      description: config.description,
+      tips: config.tips,
+      badge: config.badge,
+    })
     setState("result")
   }
 
@@ -99,14 +83,20 @@ export function Quiz() {
     setResult(null)
   }
 
+  const formatShareText = (currentResult: QuizResult) =>
+    quizCopy.shareTemplate
+      .replace("{score}", String(currentResult.score))
+      .replace("{maxScore}", String(currentResult.maxScore))
+      .replace("{title}", currentResult.title)
+
   const shareResult = () => {
     if (!result) return
-    const text = `Jeg fikk ${result.score}/${result.maxScore} på SirkulærHamar-quizen og er en ${result.title}! Ta quizen du også: `
+    const text = formatShareText(result)
     if (navigator.share) {
-      navigator.share({ title: "Min Sirkulær Score", text })
+      navigator.share({ title: site.name, text })
     } else {
       navigator.clipboard.writeText(text + window.location.href)
-      alert("Kopiert til utklippstavle!")
+      alert(quizCopy.copiedLabel)
     }
   }
 
@@ -125,20 +115,19 @@ export function Quiz() {
                 <div className="mx-auto mb-4 h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
                   <Target className="h-10 w-10 text-primary" />
                 </div>
-                <CardTitle className="text-3xl">Hvor sirkulær er du?</CardTitle>
-                <CardDescription className="text-base">
-                  Ta vår quiz og finn ut hvor miljøvennlige vanene dine er. Du får personlige tips basert på svarene
-                  dine!
-                </CardDescription>
+                <CardTitle className="text-3xl">{quizCopy.introTitle}</CardTitle>
+                <CardDescription className="text-base">{quizCopy.introDescription}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex justify-center gap-4 text-sm text-muted-foreground">
-                  <span>{quizQuestions.length} spørsmål</span>
-                  <span>•</span>
-                  <span>~2 minutter</span>
+                  <span>
+                    {quizQuestions.length} {quizCopy.questionsLabel}
+                  </span>
+                  <span>-</span>
+                  <span>{quizCopy.timeEstimate}</span>
                 </div>
                 <Button onClick={startQuiz} size="lg" className="gap-2">
-                  Start quizen
+                  {quizCopy.startButton}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </CardContent>
@@ -157,7 +146,7 @@ export function Quiz() {
               <CardHeader>
                 <div className="flex items-center justify-between mb-4">
                   <Badge variant="secondary">
-                    Spørsmål {currentQuestion + 1} av {quizQuestions.length}
+                    {quizCopy.progressLabel} {currentQuestion + 1} av {quizQuestions.length}
                   </Badge>
                   <span className="text-sm text-muted-foreground">
                     {Math.round(((currentQuestion + 1) / quizQuestions.length) * 100)}%
@@ -197,7 +186,7 @@ export function Quiz() {
               <CardHeader>
                 <div className="text-6xl mb-4">{result.badge}</div>
                 <Badge className="mx-auto mb-2">
-                  {result.score}/{result.maxScore} poeng
+                  {result.score}/{result.maxScore} {quizCopy.pointsLabel}
                 </Badge>
                 <CardTitle className="text-3xl text-primary">{result.title}</CardTitle>
                 <CardDescription className="text-base">{result.description}</CardDescription>
@@ -206,7 +195,7 @@ export function Quiz() {
                 <div className="p-4 rounded-lg bg-muted/50">
                   <h4 className="font-semibold mb-3 flex items-center justify-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-primary" />
-                    Dine neste steg:
+                    {quizCopy.nextStepsTitle}
                   </h4>
                   <ul className="space-y-2 text-left">
                     {result.tips.map((tip, index) => (
@@ -221,17 +210,17 @@ export function Quiz() {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button onClick={shareResult} variant="outline" className="flex-1 gap-2 bg-transparent">
                     <Share2 className="h-4 w-4" />
-                    Del resultatet
+                    {quizCopy.shareLabel}
                   </Button>
                   <Button onClick={resetQuiz} variant="outline" className="flex-1 gap-2 bg-transparent">
                     <RotateCcw className="h-4 w-4" />
-                    Ta quizen på nytt
+                    {quizCopy.retryLabel}
                   </Button>
                 </div>
 
                 <Button asChild className="w-full" size="lg">
                   <Link href="/aktorer">
-                    Utforsk aktører i Hamar
+                    {quizCopy.exploreActorsLabel}
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Link>
                 </Button>
@@ -242,9 +231,9 @@ export function Quiz() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Trophy className="h-5 w-5 text-accent" />
-                  Utfordringer for deg
+                  {quizCopy.challengesTitle}
                 </CardTitle>
-                <CardDescription>Fullfør utfordringer for å bli enda mer sirkulær!</CardDescription>
+                <CardDescription>{quizCopy.challengesDescription}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3 sm:grid-cols-2">

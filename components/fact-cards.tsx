@@ -2,16 +2,15 @@
 
 import { motion } from "framer-motion"
 import { facts } from "@/lib/data"
+import { sectionContent } from "@/content/no"
 
 export function FactCards() {
   return (
     <section className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Fakta om bærekraft</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Visste du dette om gjenbruk, e-avfall og reparasjon?
-          </p>
+          <h2 className="text-3xl font-bold mb-4">{sectionContent.facts.title}</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">{sectionContent.facts.description}</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

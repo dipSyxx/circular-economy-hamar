@@ -1,18 +1,19 @@
-import type React from "react"
-import type { Metadata, Viewport } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
-import "./globals.css"
+import type React from "react";
+import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { ThemeProvider } from "@/components/theme-provider";
+import { site } from "@/content/no";
+import "./globals.css";
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const _geist = Geist({ subsets: ["latin"] });
+const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SirkulærHamar - Gjenbruk, Reparasjon, Bærekraft",
-  description:
-    "Din guide til sirkulære tilbud i Hamar. Finn bruktbutikker, reparatører og lær hvordan du kan leve mer bærekraftig.",
+  title: site.title,
+  description: site.description,
   generator: "v0.app",
-  keywords: ["sirkulær", "gjenbruk", "hamar", "bærekraft", "reparasjon", "brukt"],
+  keywords: site.keywords,
   icons: {
     icon: [
       {
@@ -30,25 +31,32 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-icon.png",
   },
-}
+};
 
 export const viewport: Viewport = {
   themeColor: "#22c55e",
   width: "device-width",
   initialScale: 1,
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="no">
+    <html lang="nb" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>
-  )
+  );
 }

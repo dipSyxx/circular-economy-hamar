@@ -5,13 +5,7 @@ import { Card } from "@/components/ui/card"
 import { CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-
-const actions = [
-  "Kjøp én ting brukt denne uka",
-  "Fiks én ting før du kjøper nytt",
-  "Lever inn e-avfall på riktig sted",
-  "Ta med en venn til bruktbutikk",
-]
+import { ctaContent } from "@/content/no"
 
 export function CTASection() {
   return (
@@ -26,14 +20,14 @@ export function CTASection() {
           >
             <Card className="p-8 md:p-12 bg-primary text-primary-foreground">
               <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">Klar for å gjøre en forskjell?</h2>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">{ctaContent.title}</h2>
                 <p className="text-primary-foreground/80 max-w-xl mx-auto">
-                  Start med små steg. Her er fire enkle ting du kan gjøre denne uka:
+                  {ctaContent.description}
                 </p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2 mb-8">
-                {actions.map((action, index) => (
+                {ctaContent.actions.map((action, index) => (
                   <motion.div
                     key={action}
                     initial={{ opacity: 0, x: -20 }}
@@ -50,7 +44,7 @@ export function CTASection() {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button asChild size="lg" variant="secondary">
-                  <Link href="/aktorer">Finn aktører i Hamar</Link>
+                  <Link href={ctaContent.primaryCta.href}>{ctaContent.primaryCta.label}</Link>
                 </Button>
                 <Button
                   asChild
@@ -58,7 +52,7 @@ export function CTASection() {
                   variant="outline"
                   className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 bg-transparent"
                 >
-                  <Link href="/quiz">Ta sirkulærquizen</Link>
+                  <Link href={ctaContent.secondaryCta.href}>{ctaContent.secondaryCta.label}</Link>
                 </Button>
               </div>
             </Card>

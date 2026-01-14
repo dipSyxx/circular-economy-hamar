@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { MapPin, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import type { Actor } from "@/lib/data"
+import { actorCopy } from "@/content/no"
 
 interface ActorCardProps {
   actor: Actor
@@ -16,18 +17,12 @@ export function ActorCard({ actor }: ActorCardProps) {
     gjenvinning: "bg-chart-2/20 text-chart-2",
   }
 
-  const categoryLabels = {
-    brukt: "Brukt",
-    reparasjon: "Reparasjon",
-    gjenvinning: "Gjenvinning",
-  }
-
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="aspect-video relative overflow-hidden">
         <img src={actor.image || "/placeholder.svg"} alt={actor.name} className="object-cover w-full h-full" />
         <div className="absolute top-4 left-4">
-          <Badge className={categoryColors[actor.category]}>{categoryLabels[actor.category]}</Badge>
+          <Badge className={categoryColors[actor.category]}>{actorCopy.categoryLabels[actor.category]}</Badge>
         </div>
       </div>
       <CardHeader>
@@ -50,7 +45,7 @@ export function ActorCard({ actor }: ActorCardProps) {
 
         <div className="flex gap-2">
           <Button asChild className="flex-1">
-            <Link href={`/aktorer/${actor.slug}`}>Les mer</Link>
+            <Link href={`/aktorer/${actor.slug}`}>{actorCopy.readMoreLabel}</Link>
           </Button>
           {actor.website && (
             <Button variant="outline" size="icon" asChild>
