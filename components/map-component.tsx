@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useMemo, useState } from "react"
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet"
@@ -8,6 +8,8 @@ import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png"
 import iconUrl from "leaflet/dist/images/marker-icon.png"
 import shadowUrl from "leaflet/dist/images/marker-shadow.png"
 import { actors } from "@/lib/data"
+import { formatTime, getOpeningStatus } from "@/lib/opening-hours"
+import { recordAction } from "@/lib/profile-store"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -87,14 +89,21 @@ export function MapComponent() {
 
   const routeLink = useMemo(() => {
     if (routeActors.length < 2) return null
-    const origin = userLocation ? `${userLocation[0]},${userLocation[1]}` : routeActors[0].address
-    const destination = routeActors[routeActors.length - 1].address
+    const formatCoords = (lat: number, lng: number) => `${lat},${lng}`
+    const origin = userLocation
+      ? formatCoords(userLocation[0], userLocation[1])
+      : formatCoords(routeActors[0].lat, routeActors[0].lng)
+    const destination = formatCoords(routeActors[routeActors.length - 1].lat, routeActors[routeActors.length - 1].lng)
     const waypoints = userLocation ? routeActors.slice(0, -1) : routeActors.slice(1, -1)
     const waypointParam =
-      waypoints.length > 0 ? `&waypoints=${encodeURIComponent(waypoints.map((actor) => actor.address).join("|"))}` : ""
-    return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(
-      destination,
-    )}${waypointParam}`
+      waypoints.length > 0
+        ? `&waypoints=${encodeURIComponent(
+            waypoints.map((actor) => formatCoords(actor.lat, actor.lng)).join("|"),
+          )}`
+        : ""
+    return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+      origin,
+    )}&destination=${encodeURIComponent(destination)}${waypointParam}`
   }, [routeActors, userLocation])
 
   useEffect(() => {
@@ -223,37 +232,42 @@ export function MapComponent() {
         <Card className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-semibold">Route mode</h4>
-              <p className="text-xs text-muted-foreground">Pick up to 3 stops for a quick itinerary.</p>
+              <h4 className="font-semibold">{mapCopy.routeTitle}</h4>
+              <p className="text-xs text-muted-foreground">{mapCopy.routeDescription}</p>
             </div>
             {routeStops.length > 0 && (
               <Button size="sm" variant="ghost" onClick={clearRoute}>
-                Clear
+                {mapCopy.routeClearLabel}
               </Button>
             )}
           </div>
           <div className="space-y-2">
-            {routeActors.length === 0 && <p className="text-sm text-muted-foreground">No stops selected yet.</p>}
+            {routeActors.length === 0 && <p className="text-sm text-muted-foreground">{mapCopy.routeEmptyLabel}</p>}
             {routeActors.map((actor, index) => (
               <div key={actor.id} className="flex items-center justify-between gap-2 rounded-md border px-3 py-2">
                 <div className="text-sm">
                   <span className="font-semibold">{index + 1}.</span> {actor.name}
                 </div>
                 <Button size="sm" variant="outline" onClick={() => removeRouteStop(actor.id)}>
-                  Remove
+                  {mapCopy.routeRemoveLabel}
                 </Button>
               </div>
             ))}
           </div>
           {routeDistance !== null && (
             <div className="text-xs text-muted-foreground">
-              Estimated distance: {routeDistance.toFixed(1)} {mapCopy.distanceUnit}
+              {mapCopy.routeDistanceLabel}: {routeDistance.toFixed(1)} {mapCopy.distanceUnit}
             </div>
           )}
           {routeLink && (
             <Button asChild size="sm" className="w-full">
-              <a href={routeLink} target="_blank" rel="noopener noreferrer">
-                Open route in Maps
+              <a
+                href={routeLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => recordAction("go_directions", { route: "multi" })}
+              >
+                {mapCopy.routeOpenLabel}
               </a>
             </Button>
           )}
@@ -264,6 +278,17 @@ export function MapComponent() {
             const distance =
               userLocation &&
               `${getDistanceKm(userLocation, [actor.lat, actor.lng]).toFixed(1)} ${mapCopy.distanceUnit}`
+            const openStatus = getOpeningStatus(actor.openingHoursOsm)
+            const statusLabel =
+              openStatus.state === "open"
+                ? mapCopy.openNowLabel
+                : openStatus.state === "closed"
+                  ? mapCopy.closedNowLabel
+                  : mapCopy.hoursFallbackLabel
+            const statusDetail =
+              openStatus.state === "unknown" || !openStatus.nextChange
+                ? null
+                : `${openStatus.state === "open" ? mapCopy.closesAtLabel : mapCopy.opensAtLabel} ${formatTime(openStatus.nextChange)}`
 
             return (
               <Card
@@ -281,16 +306,25 @@ export function MapComponent() {
                       {actor.address}
                     </p>
                     {distance && <p className="text-xs text-muted-foreground mt-1">{distance}</p>}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {statusLabel}
+                      {statusDetail ? ` - ${statusDetail}` : ""}
+                    </p>
                     <Badge className="mt-2" variant="secondary">
                       {mapCopy.categoryLabels[actor.category]}
                     </Badge>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Button size="sm" variant="outline" onClick={() => addRouteStop(actor.id)} disabled={routeStops.includes(actor.id) || routeStops.length >= 3}>
-                      {routeStops.includes(actor.id) ? "Added" : "Add"}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => addRouteStop(actor.id)}
+                      disabled={routeStops.includes(actor.id) || routeStops.length >= 3}
+                    >
+                      {routeStops.includes(actor.id) ? mapCopy.routeAddedLabel : mapCopy.routeAddLabel}
                     </Button>
                     <Button size="sm" variant="ghost" asChild>
-                      <Link href={`/aktorer/${actor.slug}`}>
+                      <Link href={`/aktorer/${actor.slug}`} onClick={() => recordAction("open_actor", { actorId: actor.id })}>
                         <ExternalLink className="h-4 w-4" />
                       </Link>
                     </Button>

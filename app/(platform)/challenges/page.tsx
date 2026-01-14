@@ -1,4 +1,4 @@
-﻿import { pageCopy } from "@/content/no"
+import { pageCopy } from "@/content/no"
 import { ChallengesBoard } from "@/components/challenges-board"
 
 export default function ChallengesPage() {

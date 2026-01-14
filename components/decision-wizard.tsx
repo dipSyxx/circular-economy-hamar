@@ -1,9 +1,10 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { decideCopy, pageCopy } from "@/content/no"
 import { evaluateDecision, type DecisionInput, type ItemType, type ProblemType, type Priority } from "@/lib/decision-engine"
 import { actors } from "@/lib/data"
+import { formatTime, getOpeningStatus } from "@/lib/opening-hours"
 import { recordAction, recordDecision } from "@/lib/profile-store"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -33,109 +34,9 @@ const getDistanceKm = (from: [number, number], to: [number, number]) => {
 type MatchReason = "open_now" | "closed_now" | "closest"
 
 const matchReasonLabels: Record<MatchReason, string> = {
-  open_now: "Open now",
-  closed_now: "Closed now",
-  closest: "Closest",
-}
-
-const normalizeDayToken = (value: string) => value.toLowerCase().replace(/[^a-z]/g, "")
-
-const dayTokenMap: Record<string, number> = {
-  man: 1,
-  tir: 2,
-  ons: 3,
-  tor: 4,
-  tors: 4,
-  fre: 5,
-  lor: 6,
-  son: 0,
-  sun: 0,
-  sat: 6,
-  l: 6,
-  lr: 6,
-  sn: 0,
-}
-
-const parseDayToken = (token: string) => {
-  const normalized = normalizeDayToken(token)
-  return dayTokenMap[normalized] ?? null
-}
-
-const parseTimeRange = (value: string) => {
-  if (!value) return null
-  if (/stengt/i.test(value)) return { closed: true }
-  const match = value.match(/(\d{1,2})(?::(\d{2}))?\s*-\s*(\d{1,2})(?::(\d{2}))?/)
-  if (!match) return null
-  const openHours = Number(match[1])
-  const openMinutes = Number(match[2] ?? "0")
-  const closeHours = Number(match[3])
-  const closeMinutes = Number(match[4] ?? "0")
-  return {
-    closed: false,
-    openMinutes: openHours * 60 + openMinutes,
-    closeMinutes: closeHours * 60 + closeMinutes,
-  }
-}
-
-const parseOpeningHours = (lines: string[]) => {
-  const entries: { day: number; openMinutes?: number; closeMinutes?: number; closed: boolean }[] = []
-
-  lines.forEach((line) => {
-    const divider = line.indexOf(":")
-    if (divider === -1) return
-    const dayPart = line.slice(0, divider).trim()
-    const timePart = line.slice(divider + 1).trim()
-    const time = parseTimeRange(timePart)
-    if (!time) return
-
-    const tokens = dayPart.split("-").map((token) => token.trim())
-    const startDay = parseDayToken(tokens[0])
-    const endDay = tokens.length > 1 ? parseDayToken(tokens[1]) : null
-
-    if (startDay === null) return
-    if (endDay === null) {
-      entries.push({
-        day: startDay,
-        closed: time.closed,
-        openMinutes: time.closed ? undefined : time.openMinutes,
-        closeMinutes: time.closed ? undefined : time.closeMinutes,
-      })
-      return
-    }
-
-    let current = startDay
-    while (true) {
-      entries.push({
-        day: current,
-        closed: time.closed,
-        openMinutes: time.closed ? undefined : time.openMinutes,
-        closeMinutes: time.closed ? undefined : time.closeMinutes,
-      })
-      if (current === endDay) break
-      current = (current + 1) % 7
-    }
-  })
-
-  return entries
-}
-
-const getOpenNow = (lines: string[]) => {
-  const entries = parseOpeningHours(lines)
-  if (!entries.length) return null
-
-  const now = new Date()
-  const today = now.getDay()
-  const minutesNow = now.getHours() * 60 + now.getMinutes()
-  const todays = entries.filter((entry) => entry.day === today)
-  if (!todays.length) return null
-  if (todays.some((entry) => entry.closed)) return false
-  return todays.some(
-    (entry) =>
-      typeof entry.openMinutes === "number" &&
-      typeof entry.closeMinutes === "number" &&
-      minutesNow >= entry.openMinutes &&
-      minutesNow <= entry.closeMinutes,
-  )
+  open_now: decideCopy.matching.openNowLabel,
+  closed_now: decideCopy.matching.closedNowLabel,
+  closest: decideCopy.matching.closestLabel,
 }
 
 export function DecisionWizard() {
@@ -187,19 +88,19 @@ export function DecisionWizard() {
 
     const scored = baseList.map((actor) => {
       const distanceKm = userLocation ? getDistanceKm(userLocation, [actor.lat, actor.lng]) : null
-      const openNow = getOpenNow(actor.openingHours)
+      const openStatus = getOpeningStatus(actor.openingHoursOsm)
       let score = 0
-      if (openNow === true) score += 3
-      if (openNow === false) score -= 1
+      if (openStatus.state === "open") score += 3
+      if (openStatus.state === "closed") score -= 1
       if (distanceKm !== null) score += Math.max(0, 10 - distanceKm) / 10
-      return { actor, distanceKm, openNow, score }
+      return { actor, distanceKm, openStatus, score }
     })
 
     const sorted = scored.sort((a, b) => b.score - a.score)
     return sorted.map((entry, index) => {
       const reasons: MatchReason[] = []
-      if (entry.openNow === true) reasons.push("open_now")
-      if (entry.openNow === false) reasons.push("closed_now")
+      if (entry.openStatus.state === "open") reasons.push("open_now")
+      if (entry.openStatus.state === "closed") reasons.push("closed_now")
       if (entry.distanceKm !== null && index === 0) reasons.push("closest")
       return { ...entry, reasons }
     })
@@ -229,7 +130,7 @@ export function DecisionWizard() {
 
   const requestLocation = () => {
     if (!navigator.geolocation) {
-      setLocationError("Geolocation not available")
+      setLocationError(decideCopy.matching.locationUnavailable)
       return
     }
 
@@ -239,7 +140,7 @@ export function DecisionWizard() {
         setLocationError(null)
       },
       () => {
-        setLocationError("Could not fetch location")
+        setLocationError(decideCopy.matching.locationError)
       },
       { enableHighAccuracy: true, timeout: 10000 },
     )
@@ -448,7 +349,9 @@ export function DecisionWizard() {
                   <div className="flex items-center justify-between">
                     <h4 className="font-semibold">{decideCopy.optionCopy[option.type].title}</h4>
                     <Badge variant={option.type === recommendation?.type ? "default" : "secondary"}>
-                      {option.type === recommendation?.type ? "Best" : "Alt"}
+                      {option.type === recommendation?.type
+                        ? decideCopy.comparisonBadges.best
+                        : decideCopy.comparisonBadges.alt}
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{decideCopy.optionCopy[option.type].description}</p>
@@ -472,7 +375,7 @@ export function DecisionWizard() {
                 <CardTitle>{decideCopy.matchedActorsTitle}</CardTitle>
                 <Button size="sm" variant="outline" onClick={requestLocation} className="gap-2">
                   <Crosshair className="h-4 w-4" />
-                  Use my location
+                  {decideCopy.matching.useLocationLabel}
                 </Button>
               </div>
               {locationError && <CardDescription className="text-destructive">{locationError}</CardDescription>}
@@ -487,7 +390,7 @@ export function DecisionWizard() {
                 </div>
               )}
 
-              {matchedActors.map(({ actor, distanceKm, reasons }) => {
+              {matchedActors.map(({ actor, distanceKm, reasons, openStatus }) => {
                 const primaryAction =
                   decision?.recommendation === "repair" && actor.phone
                     ? { label: decideCopy.actions.call, href: `tel:${actor.phone}`, icon: Phone, actionType: "go_call" as const }
@@ -502,7 +405,14 @@ export function DecisionWizard() {
                   ? { label: decideCopy.actions.website, href: actor.website, icon: Globe, actionType: "go_website" as const }
                   : null
 
-                const distanceLabel = distanceKm !== null ? `${distanceKm.toFixed(1)} km` : null
+                const distanceLabel =
+                  distanceKm !== null ? `${distanceKm.toFixed(1)} ${decideCopy.matching.distanceUnit}` : null
+                const nextChangeLabel =
+                  actor.openingHoursOsm && actor.openingHoursOsm.length > 0
+                    ? openStatus.nextChange
+                      ? `${openStatus.state === "open" ? decideCopy.matching.closesAtLabel : decideCopy.matching.opensAtLabel} ${formatTime(openStatus.nextChange)}`
+                      : decideCopy.matching.hoursFallbackLabel
+                    : decideCopy.matching.hoursFallbackLabel
 
                 return (
                   <div key={actor.id} className="flex flex-col gap-3 rounded-lg border p-4">
@@ -519,6 +429,7 @@ export function DecisionWizard() {
                           </Badge>
                         ))}
                       </div>
+                      <p className="text-xs text-muted-foreground">{nextChangeLabel}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Button asChild variant="default">

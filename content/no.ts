@@ -1,4 +1,6 @@
-﻿export const site = {
+import type { Actor, Challenge } from "@/lib/data"
+
+export const site = {
   name: "SirkulærHamar",
   title: "SirkulærHamar - Gjenbruk, Reparasjon, Bærekraft",
   description:
@@ -14,6 +16,16 @@ export const navigation = [
   { href: "/quiz", label: "Quiz" },
   { href: "/fakta", label: "Fakta" },
 ]
+
+export const bottomNavCopy = {
+  items: [
+    { href: "/", label: "Hjem", key: "home" },
+    { href: "/decide", label: "Decide", key: "decide" },
+    { href: "/kart", label: "Kart", key: "map" },
+    { href: "/challenges", label: "Oppdrag", key: "challenges" },
+    { href: "/profile", label: "Profil", key: "profile" },
+  ],
+}
 
 export const navigationCopy = {
   openMenuLabel: "Åpne meny",
@@ -45,7 +57,7 @@ export const heroContent = {
     },
     {
       title: "Ta et valg",
-      description: "Repair vs brukt vs resirkuler",
+      description: "Reparer vs brukt vs resirkuler",
       href: "/decide",
       icon: "decide",
     },
@@ -104,17 +116,80 @@ export const pageCopy = {
     description: "Finn bruktbutikker, reparatører og gjenvinningssteder nær deg.",
   },
   decide: {
-    title: "Decision Engine",
+    title: "Beslutningsmotor",
     description: "Svar på noen raske spørsmål og få et smart, sirkulært valg - med lokale aktører som neste steg.",
   },
   challenges: {
-    title: "Missions",
+    title: "Oppdrag",
     description: "Fullfør oppdrag og samle poeng for å bygge din sirkulære streak.",
   },
   profile: {
     title: "Profil",
-    description: "Se score, historikk og hvilke utfordringer du har fullført.",
+    description: "Se poeng, historikk og hvilke utfordringer du har fullført.",
   },
+}
+
+export const profileCopy = {
+  stats: {
+    scoreLabel: "Poeng",
+    streakLabel: "Streak",
+    decisionsLabel: "Beslutninger",
+    challengesLabel: "Oppdrag",
+    daysLabel: "dager",
+  },
+  metaLabels: {
+    impactLabel: "Klimaeffekt",
+    savingsLabel: "Besparelse",
+  },
+  sections: {
+    recentDecisionsTitle: "Siste beslutninger",
+    recentDecisionsDescription: "Siste resultater fra beslutningsmotoren.",
+    recentActionsTitle: "Siste handlinger",
+    recentActionsDescription: "Sporer handlinger for streaks og oppdrag.",
+    emptyDecisions: "Ingen beslutninger ennå.",
+    emptyActions: "Ingen handlinger ennå.",
+  },
+  itemLabels: {
+    phone: "Telefon",
+    laptop: "PC/Laptop",
+    clothing: "Klær",
+    other: "Annet",
+  },
+  problemLabels: {
+    screen: "Skjerm",
+    battery: "Batteri",
+    slow: "Treg",
+    no_power: "Starter ikke",
+    water: "Vannskade",
+    zipper: "Glidelås",
+    seam: "Søm",
+    other: "Annet",
+  },
+  recommendationLabels: {
+    repair: "Reparer",
+    buy_used: "Kjøp brukt",
+    donate: "Doner",
+    recycle: "Resirkuler",
+  },
+  actionLabels: {
+    decision_complete: "Beslutning fullført",
+    go_call: "Ring aktør",
+    go_directions: "Åpne veibeskrivelse",
+    go_website: "Åpne nettside",
+    open_actor: "Åpne aktørside",
+    challenge_complete: "Oppdrag fullført",
+  },
+}
+
+export const challengesCopy = {
+  stats: {
+    scoreLabel: "Poeng",
+    streakLabel: "Streak",
+    completedLabel: "Fullført",
+    daysLabel: "dager",
+  },
+  doneLabel: "Fullført",
+  markCompleteLabel: "Marker som fullført",
 }
 
 export const actorPageCopy = {
@@ -243,6 +318,20 @@ export const mapCopy = {
   locationError: "Kunne ikke hente posisjon",
   distanceUnit: "km",
   listTitle: "Aktører",
+  openNowLabel: "Åpent nå",
+  closedNowLabel: "Stengt nå",
+  closesAtLabel: "Stenger kl.",
+  opensAtLabel: "Åpner kl.",
+  hoursFallbackLabel: "Se nettsiden for åpningstider",
+  routeTitle: "Rute-modus",
+  routeDescription: "Velg opptil 3 stopp for en rask rute.",
+  routeClearLabel: "Tøm",
+  routeEmptyLabel: "Ingen stopp valgt ennå.",
+  routeRemoveLabel: "Fjern",
+  routeAddLabel: "Legg til",
+  routeAddedLabel: "Lagt til",
+  routeDistanceLabel: "Estimert avstand (luftlinje)",
+  routeOpenLabel: "Åpne rute i Google Maps",
   categoryLabels: {
     brukt: "Brukt",
     reparasjon: "Reparasjon",
@@ -301,18 +390,34 @@ export const decideCopy = {
   resultTitle: "Anbefalt valg",
   comparisonTitle: "Sammenligning",
   alternativesTitle: "Alternativer",
+  comparisonBadges: {
+    best: "Best",
+    alt: "Alternativ",
+  },
   matchedActorsTitle: "Lokale aktører som matcher",
   noActorsLabel: "Fant ingen aktører - se kartet for flere steder.",
   explainabilityTitle: "Hvorfor dette valget?",
   savingsLabel: "Besparelse",
   timeResultLabel: "Estimert tid",
-  impactLabel: "Impact score",
-  goLabel: "Go",
+  impactLabel: "Klima-score",
+  goLabel: "Gå",
   actions: {
     call: "Ring",
     directions: "Veibeskrivelse",
     website: "Nettside",
     map: "Se kart",
+  },
+  matching: {
+    useLocationLabel: "Bruk posisjonen min",
+    locationUnavailable: "Geolokasjon er ikke tilgjengelig",
+    locationError: "Kunne ikke hente posisjon",
+    openNowLabel: "Åpent nå",
+    closedNowLabel: "Stengt nå",
+    closestLabel: "Nærmest",
+    distanceUnit: "km",
+    hoursFallbackLabel: "Se nettsiden for åpningstider",
+    closesAtLabel: "Stenger kl.",
+    opensAtLabel: "Åpner kl.",
   },
   optionCopy: {
     repair: {
@@ -375,7 +480,8 @@ export const actors = [
     email: "hamar@kirppis.no",
     website: "https://www.kirppis.no/min-kirppis/",
     instagram: "https://www.instagram.com/kirppishamar/",
-    openingHours: ["Man–fre: 10:00–21:00", "Lør: 10:00–18:00", "Søn: Stengt"],
+    openingHours: ["Man-fre: 10:00-21:00", "Lør: 10:00-18:00", "Søn: Stengt"],
+    openingHoursOsm: "Mo-Fr 10:00-21:00; Sa 10:00-18:00; Su off",
     tags: ["klær", "møbler", "interiør", "stand", "vintage"],
     benefits: [
       "Spar penger på unike funn",
@@ -428,11 +534,12 @@ export const actors = [
     website: "https://www.resirkula.no/",
     instagram: "https://www.instagram.com/resirkula/",
     openingHours: [
-      "Man–tors: 10:00–17:00",
-      "Fre: 10:00–16:00",
-      "Lør: 10:00–15:00",
+      "Man-tors: 10:00-17:00",
+      "Fre: 10:00-16:00",
+      "Lør: 10:00-15:00",
       "Søn: Stengt",
     ],
+    openingHoursOsm: "Mo-Th 10:00-17:00; Fr 10:00-16:00; Sa 10:00-15:00; Su off",
     tags: ["gjenbruk", "ombruk", "møbler", "elektronikk", "butikker"],
     benefits: [
       "Kvalitetssikrede bruktvarer",
@@ -524,7 +631,60 @@ export const actors = [
       },
     ],
   },
-]
+  {
+    id: "kretslopsparken-gjenvinning",
+    name: "Kretsløpsparken gjenvinningsstasjon",
+    slug: "kretslopsparken-gjenvinning",
+    category: "gjenvinning",
+    description: "Gjenvinningsstasjon i Kretsløpsparken for sortering av avfall og e-avfall.",
+    longDescription:
+      "Kretsløpsparken er Sirkula sin gjenvinningsstasjon i Hamar-området. Her leverer du e-avfall og andre fraksjoner riktig, og Resirkula ligger i samme område for ombruk før gjenvinning.",
+    address: "Arnkvernvegen 169, 2320 Furnes",
+    lat: 60.84291,
+    lng: 11.085123,
+    phone: "62 54 37 00",
+    email: "post@sirkula.no",
+    website: "https://www.sirkula.no/gjenvinningsstasjoner/kretslopsparken/",
+    openingHours: ["Se nettsiden for åpningstider"],
+    tags: ["e-avfall", "gjenvinning", "sortering", "ombruk"],
+    benefits: [
+      "Hjelper deg å sortere riktig",
+      "Reduserer farlig avfall i restavfall",
+      "Kobler ombruk og gjenvinning i samme område",
+      "Lokal leveringsplass for Hamar-regionen",
+    ],
+    howToUse: [
+      "Sorter hjemme før du drar",
+      "Sjekk åpningstider på nettsiden",
+      "Lever e-avfall og andre fraksjoner riktig",
+      "Besøk Resirkula hvis noe kan ombrukes",
+    ],
+    image: "/placeholder.jpg",
+    sources: [
+      {
+        type: "website",
+        title: "Kretsløpsparken gjenvinningsstasjon",
+        url: "https://www.sirkula.no/gjenvinningsstasjoner/kretslopsparken/",
+        capturedAt: "2026-01-14",
+        note: "Adresse og beskrivelse av stasjonen.",
+      },
+      {
+        type: "map",
+        title: "Kretsløpsparken på kart",
+        url: "https://www.google.com/maps/search/?api=1&query=Arnkvernvegen+169+2320+Furnes",
+        capturedAt: "2026-01-14",
+        note: "Plassering i Kretsløpsparken.",
+      },
+      {
+        type: "website",
+        title: "Gjenvinningsstasjoner - Sirkula",
+        url: "https://www.sirkula.no/gjenvinningsstasjoner/",
+        capturedAt: "2026-01-14",
+        note: "Oversikt over Sirkula sine stasjoner.",
+      },
+    ],
+  },
+] satisfies Actor[]
 
 export const quizQuestions = [
   {
@@ -672,7 +832,7 @@ export const challenges = [
     icon: "🤝",
     category: "brukt",
   },
-]
+] satisfies Challenge[]
 
 export const repairData = {
   phone: {

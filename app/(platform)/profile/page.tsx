@@ -1,4 +1,4 @@
-﻿import { pageCopy } from "@/content/no"
+import { pageCopy } from "@/content/no"
 import { ProfileDashboard } from "@/components/profile-dashboard"
 
 export default function ProfilePage() {

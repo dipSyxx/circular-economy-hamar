@@ -35,6 +35,7 @@ export interface Actor {
   website?: string
   instagram?: string
   openingHours: string[]
+  openingHoursOsm?: string
   tags: string[]
   benefits: string[]
   howToUse: string[]

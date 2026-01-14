@@ -6,6 +6,7 @@ import { completeChallenge, loadProfile, type ProfileData } from "@/lib/profile-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { challengesCopy } from "@/content/no"
 
 export function ChallengesBoard() {
   const [profile, setProfile] = useState<ProfileData | null>(null)
@@ -27,19 +28,21 @@ export function ChallengesBoard() {
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardDescription>Score</CardDescription>
+            <CardDescription>{challengesCopy.stats.scoreLabel}</CardDescription>
             <CardTitle>{profile?.score ?? 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader>
-            <CardDescription>Streak</CardDescription>
-            <CardTitle>{profile?.streakDays ?? 0} days</CardTitle>
+            <CardDescription>{challengesCopy.stats.streakLabel}</CardDescription>
+            <CardTitle>
+              {profile?.streakDays ?? 0} {challengesCopy.stats.daysLabel}
+            </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader>
-            <CardDescription>Completed</CardDescription>
+            <CardDescription>{challengesCopy.stats.completedLabel}</CardDescription>
             <CardTitle>
               {completedCount} / {challenges.length}
             </CardTitle>
@@ -55,7 +58,9 @@ export function ChallengesBoard() {
               <CardHeader>
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle className="text-lg">{challenge.title}</CardTitle>
-                  <Badge variant={isDone ? "secondary" : "default"}>{isDone ? "Done" : `+${challenge.points}`}</Badge>
+                  <Badge variant={isDone ? "secondary" : "default"}>
+                    {isDone ? challengesCopy.doneLabel : `+${challenge.points}`}
+                  </Badge>
                 </div>
                 <CardDescription>{challenge.description}</CardDescription>
               </CardHeader>
@@ -66,7 +71,7 @@ export function ChallengesBoard() {
                   disabled={isDone}
                   onClick={() => handleComplete(challenge.id, challenge.points)}
                 >
-                  {isDone ? "Completed" : "Mark complete"}
+                  {isDone ? challengesCopy.doneLabel : challengesCopy.markCompleteLabel}
                 </Button>
               </CardContent>
             </Card>

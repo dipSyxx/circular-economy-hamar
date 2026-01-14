@@ -1,17 +1,18 @@
-﻿"use client"
+"use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Sparkles, MapPin, Trophy, User } from "lucide-react"
+import { Home, Sparkles, MapPin, Trophy, User, type LucideIcon } from "lucide-react"
+import { bottomNavCopy } from "@/content/no"
 
-const items = [
-  { href: "/", label: "Hjem", icon: Home },
-  { href: "/decide", label: "Decide", icon: Sparkles },
-  { href: "/kart", label: "Kart", icon: MapPin },
-  { href: "/challenges", label: "Missions", icon: Trophy },
-  { href: "/profile", label: "Profil", icon: User },
-]
+const iconMap: Record<string, LucideIcon> = {
+  home: Home,
+  decide: Sparkles,
+  map: MapPin,
+  challenges: Trophy,
+  profile: User,
+}
 
 export function BottomNav() {
   const pathname = usePathname()
@@ -19,9 +20,9 @@ export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">
       <div className="mx-auto flex max-w-md items-center justify-between px-4 py-2">
-        {items.map((item) => {
+        {bottomNavCopy.items.map((item) => {
           const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
-          const Icon = item.icon
+          const Icon = iconMap[item.key] ?? Home
           return (
             <Link
               key={item.href}
