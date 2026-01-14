@@ -61,12 +61,26 @@ const actionPoints: Record<ActionType, number> = {
 const maxActions = 20
 const maxDecisions = 10
 
-const getDateKey = (date = new Date()) => date.toISOString().slice(0, 10)
+const getDateKey = (date = new Date()) => {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Oslo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+  const parts = formatter.formatToParts(date)
+  const year = parts.find((part) => part.type === "year")?.value ?? "1970"
+  const month = parts.find((part) => part.type === "month")?.value ?? "01"
+  const day = parts.find((part) => part.type === "day")?.value ?? "01"
+  return `${year}-${month}-${day}`
+}
 
 const diffInDays = (current: string, previous: string) => {
-  const currentDate = new Date(`${current}T00:00:00Z`)
-  const previousDate = new Date(`${previous}T00:00:00Z`)
-  const diffMs = currentDate.getTime() - previousDate.getTime()
+  const [currentYear, currentMonth, currentDay] = current.split("-").map(Number)
+  const [previousYear, previousMonth, previousDay] = previous.split("-").map(Number)
+  const currentDate = Date.UTC(currentYear, currentMonth - 1, currentDay)
+  const previousDate = Date.UTC(previousYear, previousMonth - 1, previousDay)
+  const diffMs = currentDate - previousDate
   return Math.round(diffMs / (1000 * 60 * 60 * 24))
 }
 

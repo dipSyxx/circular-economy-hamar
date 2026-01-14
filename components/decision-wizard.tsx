@@ -54,7 +54,7 @@ export function DecisionWizard() {
   const canContinue = useMemo(() => {
     if (step === 0) return !!itemType
     if (step === 1) return !!problemType
-    if (step === 2) return budget > 0 && timeDays >= 0
+    if (step === 2) return budget >= 0 && timeDays >= 0
     return true
   }, [step, itemType, problemType, budget, timeDays])
 
@@ -96,12 +96,21 @@ export function DecisionWizard() {
       return { actor, distanceKm, openStatus, score }
     })
 
+    let closestActorId: string | null = null
+    let closestDistance = Number.POSITIVE_INFINITY
+    for (const entry of scored) {
+      if (entry.distanceKm !== null && entry.distanceKm < closestDistance) {
+        closestDistance = entry.distanceKm
+        closestActorId = entry.actor.id
+      }
+    }
+
     const sorted = scored.sort((a, b) => b.score - a.score)
     return sorted.map((entry, index) => {
       const reasons: MatchReason[] = []
       if (entry.openStatus.state === "open") reasons.push("open_now")
       if (entry.openStatus.state === "closed") reasons.push("closed_now")
-      if (entry.distanceKm !== null && index === 0) reasons.push("closest")
+      if (entry.distanceKm !== null && entry.actor.id === closestActorId) reasons.push("closest")
       return { ...entry, reasons }
     })
   }, [decision, userLocation])
