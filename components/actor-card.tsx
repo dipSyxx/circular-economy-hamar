@@ -1,16 +1,22 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { MapPin, ExternalLink } from "lucide-react"
-import Link from "next/link"
-import type { Actor } from "@/lib/data"
-import { actorCopy } from "@/content/no"
-import { recordAction } from "@/lib/profile-store"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { MapPin, ExternalLink } from "lucide-react";
+import Link from "next/link";
+import type { Actor } from "@/lib/data";
+import { actorCopy } from "@/content/no";
+import { recordAction } from "@/lib/profile-store";
 
 interface ActorCardProps {
-  actor: Actor
+  actor: Actor;
 }
 
 export function ActorCard({ actor }: ActorCardProps) {
@@ -18,18 +24,26 @@ export function ActorCard({ actor }: ActorCardProps) {
     brukt: "bg-primary/10 text-primary",
     reparasjon: "bg-accent/20 text-accent-foreground",
     gjenvinning: "bg-chart-2/20 text-chart-2",
-  }
+  };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="overflow-hidden pt-0 hover:shadow-lg transition-shadow">
       <div className="aspect-video relative overflow-hidden">
-        <img src={actor.image || "/placeholder.svg"} alt={actor.name} className="object-cover w-full h-full" />
-        <div className="absolute top-4 left-4">
-          <Badge className={categoryColors[actor.category]}>{actorCopy.categoryLabels[actor.category]}</Badge>
+        <img
+          src={actor.image || "/placeholder.svg"}
+          alt={actor.name}
+          className="object-cover w-full h-full"
+        />
+        <div className="absolute h-[21px] top-4 left-4 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full">
+          <Badge className={categoryColors[actor.category]}>
+            {actorCopy.categoryLabels[actor.category]}
+          </Badge>
         </div>
       </div>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">{actor.name}</CardTitle>
+        <CardTitle className="flex items-center justify-between">
+          {actor.name}
+        </CardTitle>
         <CardDescription className="flex items-center gap-1">
           <MapPin className="h-3 w-3" />
           {actor.address}
@@ -48,7 +62,10 @@ export function ActorCard({ actor }: ActorCardProps) {
 
         <div className="flex gap-2">
           <Button asChild className="flex-1">
-            <Link href={`/aktorer/${actor.slug}`} onClick={() => recordAction("open_actor", { actorId: actor.id })}>
+            <Link
+              href={`/aktorer/${actor.slug}`}
+              onClick={() => recordAction("open_actor", { actorId: actor.id })}
+            >
               {actorCopy.readMoreLabel}
             </Link>
           </Button>
@@ -58,7 +75,9 @@ export function ActorCard({ actor }: ActorCardProps) {
                 href={actor.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => recordAction("go_website", { actorId: actor.id })}
+                onClick={() =>
+                  recordAction("go_website", { actorId: actor.id })
+                }
               >
                 <ExternalLink className="h-4 w-4" />
               </a>
@@ -67,5 +86,5 @@ export function ActorCard({ actor }: ActorCardProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
