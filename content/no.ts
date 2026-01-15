@@ -679,7 +679,8 @@ export const actors = [
       "Lever e-avfall og andre fraksjoner riktig",
       "Besøk Resirkula hvis noe kan ombrukes",
     ],
-    image: "/placeholder.jpg",
+    image:
+      "https://www.sirkula.no/getfile.php/132780-1731567328/1.%20Sirkula.no/Sider/Bildearkiv%20Sirkula/Gjenvinningstasjoner/Kretsl%C3%B8psparken/SirkulaKretslopspark_26.jpg%20%28extra_large%29.webp",
     sources: [
       {
         type: "website",
