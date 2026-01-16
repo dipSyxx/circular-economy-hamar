@@ -14,16 +14,18 @@ import Link from "next/link";
 import type { Actor } from "@/lib/data";
 import { actorCopy } from "@/content/no";
 import { recordAction } from "@/lib/profile-store";
+import { categoryConfig } from "@/lib/categories";
 
 interface ActorCardProps {
   actor: Actor;
 }
 
 export function ActorCard({ actor }: ActorCardProps) {
-  const categoryColors = {
-    brukt: "bg-primary/10 text-primary",
-    reparasjon: "bg-accent/20 text-accent-foreground",
-    gjenvinning: "bg-chart-2/20 text-chart-2",
+  const categoryColor = categoryConfig[actor.category]?.color ?? "#64748b";
+  const badgeStyle = {
+    backgroundColor: `${categoryColor}1A`,
+    borderColor: categoryColor,
+    color: categoryColor,
   };
 
   return (
@@ -35,7 +37,7 @@ export function ActorCard({ actor }: ActorCardProps) {
           className="object-cover w-full h-full"
         />
         <div className="absolute h-[21px] top-4 left-4 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full">
-          <Badge className={categoryColors[actor.category]}>
+          <Badge variant="outline" className="border" style={badgeStyle}>
             {actorCopy.categoryLabels[actor.category]}
           </Badge>
         </div>

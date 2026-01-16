@@ -169,7 +169,18 @@ export const pageCopy = {
     title: "Sirkulære aktører i Hamar",
     description:
       "Utforsk lokale bruktbutikker, reparatører og gjenvinningssteder. Hver aktør bidrar til en mer bærekraftig by.",
-    badges: ["Brukt", "Reparasjon", "Gjenvinning"],
+    badges: [
+      "Ombruk/second hand",
+      "Utleie/utlån",
+      "Reparasjon mobil/PC",
+      "Reparasjon sko og klær",
+      "Møbelreparasjon",
+      "Sykkelverksted",
+      "Ombruksverksted",
+      "Mottak for ombruk",
+      "Bærekraftig mat",
+      "Gjenvinning",
+    ],
   },
   facts: {
     title: "Fakta om bærekraft",

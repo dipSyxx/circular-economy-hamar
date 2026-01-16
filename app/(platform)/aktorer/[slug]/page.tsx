@@ -17,6 +17,7 @@ import {
 import Link from "next/link"
 import { actorCopy, actorPageCopy } from "@/content/no"
 import type { SourceType } from "@/lib/data"
+import { categoryConfig } from "@/lib/categories"
 
 interface ActorPageProps {
   params: Promise<{ slug: string }>
@@ -36,10 +37,11 @@ export default async function ActorPage({ params }: ActorPageProps) {
     notFound()
   }
 
-  const categoryColors = {
-    brukt: "bg-primary/10 text-primary",
-    reparasjon: "bg-accent/20 text-accent-foreground",
-    gjenvinning: "bg-chart-2/20 text-chart-2",
+  const categoryColor = categoryConfig[actor.category]?.color ?? "#64748b"
+  const badgeStyle = {
+    backgroundColor: `${categoryColor}1A`,
+    borderColor: categoryColor,
+    color: categoryColor,
   }
 
   const sourceLabels: Record<SourceType, string> = {
@@ -67,7 +69,9 @@ export default async function ActorPage({ params }: ActorPageProps) {
 
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <Badge className={categoryColors[actor.category]}>{actorCopy.categoryLongLabels[actor.category]}</Badge>
+              <Badge variant="outline" className="border" style={badgeStyle}>
+                {actorCopy.categoryLongLabels[actor.category]}
+              </Badge>
               {actor.tags.map((tag) => (
                 <Badge key={tag} variant="secondary">
                   {tag}
