@@ -1,4 +1,4 @@
-﻿import {
+import {
   actors as contentActors,
   challenges as contentChallenges,
   detailedFacts as contentDetailedFacts,
@@ -7,6 +7,7 @@
   quizResults as contentQuizResults,
   repairData as contentRepairData,
 } from "@/content/no"
+import type { ItemType, ProblemType } from "@/lib/decision-engine"
 
 export type ActorCategory = "brukt" | "reparasjon" | "gjenvinning"
 
@@ -40,7 +41,16 @@ export interface Actor {
   benefits: string[]
   howToUse: string[]
   image: string
+  repairServices?: RepairService[]
   sources: Source[]
+}
+
+export interface RepairService {
+  problemType: ProblemType
+  itemTypes?: ItemType[]
+  priceMin: number
+  priceMax: number
+  etaDays?: number
 }
 
 export interface QuizQuestion {

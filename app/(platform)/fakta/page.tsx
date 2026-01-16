@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge"
 import { detailedFacts, facts } from "@/lib/data"
 import { ExternalLink, BookOpen, Lightbulb, AlertTriangle } from "lucide-react"
 import Link from "next/link"
-import { pageCopy } from "@/content/no"
+import { co2eSources, pageCopy } from "@/content/no"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 export default function FactsPage() {
   return (
@@ -95,6 +96,49 @@ export default function FactsPage() {
               </Card>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="py-12 border-t">
+        <div className="container mx-auto px-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>{pageCopy.facts.co2eSourcesTitle}</CardTitle>
+              <p className="text-sm text-muted-foreground">{pageCopy.facts.co2eSourcesDescription}</p>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="single" collapsible>
+                <AccordionItem value="co2e-sources">
+                  <AccordionTrigger>{pageCopy.facts.co2eSourcesToggleLabel}</AccordionTrigger>
+                  <AccordionContent className="space-y-6 pt-2">
+                    {co2eSources.map((source) => (
+                      <div key={source.id} className="space-y-2">
+                        <a
+                          href={source.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                        >
+                          {source.title}
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                        {source.capturedAt && (
+                          <p className="text-xs text-muted-foreground">Hentet: {source.capturedAt}</p>
+                        )}
+                        {source.anchors && (
+                          <ul className="list-disc pl-5 text-sm text-muted-foreground">
+                            {source.anchors.map((anchor) => (
+                              <li key={anchor}>{anchor}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </CardContent>
+          </Card>
         </div>
       </section>
 

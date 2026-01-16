@@ -24,6 +24,80 @@ export const navigation = [
   { href: "/fakta", label: "Fakta" },
 ];
 
+export const co2eSources = [
+  {
+    id: "apple-per-iphone-16-pro",
+    title: "Apple Product Environmental Report - iPhone 16 Pro / 16 Pro Max",
+    url: "https://www.apple.com/environment/pdf/products/iphone/iPhone_16_Pro_PER_Sept2024.pdf",
+    capturedAt: "2026-01-16",
+    anchors: [
+      "Carbon footprint: ~61 kg CO2e (iPhone 16 Pro)",
+      "Life-cycle split: Production ~81% (dominant stage)",
+    ],
+  },
+  {
+    id: "apple-per-iphone-15",
+    title: "Apple Product Environmental Report - iPhone 15",
+    url: "https://www.apple.com/environment/pdf/products/iphone/iPhone_15_PER_June2025.pdf",
+    capturedAt: "2026-01-16",
+    anchors: [
+      "Carbon footprint: ~66 kg CO2e (iPhone 15)",
+      "Life-cycle split shows production/manufacturing as dominant share (model-specific)",
+    ],
+  },
+  {
+    id: "apple-per-iphone-16e",
+    title: "Apple Product Environmental Report - iPhone 16e",
+    url: "https://www.apple.com/environment/pdf/products/iphone/iPhone_16e_PER_Feb2025.pdf",
+    capturedAt: "2026-01-16",
+    anchors: [
+      "Carbon footprint: ~43 kg CO2e (iPhone 16e)",
+      "Life-cycle split: Production ~82%",
+    ],
+  },
+  {
+    id: "apple-per-macbook-air-2017",
+    title: "Apple Product Environmental Report - 13-inch MacBook Air (2017)",
+    url: "https://www.apple.com/environment/pdf/products/notebooks/13-inch_MacBookAir_PER_June2017.pdf",
+    capturedAt: "2026-01-16",
+    anchors: [
+      "Total GHG: ~339 kg CO2e (model report)",
+      "Life-cycle split: Production ~83% (dominant stage)",
+    ],
+  },
+  {
+    id: "foxway-handprint-2021",
+    title: "Foxway - Carbon Handprint Report (2021)",
+    url: "https://www.foxway.com/hubfs/ESG2021/Foxway%20Carbon%20Handprint%20Report%202021.pdf",
+    capturedAt: "2026-01-16",
+    anchors: [
+      "Refurbished laptop footprint: ~6.65 kg CO2-eq (per device, report example)",
+      "Avoided emissions example: ~258 kg CO2-eq (new vs refurbished comparison framing)",
+    ],
+  },
+  {
+    id: "levis-501-lca-2015",
+    title: "Levi Strauss - Full LCA Results Deck (501 jeans)",
+    url: "http://levistrauss.com/wp-content/uploads/2015/03/Full-LCA-Results-Deck-FINAL.pdf",
+    capturedAt: "2026-01-16",
+    anchors: ["Total climate change impact: ~33.4 kg CO2-e (501 jeans, study result)"],
+  },
+  {
+    id: "global-ewaste-monitor-2024-pdf",
+    title: "Global E-waste Monitor 2024 (UNITAR/ITU partnership) - PDF",
+    url: "https://api.globalewaste.org/publications/file/297/Global-E-waste-Monitor-2024.pdf",
+    capturedAt: "2026-01-16",
+    anchors: ["Use for e-waste scale/context stats and citation block on /fakta"],
+  },
+  {
+    id: "global-ewaste-monitor-2024-landing",
+    title: "Global E-waste Monitor 2024 - landing page",
+    url: "https://ewastemonitor.info/gem-2024/",
+    capturedAt: "2026-01-16",
+    anchors: ["Public overview page + links to report/materials"],
+  },
+] as const
+
 export const bottomNavCopy = {
   items: [
     { href: "/", label: "Hjem", key: "home" },
@@ -103,6 +177,9 @@ export const pageCopy = {
       "Lær mer om hvorfor gjenbruk, reparasjon og riktig avfallshåndtering er viktig - for deg, for miljøet og for fremtiden.",
     tipsTitle: "Tips for deg:",
     sourcesLabel: "Kilder:",
+    co2eSourcesTitle: "CO2e-kilder",
+    co2eSourcesDescription: "Kilder bak CO2e-estimatene i beslutningsmotoren.",
+    co2eSourcesToggleLabel: "Vis CO2e-kilder",
     ctaTitle: "Klar til å gjøre en forskjell?",
     ctaDescription:
       "Nå som du vet mer om hvorfor sirkulær økonomi er viktig, er det på tide å sette kunnskapen ut i praksis!",
@@ -336,6 +413,8 @@ export const mapCopy = {
   closedNowLabel: "Stengt nå",
   closesAtLabel: "Stenger kl.",
   opensAtLabel: "Åpner kl.",
+    priceRangeLabel: "Prisestimat",
+    etaLabel: "Tidsbruk",
   hoursFallbackLabel: "Se nettsiden for åpningstider",
   routeTitle: "Rute-modus",
   routeDescription: "Velg opptil 3 stopp for en rask rute.",
@@ -400,6 +479,7 @@ export const decideCopy = {
     { value: "save_money", label: "Spare penger" },
     { value: "save_time", label: "Spare tid" },
     { value: "save_impact", label: "Mest klimaeffekt" },
+    { value: "balanced", label: "Balansert" },
   ],
   resultTitle: "Anbefalt valg",
   comparisonTitle: "Sammenligning",
@@ -413,7 +493,48 @@ export const decideCopy = {
   explainabilityTitle: "Hvorfor dette valget?",
   savingsLabel: "Besparelse",
   timeResultLabel: "Estimert tid",
+  daysLabel: "dager",
   impactLabel: "Klima-score",
+  co2eLabel: "CO2e spart",
+  co2eSourcesLabel: "CO2e-kilder",
+  recommendedNotFeasibleLabel: "Anbefalingen er ikke helt gjennomførbar nå.",
+  bestFeasibleLabel: "Beste gjennomførbare alternativ",
+  recommendationDeltaLabel: "For å gjøre anbefalingen mulig:",
+  confidenceLabel: "Sikkerhet",
+  confidenceLevels: {
+    low: "Lav",
+    medium: "Middels",
+    high: "Høy",
+  },
+  feasibilityLabels: {
+    feasible: "Gjennomførbart",
+    not_fully_feasible: "Ikke helt gjennomf?rbart",
+  },
+  feasibilityDeltaLabel: "Nesten gjennomf?rbart",
+  feasibilityDeltaBudgetLabel: "Mangler",
+  feasibilityDeltaTimeLabel: "Mangler",
+  whyNotTitle: "Hvorfor ikke?",
+  whyNotReasons: {
+    overBudget: "Over budsjettet ditt",
+    tooSlow: "Tar for lang tid",
+    lowerImpact: "Lavere klimaeffekt",
+    lowerSavings: "Lavere besparelse",
+    moreExpensive: "Dyrere enn alternativet",
+  },
+  planB: {
+    title: "Plan B",
+    description: "Dette valget passer ikke helt budsjett/tid. Pr?v dette som neste steg:",
+    reasons: {
+      budget: "Budsjettet ditt er lavere enn anbefalt.",
+      time: "Tiden din er for kort.",
+    },
+    steps: {
+      repair: ["Be om gratis diagnose", "Sjekk brukt som backup", "Vurder ? sette av litt mer budsjett"],
+      buy_used: ["Sjekk bruktmarkedet f?rst", "Avtal henting n?r du har tid", "Selg eller lever inn det gamle"],
+      donate: ["Sett av tid i kalenderen", "Sorter det som kan gis bort", "Lever til ombruk n?r du kan"],
+      recycle: ["Samle e-avfall hjemme", "Planlegg en tur til gjenvinning", "Sjekk ?pningstidene f?rst"],
+    },
+  },
   goLabel: "Gå",
   actions: {
     call: "Ring",
@@ -428,10 +549,14 @@ export const decideCopy = {
     openNowLabel: "Åpent nå",
     closedNowLabel: "Stengt nå",
     closestLabel: "Nærmest",
+    serviceMatchLabel: "Dekker problemet",
+    budgetFitLabel: "Innenfor budsjett",
     distanceUnit: "km",
     hoursFallbackLabel: "Se nettsiden for åpningstider",
     closesAtLabel: "Stenger kl.",
     opensAtLabel: "Åpner kl.",
+    priceRangeLabel: "Prisestimat",
+    etaLabel: "Tidsbruk",
   },
   optionCopy: {
     repair: {
@@ -456,6 +581,7 @@ export const decideCopy = {
     fast_enough: "Rask nok",
     high_impact: "Høy klimaeffekt",
     high_risk: "Høy risiko",
+    policy_right_to_repair: "Prioriterer reparasjon (rett til ? reparere)",
     best_overall: "Beste totalvalg",
   },
 };
@@ -624,6 +750,13 @@ export const actors = [
       "Få prisestimat og tidsbruk",
       "Lever inn enheten",
       "Hent ferdig reparert - eller få råd om brukt",
+    ],
+    repairServices: [
+      { problemType: "screen", itemTypes: ["phone", "laptop"], priceMin: 900, priceMax: 1800, etaDays: 2 },
+      { problemType: "battery", itemTypes: ["phone", "laptop"], priceMin: 500, priceMax: 1200, etaDays: 1 },
+      { problemType: "slow", itemTypes: ["phone", "laptop"], priceMin: 400, priceMax: 900, etaDays: 1 },
+      { problemType: "no_power", itemTypes: ["phone", "laptop"], priceMin: 900, priceMax: 2000, etaDays: 3 },
+      { problemType: "water", itemTypes: ["phone", "laptop"], priceMin: 1200, priceMax: 3000, etaDays: 4 },
     ],
     image: "/electronics-repair-shop-with-technician-fixing-sma.jpg",
     sources: [

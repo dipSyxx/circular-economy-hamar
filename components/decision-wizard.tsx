@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { decideCopy, pageCopy } from "@/content/no"
+import { co2eSources, decideCopy, pageCopy } from "@/content/no"
 import { evaluateDecision, type DecisionInput, type ItemType, type ProblemType, type Priority } from "@/lib/decision-engine"
 import { actors } from "@/lib/data"
 import { formatTime, getOpeningStatus } from "@/lib/opening-hours"
@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowRight, ArrowLeft, Sparkles, MapPin, Phone, Globe, Crosshair } from "lucide-react"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { ArrowRight, ArrowLeft, Sparkles, MapPin, Phone, Globe, Crosshair, ExternalLink } from "lucide-react"
 import Link from "next/link"
 
 const buildDirectionsLink = (address: string) =>
@@ -31,12 +32,23 @@ const getDistanceKm = (from: [number, number], to: [number, number]) => {
   return 6371 * c
 }
 
-type MatchReason = "open_now" | "closed_now" | "closest"
+type MatchReason = "open_now" | "closed_now" | "closest" | "service_match" | "budget_fit"
 
 const matchReasonLabels: Record<MatchReason, string> = {
   open_now: decideCopy.matching.openNowLabel,
   closed_now: decideCopy.matching.closedNowLabel,
   closest: decideCopy.matching.closestLabel,
+  service_match: decideCopy.matching.serviceMatchLabel,
+  budget_fit: decideCopy.matching.budgetFitLabel,
+}
+
+const formatScore = (value: number) => (Number.isFinite(value) ? value.toFixed(1) : "-")
+
+const co2eSourcesByItem: Record<ItemType, string[]> = {
+  phone: ["apple-per-iphone-16-pro", "apple-per-iphone-15", "apple-per-iphone-16e"],
+  laptop: ["apple-per-macbook-air-2017", "foxway-handprint-2021"],
+  clothing: ["levis-501-lca-2015"],
+  other: ["global-ewaste-monitor-2024-pdf", "global-ewaste-monitor-2024-landing"],
 }
 
 export function DecisionWizard() {
@@ -77,6 +89,17 @@ export function DecisionWizard() {
     let baseList = actors
     if (decision.recommendation === "repair") {
       baseList = actors.filter((actor) => actor.category === "reparasjon")
+      if (problemType) {
+        const covered = baseList.filter((actor) =>
+          actor.repairServices?.some(
+            (service) =>
+              service.problemType === problemType && (!service.itemTypes || (itemType && service.itemTypes.includes(itemType))),
+          ),
+        )
+        if (covered.length > 0) {
+          baseList = covered
+        }
+      }
     } else if (decision.recommendation === "buy_used") {
       baseList = actors.filter((actor) => actor.category === "brukt")
     } else if (decision.recommendation === "donate") {
@@ -87,13 +110,26 @@ export function DecisionWizard() {
     }
 
     const scored = baseList.map((actor) => {
-      const distanceKm = userLocation ? getDistanceKm(userLocation, [actor.lat, actor.lng]) : null
+      const hasCoords = !(actor.lat === 0 && actor.lng === 0)
+      const distanceKm = userLocation && hasCoords ? getDistanceKm(userLocation, [actor.lat, actor.lng]) : null
       const openStatus = getOpeningStatus(actor.openingHoursOsm)
+      const serviceMatch =
+        decision.recommendation === "repair" && problemType
+          ? actor.repairServices?.find(
+              (service) =>
+                service.problemType === problemType &&
+                (!service.itemTypes || (itemType && service.itemTypes.includes(itemType))),
+            ) ?? null
+          : null
       let score = 0
       if (openStatus.state === "open") score += 3
       if (openStatus.state === "closed") score -= 1
       if (distanceKm !== null) score += Math.max(0, 10 - distanceKm) / 10
-      return { actor, distanceKm, openStatus, score }
+      if (serviceMatch) score += 1.5
+      if (serviceMatch?.etaDays && timeDays >= serviceMatch.etaDays) score += 0.3
+      if (serviceMatch && budget >= serviceMatch.priceMax) score += 0.5
+      if (serviceMatch && budget < serviceMatch.priceMin) score -= 0.5
+      return { actor, distanceKm, openStatus, serviceMatch, score }
     })
 
     let closestActorId: string | null = null
@@ -106,14 +142,46 @@ export function DecisionWizard() {
     }
 
     const sorted = scored.sort((a, b) => b.score - a.score)
-    return sorted.map((entry, index) => {
+    return sorted.map((entry) => {
       const reasons: MatchReason[] = []
       if (entry.openStatus.state === "open") reasons.push("open_now")
       if (entry.openStatus.state === "closed") reasons.push("closed_now")
       if (entry.distanceKm !== null && entry.actor.id === closestActorId) reasons.push("closest")
+      if (entry.serviceMatch) reasons.push("service_match")
+      if (entry.serviceMatch && budget >= entry.serviceMatch.priceMax) reasons.push("budget_fit")
       return { ...entry, reasons }
     })
-  }, [decision, userLocation])
+  }, [decision, userLocation, budget, problemType, itemType, timeDays])
+
+  const getWhyNotReasons = (option: NonNullable<typeof decision>["options"][number]) => {
+    if (!recommendation || option.type === recommendation.type) return []
+    const reasons: string[] = []
+    if (option.expectedCostMax > budget) reasons.push(decideCopy.whyNotReasons.overBudget)
+    if (option.expectedTimeDays > timeDays) reasons.push(decideCopy.whyNotReasons.tooSlow)
+    if (option.impactScore < recommendation.impactScore) reasons.push(decideCopy.whyNotReasons.lowerImpact)
+    if (option.savingsMax < recommendation.savingsMax) reasons.push(decideCopy.whyNotReasons.lowerSavings)
+    if (option.expectedCostMin > recommendation.expectedCostMin) reasons.push(decideCopy.whyNotReasons.moreExpensive)
+    return reasons.slice(0, 2)
+  }
+
+  const getFeasibilityDelta = (option: NonNullable<typeof decision>["options"][number]) => {
+    if (option.feasibilityStatus === "ok") return null
+    const parts: string[] = []
+    if (option.deltaBudgetNok > 0) {
+      parts.push(`${decideCopy.feasibilityDeltaBudgetLabel} +${option.deltaBudgetNok} NOK`)
+    }
+    if (option.deltaTimeDays > 0) {
+      parts.push(`${decideCopy.feasibilityDeltaTimeLabel} +${option.deltaTimeDays} ${decideCopy.daysLabel}`)
+    }
+    return parts.length ? parts.join(" · ") : null
+  }
+
+  const co2eLinks = useMemo(() => {
+    if (!itemType) return co2eSources
+    const ids = co2eSourcesByItem[itemType] ?? []
+    const selected = co2eSources.filter((source) => ids.includes(source.id))
+    return selected.length ? selected : co2eSources
+  }, [itemType])
 
   useEffect(() => {
     if (!showResult || !decision || !itemType || !problemType) return
@@ -248,25 +316,13 @@ export function DecisionWizard() {
                     <label className="text-sm font-medium" htmlFor="budget">
                       {decideCopy.budgetLabel}
                     </label>
-                    <Input
-                      id="budget"
-                      type="number"
-                      min={0}
-                      value={budget}
-                      onChange={(event) => setBudget(Number(event.target.value))}
-                    />
+                    <Input id="budget" type="number" min={0} value={budget} onChange={(event) => setBudget(Number(event.target.value))} />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium" htmlFor="time">
                       {decideCopy.timeLabel}
                     </label>
-                    <Input
-                      id="time"
-                      type="number"
-                      min={0}
-                      value={timeDays}
-                      onChange={(event) => setTimeDays(Number(event.target.value))}
-                    />
+                    <Input id="time" type="number" min={0} value={timeDays} onChange={(event) => setTimeDays(Number(event.target.value))} />
                   </div>
                 </div>
               </div>
@@ -275,11 +331,7 @@ export function DecisionWizard() {
             {step === 3 && (
               <div className="space-y-4">
                 <h3 className="font-semibold">{decideCopy.priorityTitle}</h3>
-                <RadioGroup
-                  value={priority ?? ""}
-                  onValueChange={(value) => setPriority(value as Priority)}
-                  className="grid gap-3"
-                >
+                <RadioGroup value={priority ?? ""} onValueChange={(value) => setPriority(value as Priority)} className="grid gap-3">
                   {decideCopy.priorityOptions.map((option) => (
                     <label key={option.value} className="flex items-center gap-2 rounded-lg border p-3">
                       <RadioGroupItem value={option.value} />
@@ -315,6 +367,36 @@ export function DecisionWizard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {decision && (
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">
+                    {decideCopy.confidenceLabel}: {decideCopy.confidenceLevels[decision.confidence]}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className={decision.status === "not_fully_feasible" ? "border-destructive text-destructive" : ""}
+                  >
+                    {decision.status === "feasible"
+                      ? decideCopy.feasibilityLabels.feasible
+                      : decideCopy.feasibilityLabels.not_fully_feasible}
+                  </Badge>
+                </div>
+              )}
+
+              {decision && !decision.recommendedFeasible && decision.bestFeasibleOption && recommendation && (
+                <div className="rounded-lg border border-amber-300/60 bg-amber-50/60 p-4 text-sm text-muted-foreground">
+                  <p className="font-semibold text-foreground">{decideCopy.recommendedNotFeasibleLabel}</p>
+                  {getFeasibilityDelta(recommendation) && (
+                    <p className="mt-1">
+                      {decideCopy.recommendationDeltaLabel} {getFeasibilityDelta(recommendation)}
+                    </p>
+                  )}
+                  <p className="mt-2">
+                    {decideCopy.bestFeasibleLabel}: {decideCopy.optionCopy[decision.bestFeasibleOption].title}
+                  </p>
+                </div>
+              )}
+
               <div>
                 <p className="text-sm font-semibold mb-2">{decideCopy.explainabilityTitle}</p>
                 <div className="flex flex-wrap gap-2">
@@ -336,12 +418,64 @@ export function DecisionWizard() {
                   </div>
                   <div className="rounded-lg border p-4 text-center">
                     <p className="text-sm text-muted-foreground">{decideCopy.timeResultLabel}</p>
-                    <p className="text-2xl font-bold text-primary">~{recommendation.timeDays} dager</p>
+                    <p className="text-2xl font-bold text-primary">~{recommendation.timeDays} {decideCopy.daysLabel}</p>
                   </div>
                   <div className="rounded-lg border p-4 text-center">
                     <p className="text-sm text-muted-foreground">{decideCopy.impactLabel}</p>
-                    <p className="text-2xl font-bold text-primary">{recommendation.impactScore}</p>
+                    <p className="text-2xl font-bold text-primary">{formatScore(recommendation.impactScore)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {decideCopy.co2eLabel}: ~{recommendation.co2eSavedMin}-{recommendation.co2eSavedMax} kg
+                    </p>
+                    {co2eLinks.length > 0 && (
+                      <div className="mt-2">
+                        <Accordion type="single" collapsible>
+                          <AccordionItem value="co2e-sources" className="border-none">
+                            <AccordionTrigger className="py-2 text-xs font-semibold">
+                              {decideCopy.co2eSourcesLabel}
+                            </AccordionTrigger>
+                            <AccordionContent className="pt-1 pb-0">
+                              <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
+                                {co2eLinks.map((source) => (
+                                  <a
+                                    key={source.id}
+                                    href={source.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-primary hover:underline"
+                                  >
+                                    {source.title}
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                ))}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
+                      </div>
+                    )}
                   </div>
+                </div>
+              )}
+
+              {decision?.status === "not_fully_feasible" && decision.planB && (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 space-y-2">
+                  <p className="text-sm font-semibold">{decideCopy.planB.title}</p>
+                  <p className="text-sm text-muted-foreground">{decideCopy.planB.description}</p>
+                  {(decision.planB.budgetTooLow || decision.planB.timeTooShort) && (
+                    <p className="text-xs text-muted-foreground">
+                      {decision.planB.deltaBudgetNok > 0
+                        ? `${decideCopy.feasibilityDeltaBudgetLabel} +${decision.planB.deltaBudgetNok} NOK. `
+                        : ""}
+                      {decision.planB.deltaTimeDays > 0
+                        ? `${decideCopy.feasibilityDeltaTimeLabel} +${decision.planB.deltaTimeDays} ${decideCopy.daysLabel}.`
+                        : ""}
+                    </p>
+                  )}
+                  <ul className="list-disc pl-5 text-sm text-muted-foreground">
+                    {decideCopy.planB.steps[decision.planB.key].map((step) => (
+                      <li key={step}>{step}</li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </CardContent>
@@ -353,28 +487,43 @@ export function DecisionWizard() {
               <CardDescription>{decideCopy.alternativesTitle}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-3">
-              {decision?.options.slice(0, 3).map((option) => (
-                <div key={option.type} className="rounded-lg border p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold">{decideCopy.optionCopy[option.type].title}</h4>
-                    <Badge variant={option.type === recommendation?.type ? "default" : "secondary"}>
-                      {option.type === recommendation?.type
-                        ? decideCopy.comparisonBadges.best
-                        : decideCopy.comparisonBadges.alt}
-                    </Badge>
+              {decision?.options.slice(0, 3).map((option) => {
+                const whyNot = getWhyNotReasons(option)
+                const feasibilityDelta = getFeasibilityDelta(option)
+                return (
+                  <div key={option.type} className="rounded-lg border p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">{decideCopy.optionCopy[option.type].title}</h4>
+                      <Badge variant={option.type === recommendation?.type ? "default" : "secondary"}>
+                        {option.type === recommendation?.type ? decideCopy.comparisonBadges.best : decideCopy.comparisonBadges.alt}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{decideCopy.optionCopy[option.type].description}</p>
+                    <div className="text-sm text-muted-foreground">
+                      {decideCopy.savingsLabel}: {option.savingsMin}-{option.savingsMax} kr
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {decideCopy.timeResultLabel}: ~{option.timeDays} {decideCopy.daysLabel}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {decideCopy.impactLabel}: {formatScore(option.impactScore)}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {decideCopy.co2eLabel}: ~{option.co2eSavedMin}-{option.co2eSavedMax} kg
+                    </div>
+                    {feasibilityDelta && (
+                      <div className="text-xs text-muted-foreground">
+                        <span className="font-semibold">{decideCopy.feasibilityDeltaLabel}</span> {feasibilityDelta}
+                      </div>
+                    )}
+                    {whyNot.length > 0 && (
+                      <div className="text-xs text-muted-foreground">
+                        <span className="font-semibold">{decideCopy.whyNotTitle}</span> {whyNot.join(" · ")}
+                      </div>
+                    )}
                   </div>
-                  <p className="text-sm text-muted-foreground">{decideCopy.optionCopy[option.type].description}</p>
-                  <div className="text-sm text-muted-foreground">
-                    {decideCopy.savingsLabel}: {option.savingsMin}-{option.savingsMax} kr
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {decideCopy.timeResultLabel}: ~{option.timeDays} dager
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {decideCopy.impactLabel}: {option.impactScore}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </CardContent>
           </Card>
 
@@ -399,7 +548,7 @@ export function DecisionWizard() {
                 </div>
               )}
 
-              {matchedActors.map(({ actor, distanceKm, reasons, openStatus }) => {
+              {matchedActors.map(({ actor, distanceKm, reasons, openStatus, serviceMatch }) => {
                 const primaryAction =
                   decision?.recommendation === "repair" && actor.phone
                     ? { label: decideCopy.actions.call, href: `tel:${actor.phone}`, icon: Phone, actionType: "go_call" as const }
@@ -422,6 +571,11 @@ export function DecisionWizard() {
                       ? `${openStatus.state === "open" ? decideCopy.matching.closesAtLabel : decideCopy.matching.opensAtLabel} ${formatTime(openStatus.nextChange)}`
                       : decideCopy.matching.hoursFallbackLabel
                     : decideCopy.matching.hoursFallbackLabel
+                const priceLabel = serviceMatch
+                  ? `${decideCopy.matching.priceRangeLabel}: ${serviceMatch.priceMin}-${serviceMatch.priceMax} kr`
+                  : null
+                const etaLabel =
+                  serviceMatch?.etaDays ? `${decideCopy.matching.etaLabel}: ~${serviceMatch.etaDays} ${decideCopy.daysLabel}` : null
 
                 return (
                   <div key={actor.id} className="flex flex-col gap-3 rounded-lg border p-4">
@@ -430,6 +584,8 @@ export function DecisionWizard() {
                         <h4 className="font-semibold">{actor.name}</h4>
                         <p className="text-sm text-muted-foreground">{actor.address}</p>
                         {distanceLabel && <p className="text-xs text-muted-foreground mt-1">{distanceLabel}</p>}
+                        {priceLabel && <p className="text-xs text-muted-foreground mt-1">{priceLabel}</p>}
+                        {etaLabel && <p className="text-xs text-muted-foreground mt-1">{etaLabel}</p>}
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {reasons.map((reason) => (
