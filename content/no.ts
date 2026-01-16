@@ -18,7 +18,7 @@ export const site = {
 export const navigation = [
   { href: "/", label: "Hjem" },
   { href: "/aktorer", label: "Aktører" },
-  { href: "/decide", label: "Decide" },
+  { href: "/decide", label: "Beslutning" },
   { href: "/kart", label: "Kart" },
   { href: "/quiz", label: "Quiz" },
   { href: "/fakta", label: "Fakta" },
@@ -101,7 +101,7 @@ export const co2eSources = [
 export const bottomNavCopy = {
   items: [
     { href: "/", label: "Hjem", key: "home" },
-    { href: "/decide", label: "Decide", key: "decide" },
+    { href: "/decide", label: "Beslutning", key: "decide" },
     { href: "/kart", label: "Kart", key: "map" },
     { href: "/challenges", label: "Oppdrag", key: "challenges" },
     { href: "/profile", label: "Profil", key: "profile" },
