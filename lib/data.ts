@@ -9,7 +9,17 @@ import {
 } from "@/content/no"
 import type { ItemType, ProblemType } from "@/lib/decision-engine"
 
-export type ActorCategory = "brukt" | "reparasjon" | "gjenvinning"
+export type ActorCategory =
+  | "brukt"
+  | "reparasjon"
+  | "gjenvinning"
+  | "utleie"
+  | "reparasjon_sko_klar"
+  | "mottak_ombruk"
+  | "mobelreparasjon"
+  | "sykkelverksted"
+  | "ombruksverksted"
+  | "baerekraftig_mat"
 
 export type SourceType = "website" | "social" | "google_reviews" | "article" | "map"
 

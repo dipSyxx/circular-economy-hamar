@@ -14,15 +14,32 @@ import "leaflet/dist/leaflet.css";
 import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
-import { actors } from "@/lib/data";
+import { actors, type ActorCategory } from "@/lib/data";
 import { formatTime, getOpeningStatus } from "@/lib/opening-hours";
 import { recordAction } from "@/lib/profile-store";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, ExternalLink, Crosshair } from "lucide-react";
+import {
+  Armchair,
+  Bike,
+  Crosshair,
+  ExternalLink,
+  Hammer,
+  Inbox,
+  KeyRound,
+  Laptop,
+  Layers,
+  Leaf,
+  MapPin,
+  Recycle,
+  Scissors,
+  ShoppingBag,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { mapCopy } from "@/content/no";
+import { renderToStaticMarkup } from "react-dom/server";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl,
@@ -46,6 +63,94 @@ const getDistanceKm = (from: [number, number], to: [number, number]) => {
   return 6371 * c;
 };
 
+const categoryOrder: ActorCategory[] = [
+  "brukt",
+  "utleie",
+  "reparasjon",
+  "reparasjon_sko_klar",
+  "mobelreparasjon",
+  "sykkelverksted",
+  "ombruksverksted",
+  "mottak_ombruk",
+  "baerekraftig_mat",
+  "gjenvinning",
+];
+
+const categoryMeta: Record<
+  ActorCategory,
+  { label: string; color: string; icon: LucideIcon }
+> = {
+  brukt: {
+    label: mapCopy.filterBrukt,
+    color: "#22c55e",
+    icon: ShoppingBag,
+  },
+  utleie: {
+    label: mapCopy.filterUtleie,
+    color: "#8b5cf6",
+    icon: KeyRound,
+  },
+  reparasjon: {
+    label: mapCopy.filterReparasjon,
+    color: "#f59e0b",
+    icon: Laptop,
+  },
+  reparasjon_sko_klar: {
+    label: mapCopy.filterReparasjonSkoKlar,
+    color: "#ec4899",
+    icon: Scissors,
+  },
+  mobelreparasjon: {
+    label: mapCopy.filterMobelreparasjon,
+    color: "#a16207",
+    icon: Armchair,
+  },
+  sykkelverksted: {
+    label: mapCopy.filterSykkelverksted,
+    color: "#06b6d4",
+    icon: Bike,
+  },
+  ombruksverksted: {
+    label: mapCopy.filterOmbruksverksted,
+    color: "#14b8a6",
+    icon: Hammer,
+  },
+  mottak_ombruk: {
+    label: mapCopy.filterMottakOmbruk,
+    color: "#0ea5e9",
+    icon: Inbox,
+  },
+  baerekraftig_mat: {
+    label: mapCopy.filterBaerekraftigMat,
+    color: "#65a30d",
+    icon: Leaf,
+  },
+  gjenvinning: {
+    label: mapCopy.filterGjenvinning,
+    color: "#3b82f6",
+    icon: Recycle,
+  },
+};
+
+const buildMarkerIcon = (color: string, Icon: LucideIcon) => {
+  const svg = renderToStaticMarkup(
+    <Icon color="white" size={16} strokeWidth={2} />
+  );
+  return L.divIcon({
+    className: "",
+    html: `<div style="background-color:${color}; width: 30px; height: 30px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">${svg}</div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+    popupAnchor: [0, -15],
+  });
+};
+
+const getFilterButtonStyle = (active: boolean, color: string) => ({
+  backgroundColor: active ? color : `${color}1A`,
+  color: active ? "#fff" : color,
+  borderColor: color,
+});
+
 function MapFocus({ position }: { position: [number, number] | null }) {
   const map = useMap();
 
@@ -60,9 +165,7 @@ function MapFocus({ position }: { position: [number, number] | null }) {
 
 export function MapComponent() {
   const [selectedActorId, setSelectedActorId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<
-    "all" | "brukt" | "reparasjon" | "gjenvinning"
-  >("all");
+  const [filter, setFilter] = useState<"all" | ActorCategory>("all");
   const [userLocation, setUserLocation] = useState<[number, number] | null>(
     null
   );
@@ -162,20 +265,15 @@ export function MapComponent() {
   };
 
   const icons = useMemo(() => {
-    const createIcon = (color: string) =>
-      L.divIcon({
-        className: "custom-marker",
-        html: `<div style="background-color:${color}; width: 28px; height: 28px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 28],
-        popupAnchor: [0, -28],
-      });
+    const categoryIcons = categoryOrder.reduce((acc, category) => {
+      const meta = categoryMeta[category];
+      acc[category] = buildMarkerIcon(meta.color, meta.icon);
+      return acc;
+    }, {} as Record<ActorCategory, L.DivIcon>);
 
     return {
-      brukt: createIcon("#22c55e"),
-      reparasjon: createIcon("#eab308"),
-      gjenvinning: createIcon("#3b82f6"),
-      user: createIcon("#0ea5e9"),
+      ...categoryIcons,
+      user: buildMarkerIcon("#0ea5e9", Crosshair),
     };
   }, []);
 
@@ -201,88 +299,92 @@ export function MapComponent() {
     <div className="grid gap-6 lg:grid-cols-[1fr_350px]">
       <div className="relative">
         <div className="absolute top-4 left-[52px] z-[1000] flex gap-2 flex-wrap">
-          <Button
-            size="sm"
-            variant={filter === "all" ? "default" : "secondary"}
-            onClick={() => setFilter("all")}
-          >
-            {mapCopy.filterAll}
-          </Button>
-          <Button
-            size="sm"
-            variant={filter === "brukt" ? "default" : "secondary"}
-            onClick={() => setFilter("brukt")}
-          >
-            {mapCopy.filterBrukt}
-          </Button>
-          <Button
-            size="sm"
-            variant={filter === "reparasjon" ? "default" : "secondary"}
-            onClick={() => setFilter("reparasjon")}
-          >
-            {mapCopy.filterReparasjon}
-          </Button>
-          <Button
-            size="sm"
-            variant={filter === "gjenvinning" ? "default" : "secondary"}
-            onClick={() => setFilter("gjenvinning")}
-          >
-            {mapCopy.filterGjenvinning}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={requestLocation}
-            className="gap-2"
-          >
-            <Crosshair className="h-4 w-4" />
-            {mapCopy.nearMeLabel}
-          </Button>
-        </div>
-
-        <MapContainer
-          center={[60.7945, 11.068]}
-          zoom={13}
-          className="w-full h-[500px] lg:h-[600px] rounded-xl border"
-        >
-          <TileLayer
-            attribution="&copy; OpenStreetMap contributors"
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          {filteredActors.map((actor) => (
-            <Marker
-              key={actor.id}
-              position={[actor.lat, actor.lng]}
-              icon={icons[actor.category]}
-              eventHandlers={{
-                click: () => setSelectedActorId(actor.id),
-              }}
+          <div className="flex flex-wrap gap-2 rounded-lg border bg-background/60 p-2 shadow-sm">
+            <Button
+              size="sm"
+              variant={filter === "all" ? "default" : "secondary"}
+              onClick={() => setFilter("all")}
+              className="gap-2"
             >
-              <Popup>
-                <strong>{actor.name}</strong>
-                <br />
-                {actor.address}
-              </Popup>
-            </Marker>
-          ))}
-          {userLocation && (
-            <Marker position={userLocation} icon={icons.user}>
-              <Popup>{mapCopy.nearMeLabel}</Popup>
-            </Marker>
-          )}
-          {routePoints.length > 1 && (
-            <Polyline
-              positions={routePoints}
-              pathOptions={{ color: "#16a34a", weight: 4 }}
+              <Layers className="h-4 w-4" />
+              {mapCopy.filterAll}
+            </Button>
+            {categoryOrder.map((category) => {
+              const meta = categoryMeta[category];
+              const Icon = meta.icon;
+              const active = filter === category;
+              return (
+                <Button
+                  key={category}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setFilter(category)}
+                  className="gap-2"
+                  style={getFilterButtonStyle(active, meta.color)}
+                >
+                  <Icon className="h-4 w-4" />
+                  {meta.label}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="relative">
+          <MapContainer
+            center={[60.7945, 11.068]}
+            zoom={13}
+            className="w-full h-[500px] lg:h-[600px] rounded-xl border"
+          >
+            <TileLayer
+              attribution="&copy; OpenStreetMap contributors"
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-          )}
-          {selectedActor && (
-            <MapFocus position={[selectedActor.lat, selectedActor.lng]} />
-          )}
-          {userLocation && !selectedActor && (
-            <MapFocus position={userLocation} />
-          )}
-        </MapContainer>
+            {filteredActors.map((actor) => (
+              <Marker
+                key={actor.id}
+                position={[actor.lat, actor.lng]}
+                icon={icons[actor.category] ?? icons.brukt}
+                eventHandlers={{
+                  click: () => setSelectedActorId(actor.id),
+                }}
+              >
+                <Popup>
+                  <strong>{actor.name}</strong>
+                  <br />
+                  {actor.address}
+                </Popup>
+              </Marker>
+            ))}
+            {userLocation && (
+              <Marker position={userLocation} icon={icons.user}>
+                <Popup>{mapCopy.nearMeLabel}</Popup>
+              </Marker>
+            )}
+            {routePoints.length > 1 && (
+              <Polyline
+                positions={routePoints}
+                pathOptions={{ color: "#16a34a", weight: 4 }}
+              />
+            )}
+            {selectedActor && (
+              <MapFocus position={[selectedActor.lat, selectedActor.lng]} />
+            )}
+            {userLocation && !selectedActor && (
+              <MapFocus position={userLocation} />
+            )}
+          </MapContainer>
+          <div className="absolute bottom-4 left-4 z-[1000]">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={requestLocation}
+              className="gap-2"
+            >
+              <Crosshair className="h-4 w-4" />
+              {mapCopy.nearMeLabel}
+            </Button>
+          </div>
+        </div>
 
         {locationError && (
           <p className="mt-2 text-sm text-destructive">{locationError}</p>
@@ -355,8 +457,10 @@ export function MapComponent() {
           )}
         </Card>
 
-        <div className="space-y-3 max-h-[550px] overflow-y-auto pr-2">
+        <div className="space-y-3 max-h-[550px] overflow-y-auto pt-0.5 pl-0.5 pr-2">
           {filteredActors.map((actor) => {
+            const meta = categoryMeta[actor.category];
+            const Icon = meta.icon;
             const distance =
               userLocation &&
               `${getDistanceKm(userLocation, [actor.lat, actor.lng]).toFixed(
@@ -402,8 +506,12 @@ export function MapComponent() {
                       {statusLabel}
                       {statusDetail ? ` - ${statusDetail}` : ""}
                     </p>
-                    <Badge className="mt-2" variant="secondary">
-                      {mapCopy.categoryLabels[actor.category]}
+                    <Badge
+                      className="mt-2 flex items-center gap-1"
+                      style={{ backgroundColor: meta.color, color: "#fff" }}
+                    >
+                      <Icon className="h-3 w-3" />
+                      {meta.label}
                     </Badge>
                   </div>
                   <div className="flex flex-col gap-2">
