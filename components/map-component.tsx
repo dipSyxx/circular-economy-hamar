@@ -233,7 +233,7 @@ export function MapComponent() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_350px]">
-      <div className="relative">
+      <div className="relative z-49">
         <div className="absolute top-2.5 left-[52px] mr-10 z-[1000] flex gap-2 flex-wrap">
           <div className="flex flex-wrap gap-2 rounded-lg border bg-background/60 p-2 shadow-sm">
             <Button
