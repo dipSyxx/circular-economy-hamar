@@ -15,28 +15,13 @@ import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 import { actors, type ActorCategory } from "@/lib/data";
+import { categoryConfig, categoryOrder } from "@/lib/categories";
 import { formatTime, getOpeningStatus } from "@/lib/opening-hours";
 import { recordAction } from "@/lib/profile-store";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Armchair,
-  Bike,
-  Crosshair,
-  ExternalLink,
-  Hammer,
-  Inbox,
-  KeyRound,
-  Laptop,
-  Layers,
-  Leaf,
-  MapPin,
-  Recycle,
-  Scissors,
-  ShoppingBag,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Crosshair, ExternalLink, Layers, MapPin } from "lucide-react";
 import Link from "next/link";
 import { mapCopy } from "@/content/no";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -63,76 +48,27 @@ const getDistanceKm = (from: [number, number], to: [number, number]) => {
   return 6371 * c;
 };
 
-const categoryOrder: ActorCategory[] = [
-  "brukt",
-  "utleie",
-  "reparasjon",
-  "reparasjon_sko_klar",
-  "mobelreparasjon",
-  "sykkelverksted",
-  "ombruksverksted",
-  "mottak_ombruk",
-  "baerekraftig_mat",
-  "gjenvinning",
-];
-
-const categoryMeta: Record<
-  ActorCategory,
-  { label: string; color: string; icon: LucideIcon }
-> = {
-  brukt: {
-    label: mapCopy.filterBrukt,
-    color: "#22c55e",
-    icon: ShoppingBag,
-  },
-  utleie: {
-    label: mapCopy.filterUtleie,
-    color: "#8b5cf6",
-    icon: KeyRound,
-  },
-  reparasjon: {
-    label: mapCopy.filterReparasjon,
-    color: "#f59e0b",
-    icon: Laptop,
-  },
-  reparasjon_sko_klar: {
-    label: mapCopy.filterReparasjonSkoKlar,
-    color: "#ec4899",
-    icon: Scissors,
-  },
-  mobelreparasjon: {
-    label: mapCopy.filterMobelreparasjon,
-    color: "#a16207",
-    icon: Armchair,
-  },
-  sykkelverksted: {
-    label: mapCopy.filterSykkelverksted,
-    color: "#06b6d4",
-    icon: Bike,
-  },
-  ombruksverksted: {
-    label: mapCopy.filterOmbruksverksted,
-    color: "#14b8a6",
-    icon: Hammer,
-  },
-  mottak_ombruk: {
-    label: mapCopy.filterMottakOmbruk,
-    color: "#0ea5e9",
-    icon: Inbox,
-  },
-  baerekraftig_mat: {
-    label: mapCopy.filterBaerekraftigMat,
-    color: "#65a30d",
-    icon: Leaf,
-  },
-  gjenvinning: {
-    label: mapCopy.filterGjenvinning,
-    color: "#3b82f6",
-    icon: Recycle,
-  },
+const categoryFilterLabels: Record<ActorCategory, string> = {
+  brukt: mapCopy.filterBrukt,
+  utleie: mapCopy.filterUtleie,
+  reparasjon: mapCopy.filterReparasjon,
+  reparasjon_sko_klar: mapCopy.filterReparasjonSkoKlar,
+  mobelreparasjon: mapCopy.filterMobelreparasjon,
+  sykkelverksted: mapCopy.filterSykkelverksted,
+  ombruksverksted: mapCopy.filterOmbruksverksted,
+  mottak_ombruk: mapCopy.filterMottakOmbruk,
+  baerekraftig_mat: mapCopy.filterBaerekraftigMat,
+  gjenvinning: mapCopy.filterGjenvinning,
 };
 
-const buildMarkerIcon = (color: string, Icon: LucideIcon) => {
+const buildMarkerIcon = (
+  color: string,
+  Icon: React.ComponentType<{
+    color?: string;
+    size?: number;
+    strokeWidth?: number;
+  }>
+) => {
   const svg = renderToStaticMarkup(
     <Icon color="white" size={16} strokeWidth={2} />
   );
@@ -266,7 +202,7 @@ export function MapComponent() {
 
   const icons = useMemo(() => {
     const categoryIcons = categoryOrder.reduce((acc, category) => {
-      const meta = categoryMeta[category];
+      const meta = categoryConfig[category];
       acc[category] = buildMarkerIcon(meta.color, meta.icon);
       return acc;
     }, {} as Record<ActorCategory, L.DivIcon>);
@@ -298,7 +234,7 @@ export function MapComponent() {
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_350px]">
       <div className="relative">
-        <div className="absolute top-4 left-[52px] z-[1000] flex gap-2 flex-wrap">
+        <div className="absolute top-2.5 left-[52px] mr-10 z-[1000] flex gap-2 flex-wrap">
           <div className="flex flex-wrap gap-2 rounded-lg border bg-background/60 p-2 shadow-sm">
             <Button
               size="sm"
@@ -310,7 +246,7 @@ export function MapComponent() {
               {mapCopy.filterAll}
             </Button>
             {categoryOrder.map((category) => {
-              const meta = categoryMeta[category];
+              const meta = categoryConfig[category];
               const Icon = meta.icon;
               const active = filter === category;
               return (
@@ -323,7 +259,7 @@ export function MapComponent() {
                   style={getFilterButtonStyle(active, meta.color)}
                 >
                   <Icon className="h-4 w-4" />
-                  {meta.label}
+                  {categoryFilterLabels[category]}
                 </Button>
               );
             })}
@@ -459,7 +395,7 @@ export function MapComponent() {
 
         <div className="space-y-3 max-h-[550px] overflow-y-auto pt-0.5 pl-0.5 pr-2">
           {filteredActors.map((actor) => {
-            const meta = categoryMeta[actor.category];
+            const meta = categoryConfig[actor.category];
             const Icon = meta.icon;
             const distance =
               userLocation &&
@@ -511,7 +447,7 @@ export function MapComponent() {
                       style={{ backgroundColor: meta.color, color: "#fff" }}
                     >
                       <Icon className="h-3 w-3" />
-                      {meta.label}
+                      {mapCopy.categoryLabels[actor.category]}
                     </Badge>
                   </div>
                   <div className="flex flex-col gap-2">
