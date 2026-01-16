@@ -240,7 +240,7 @@ export function MapComponent() {
               size="sm"
               variant={filter === "all" ? "default" : "secondary"}
               onClick={() => setFilter("all")}
-              className="gap-2"
+              className="gap-2 cursor-pointer"
             >
               <Layers className="h-4 w-4" />
               {mapCopy.filterAll}
@@ -255,7 +255,7 @@ export function MapComponent() {
                   size="sm"
                   variant="outline"
                   onClick={() => setFilter(category)}
-                  className="gap-2"
+                  className="gap-2 cursor-pointer"
                   style={getFilterButtonStyle(active, meta.color)}
                 >
                   <Icon className="h-4 w-4" />
@@ -314,7 +314,7 @@ export function MapComponent() {
               size="sm"
               variant="outline"
               onClick={requestLocation}
-              className="gap-2"
+              className="gap-2 cursor-pointer"
             >
               <Crosshair className="h-4 w-4" />
               {mapCopy.nearMeLabel}
