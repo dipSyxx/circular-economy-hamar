@@ -104,7 +104,7 @@ export const bottomNavCopy = {
     { href: "/decide", label: "Beslutning", key: "decide" },
     { href: "/kart", label: "Kart", key: "map" },
     { href: "/challenges", label: "Oppdrag", key: "challenges" },
-    { href: "/profile", label: "Profil", key: "profile" },
+    { href: "/account/profile", label: "Profil", key: "profile" },
   ],
 };
 

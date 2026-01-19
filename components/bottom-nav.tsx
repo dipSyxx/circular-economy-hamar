@@ -21,7 +21,13 @@ export function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">
       <div className="mx-auto flex max-w-md items-center justify-between px-4 py-2">
         {bottomNavCopy.items.map((item) => {
-          const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
+          const isProfile = item.key === "profile"
+          const active =
+            item.href === "/"
+              ? pathname === "/"
+              : isProfile
+                ? pathname.startsWith("/account") || pathname.startsWith("/profile")
+                : pathname.startsWith(item.href)
           const Icon = iconMap[item.key] ?? Home
           return (
             <Link
