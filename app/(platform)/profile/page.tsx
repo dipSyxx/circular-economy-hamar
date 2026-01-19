@@ -1,7 +1,10 @@
 import { pageCopy } from "@/content/no"
 import { ProfileDashboard } from "@/components/profile-dashboard"
+import { requireUser } from "@/lib/auth"
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  await requireUser()
+
   return (
     <div>
       <section className="py-12 bg-muted/30">

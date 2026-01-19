@@ -2,7 +2,7 @@ import type React from "react";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
-import { ThemeProvider } from "@/components/theme-provider";
+import { AppProviders } from "@/components/app-providers";
 import { site } from "@/content/no";
 import "./globals.css";
 
@@ -47,14 +47,7 @@ export default function RootLayout({
   return (
     <html lang="nb" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        <AppProviders>{children}</AppProviders>
         <Analytics />
       </body>
     </html>
