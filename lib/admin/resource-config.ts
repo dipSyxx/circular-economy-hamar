@@ -19,4 +19,10 @@ export const adminResourceConfig: Record<string, AdminResourceConfig> = {
   "detailed-fact-sources": { model: "detailedFactSource", orderBy: [{ detailedFactId: "asc" }, { sortOrder: "asc" }] },
   "co2e-sources": { model: "co2eSource", orderBy: { title: "asc" } },
   "co2e-source-items": { model: "co2eSourceItem", orderBy: [{ itemType: "asc" }, { sourceId: "asc" }] },
+  users: { model: "user", orderBy: { createdAt: "desc" } },
+  "user-profiles": { model: "userProfile", orderBy: { createdAt: "desc" } },
+  "user-actions": { model: "userAction", orderBy: { createdAt: "desc" } },
+  decisions: { model: "decision", orderBy: { createdAt: "desc" } },
+  "challenge-completions": { model: "challengeCompletion", orderBy: { createdAt: "desc" } },
+  "quiz-attempts": { model: "quizAttempt", orderBy: { createdAt: "desc" } },
 }

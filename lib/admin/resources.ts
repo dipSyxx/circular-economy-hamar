@@ -18,6 +18,12 @@ export const adminResources: AdminResourceMeta[] = [
   { key: "detailed-fact-sources", label: "Faktakilder", description: "Kilder for detaljfakta." },
   { key: "co2e-sources", label: "CO2e-kilder", description: "Kilder brukt i beslutningsmotoren." },
   { key: "co2e-source-items", label: "CO2e-kildekoblinger", description: "Koblinger mellom CO2e-kilder og itemType." },
+  { key: "users", label: "Brukere", description: "Brukere og roller fra Neon Auth." },
+  { key: "user-profiles", label: "Brukerprofiler", description: "Poeng, streaks og status per bruker." },
+  { key: "user-actions", label: "Brukerhandlinger", description: "Handlinger og poenglogg." },
+  { key: "decisions", label: "Beslutninger", description: "Beslutningsmotorens logg." },
+  { key: "challenge-completions", label: "Oppdrag fullfort", description: "Fullforte oppdrag per bruker." },
+  { key: "quiz-attempts", label: "Quiz forsok", description: "Resultater og svar fra quiz." },
 ]
 
 export const adminResourceDefaults: Record<string, object> = {
@@ -125,5 +131,55 @@ export const adminResourceDefaults: Record<string, object> = {
   "co2e-source-items": {
     sourceId: "<co2e-source-id>",
     itemType: "phone",
+  },
+  users: {
+    id: "<user-id>",
+    email: "user@example.com",
+    name: "Eksempel bruker",
+    role: "user",
+    imageUrl: null,
+  },
+  "user-profiles": {
+    userId: "<user-id>",
+    score: 0,
+    streakDays: 0,
+    lastActionDate: "2026-01-01",
+  },
+  "user-actions": {
+    userId: "<user-id>",
+    type: "decision_complete",
+    points: 5,
+    meta: {},
+  },
+  decisions: {
+    userId: "<user-id>",
+    itemType: "phone",
+    problemType: "screen",
+    recommendation: "repair",
+    priority: "balanced",
+    status: "feasible",
+    confidence: "medium",
+    budgetNok: 1500,
+    timeDays: 7,
+    impactScore: 0.5,
+    savingsMin: 500,
+    savingsMax: 2000,
+    co2eSavedMin: 10,
+    co2eSavedMax: 30,
+    explainability: {},
+    options: [],
+    planB: {},
+  },
+  "challenge-completions": {
+    userId: "<user-id>",
+    challengeId: "<challenge-id>",
+    points: 10,
+  },
+  "quiz-attempts": {
+    userId: "<user-id>",
+    score: 4,
+    maxScore: 10,
+    level: "starter",
+    answers: {},
   },
 }

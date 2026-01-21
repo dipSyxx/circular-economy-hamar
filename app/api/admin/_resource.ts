@@ -29,7 +29,7 @@ export const createAdminResource = async (resource: string, request: Request) =>
   }
 
   const body = (await request.json()) as Record<string, unknown>
-  const data = sanitizePayload(body)
+  const data = sanitizePayload(body, { allowId: resource === "users" })
 
   const model = (prisma as Record<string, any>)[config.model]
   const created = await model.create({ data })

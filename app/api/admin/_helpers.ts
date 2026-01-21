@@ -14,10 +14,15 @@ export const requireAdminApi = async () => {
 
 const blockedFields = new Set(["id", "createdAt", "updatedAt"])
 
-export const sanitizePayload = (payload: Record<string, unknown>) => {
+export const sanitizePayload = (
+  payload: Record<string, unknown>,
+  options?: {
+    allowId?: boolean
+  },
+) => {
   const data = { ...payload }
   for (const key of Object.keys(data)) {
-    if (blockedFields.has(key)) {
+    if (blockedFields.has(key) && !(options?.allowId && key === "id")) {
       delete data[key]
     }
   }
