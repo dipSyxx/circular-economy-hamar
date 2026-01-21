@@ -5,6 +5,7 @@ import { NeonAuthUIProvider } from "@neondatabase/auth/react"
 import { AuthSync } from "@/components/auth-sync"
 import { ThemeProvider } from "@/components/theme-provider"
 import { authClient } from "@/lib/auth/client"
+import { accountLocalization } from "@/content/auth-localization"
 
 type AppProvidersProps = {
   children: ReactNode
@@ -12,7 +13,7 @@ type AppProvidersProps = {
 
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <NeonAuthUIProvider authClient={authClient}>
+    <NeonAuthUIProvider authClient={authClient} localization={accountLocalization}>
       <AuthSync />
       <ThemeProvider
         attribute="class"

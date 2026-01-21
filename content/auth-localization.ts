@@ -1,4 +1,4 @@
-import { authLocalization } from "@neondatabase/auth/react/ui/server"
+import { authLocalization } from "@neondatabase/auth/react"
 
 export const accountLocalization = {
   ...authLocalization,
