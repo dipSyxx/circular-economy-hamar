@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { adminResourceConfig } from "@/lib/admin/resource-config"
-import { requireAdminApi, sanitizePayload } from "@/app/api/admin/_helpers"
+import {
+  deleteAdminResource,
+  getAdminResource,
+  updateAdminResource,
+} from "@/app/api/admin/_resource"
 
 type RouteParams = {
   params: {
@@ -10,55 +11,14 @@ type RouteParams = {
   }
 }
 
-const getResourceConfig = (resource: string) => adminResourceConfig[resource]
-
 export async function GET(_request: Request, { params }: RouteParams) {
-  const auth = await requireAdminApi()
-  if ("error" in auth) return auth.error
-
-  const config = getResourceConfig(params.resource)
-  if (!config) {
-    return NextResponse.json({ error: "Unknown resource" }, { status: 404 })
-  }
-
-  const model = (prisma as Record<string, any>)[config.model]
-  const item = await model.findUnique({ where: { id: params.id } })
-  if (!item) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 })
-  }
-  return NextResponse.json(item)
+  return getAdminResource(params.resource, params.id)
 }
 
 export async function PATCH(request: Request, { params }: RouteParams) {
-  const auth = await requireAdminApi()
-  if ("error" in auth) return auth.error
-
-  const config = getResourceConfig(params.resource)
-  if (!config) {
-    return NextResponse.json({ error: "Unknown resource" }, { status: 404 })
-  }
-
-  const body = (await request.json()) as Record<string, unknown>
-  const data = sanitizePayload(body)
-
-  const model = (prisma as Record<string, any>)[config.model]
-  const updated = await model.update({
-    where: { id: params.id },
-    data,
-  })
-  return NextResponse.json(updated)
+  return updateAdminResource(params.resource, params.id, request)
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
-  const auth = await requireAdminApi()
-  if ("error" in auth) return auth.error
-
-  const config = getResourceConfig(params.resource)
-  if (!config) {
-    return NextResponse.json({ error: "Unknown resource" }, { status: 404 })
-  }
-
-  const model = (prisma as Record<string, any>)[config.model]
-  await model.delete({ where: { id: params.id } })
-  return NextResponse.json({ ok: true })
+  return deleteAdminResource(params.resource, params.id)
 }
