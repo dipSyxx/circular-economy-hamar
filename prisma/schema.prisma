@@ -6,13 +6,398 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ActionType {
+  decision_complete
+  go_call
+  go_directions
+  go_website
+  open_actor
+  challenge_complete
+}
+
+enum ItemType {
+  phone
+  laptop
+  clothing
+  other
+}
+
+enum ProblemType {
+  screen
+  battery
+  slow
+  no_power
+  water
+  zipper
+  seam
+  other
+}
+
+enum Priority {
+  save_money
+  save_time
+  save_impact
+  balanced
+}
+
+enum Recommendation {
+  repair
+  buy_used
+  donate
+  recycle
+}
+
+enum DecisionStatus {
+  feasible
+  not_fully_feasible
+}
+
+enum ConfidenceLevel {
+  low
+  medium
+  high
+}
+
+enum ActorCategory {
+  brukt
+  reparasjon
+  gjenvinning
+  utleie
+  reparasjon_sko_klar
+  mottak_ombruk
+  mobelreparasjon
+  sykkelverksted
+  ombruksverksted
+  baerekraftig_mat
+}
+
+enum ActorStatus {
+  pending
+  approved
+  rejected
+  archived
+}
+
+enum SourceType {
+  website
+  social
+  google_reviews
+  article
+  map
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum QuizLevel {
+  starter
+  pa_vei
+  gjenbrukshelt
+}
+
 model User {
   id        String   @id
   email     String?  @unique
   name      String?
   imageUrl  String?  @map("image_url")
+  role      UserRole @default(user)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  profile              UserProfile?
+  actions              UserAction[]
+  decisions            Decision[]
+  challengeCompletions ChallengeCompletion[]
+  quizAttempts         QuizAttempt[]
+  actorsCreated        Actor[] @relation("ActorCreatedBy")
+  actorsReviewed       Actor[] @relation("ActorReviewedBy")
+
   @@map("users")
+}
+
+model UserProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique @map("user_id")
+  score          Int      @default(0)
+  streakDays     Int      @default(0) @map("streak_days")
+  lastActionDate DateTime? @map("last_action_date")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model UserAction {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  type      ActionType
+  points    Int      @default(0)
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("user_actions")
+}
+
+model Decision {
+  id                     String           @id @default(cuid())
+  userId                 String           @map("user_id")
+  itemType               ItemType         @map("item_type")
+  problemType            ProblemType      @map("problem_type")
+  recommendation         Recommendation
+  priority               Priority?
+  status                 DecisionStatus?
+  confidence             ConfidenceLevel?
+  recommendedFeasible    Boolean?         @map("recommended_feasible")
+  bestFeasibleOption     Recommendation?  @map("best_feasible_option")
+  budgetNok              Int              @map("budget_nok")
+  timeDays               Int              @map("time_days")
+  modelRepairabilityScore Float?          @map("model_repairability_score")
+  impactScore            Float            @map("impact_score")
+  savingsMin             Float            @map("savings_min")
+  savingsMax             Float            @map("savings_max")
+  co2eSavedMin           Float?           @map("co2e_saved_min")
+  co2eSavedMax           Float?           @map("co2e_saved_max")
+  explainability         Json?
+  options                Json?
+  planB                  Json?            @map("plan_b")
+  createdAt              DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("decisions")
+}
+
+model ChallengeCompletion {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  challengeId String   @map("challenge_id")
+  points      Int
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, challengeId])
+  @@index([userId, createdAt])
+  @@map("challenge_completions")
+}
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  score     Int
+  maxScore  Int      @map("max_score")
+  level     QuizLevel
+  answers   Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("quiz_attempts")
+}
+
+model Actor {
+  id              String       @id @default(cuid())
+  name            String
+  slug            String       @unique
+  category        ActorCategory
+  description     String
+  longDescription String       @map("long_description")
+  address         String
+  lat             Float
+  lng             Float
+  phone           String?
+  email           String?
+  website         String?
+  instagram       String?
+  openingHours    String[]     @map("opening_hours")
+  openingHoursOsm String?      @map("opening_hours_osm")
+  tags            String[]
+  benefits        String[]
+  howToUse        String[]     @map("how_to_use")
+  image           String?      @map("image_url")
+  status          ActorStatus  @default(pending)
+  reviewNote      String?      @map("review_note")
+  createdById     String?      @map("created_by_id")
+  reviewedById    String?      @map("reviewed_by_id")
+  reviewedAt      DateTime?    @map("reviewed_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  createdBy  User? @relation("ActorCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  reviewedBy User? @relation("ActorReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  repairServices ActorRepairService[]
+  sources        ActorSource[]
+
+  @@index([status, category])
+  @@index([createdById, createdAt])
+  @@map("actors")
+}
+
+model ActorRepairService {
+  id          String      @id @default(cuid())
+  actorId     String      @map("actor_id")
+  problemType ProblemType @map("problem_type")
+  itemTypes   ItemType[]  @map("item_types")
+  priceMin    Int         @map("price_min")
+  priceMax    Int         @map("price_max")
+  etaDays     Int?        @map("eta_days")
+
+  actor Actor @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId])
+  @@map("actor_repair_services")
+}
+
+model ActorSource {
+  id         String     @id @default(cuid())
+  actorId    String     @map("actor_id")
+  type       SourceType
+  title      String
+  url        String
+  capturedAt DateTime?  @map("captured_at")
+  note       String?
+
+  actor Actor @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId])
+  @@map("actor_sources")
+}
+
+model Challenge {
+  id          String        @id
+  title       String
+  description String
+  points      Int
+  icon        String
+  category    ActorCategory
+  sortOrder   Int           @default(0) @map("sort_order")
+
+  completions ChallengeCompletion[]
+
+  @@index([category, sortOrder])
+  @@map("challenges")
+}
+
+model QuizQuestion {
+  id       Int    @id
+  question String
+  options  QuizOption[]
+
+  @@map("quiz_questions")
+}
+
+model QuizOption {
+  id         String @id @default(cuid())
+  questionId Int    @map("question_id")
+  text       String
+  points     Int
+  sortOrder  Int    @default(0) @map("sort_order")
+
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId, sortOrder])
+  @@map("quiz_options")
+}
+
+model QuizResult {
+  level       QuizLevel @id
+  title       String
+  description String
+  tips        String[]
+  badge       String
+
+  @@map("quiz_results")
+}
+
+model RepairEstimate {
+  id           String     @id @default(cuid())
+  itemType     ItemType   @map("item_type")
+  problemType  ProblemType @map("problem_type")
+  deviceType   String     @map("device_type")
+  issue        String
+  repairCostMin Int       @map("repair_cost_min")
+  repairCostMax Int       @map("repair_cost_max")
+  repairDays    Int       @map("repair_days")
+  usedPriceMin  Int       @map("used_price_min")
+  usedPriceMax  Int       @map("used_price_max")
+  newPrice      Int       @map("new_price")
+  co2Saved      Int       @map("co2_saved")
+
+  @@unique([itemType, problemType])
+  @@map("repair_estimates")
+}
+
+model Fact {
+  id          String @id @default(cuid())
+  title       String
+  stat        String
+  description String
+  icon        String
+  sortOrder   Int    @default(0) @map("sort_order")
+
+  @@index([sortOrder])
+  @@map("facts")
+}
+
+model DetailedFact {
+  id        String   @id @default(cuid())
+  category  String
+  title     String
+  icon      String
+  content   String[]
+  tips      String[]
+  sortOrder Int      @default(0) @map("sort_order")
+
+  sources DetailedFactSource[]
+
+  @@index([sortOrder])
+  @@map("detailed_facts")
+}
+
+model DetailedFactSource {
+  id            String @id @default(cuid())
+  detailedFactId String @map("detailed_fact_id")
+  name          String
+  url           String
+  sortOrder     Int    @default(0) @map("sort_order")
+
+  detailedFact DetailedFact @relation(fields: [detailedFactId], references: [id], onDelete: Cascade)
+
+  @@index([detailedFactId, sortOrder])
+  @@map("detailed_fact_sources")
+}
+
+model Co2eSource {
+  id         String   @id
+  title      String
+  url        String
+  capturedAt DateTime? @map("captured_at")
+  anchors    String[]
+
+  items Co2eSourceItem[]
+
+  @@map("co2e_sources")
+}
+
+model Co2eSourceItem {
+  id        String   @id @default(cuid())
+  sourceId  String   @map("source_id")
+  itemType  ItemType @map("item_type")
+
+  source Co2eSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, itemType])
+  @@index([itemType])
+  @@map("co2e_source_items")
 }

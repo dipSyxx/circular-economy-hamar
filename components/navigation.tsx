@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 import { navigation, navigationCopy, site } from "@/content/no"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { authClient } from "@/lib/auth/client"
+import { accountLocalization } from "@/content/auth-localization"
 
 const authRoutes = {
   signIn: "/auth/sign-in",
@@ -56,7 +57,7 @@ export function Navigation() {
         {/* Mobile Navigation */}
         <div className="flex items-center gap-2">
           {hasSession ? (
-            <UserButton size="icon" />
+            <UserButton size="icon" localization={accountLocalization} />
           ) : (
             <div className="hidden md:flex items-center gap-2">
               <Button variant="ghost" size="sm" asChild>
