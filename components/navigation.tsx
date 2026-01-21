@@ -2,11 +2,11 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { UserButton } from "@neondatabase/auth/react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, Recycle } from "lucide-react"
+import { Menu, Recycle, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { navigation, navigationCopy, site } from "@/content/no"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -25,6 +25,28 @@ export function Navigation() {
   const [open, setOpen] = useState(false)
   const { data } = authClient.useSession()
   const hasSession = Boolean(data?.session)
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    const checkAdmin = async () => {
+      if (!hasSession) {
+        if (active) setIsAdmin(false)
+        return
+      }
+      try {
+        const response = await fetch("/api/admin/me")
+        if (!active) return
+        setIsAdmin(response.ok)
+      } catch {
+        if (active) setIsAdmin(false)
+      }
+    }
+    void checkAdmin()
+    return () => {
+      active = false
+    }
+  }, [hasSession])
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -57,7 +79,23 @@ export function Navigation() {
         {/* Mobile Navigation */}
         <div className="flex items-center gap-2">
           {hasSession ? (
-            <UserButton size="icon" localization={accountLocalization} />
+            <UserButton
+              size="icon"
+              localization={accountLocalization}
+              additionalLinks={
+                isAdmin
+                  ? [
+                      {
+                        href: "/admin",
+                        label: "Admin",
+                        icon: <Shield className="mr-2 h-4 w-4" />,
+                        signedIn: true,
+                        separator: true,
+                      },
+                    ]
+                  : undefined
+              }
+            />
           ) : (
             <div className="hidden md:flex items-center gap-2">
               <Button variant="ghost" size="sm" asChild>
@@ -93,6 +131,20 @@ export function Navigation() {
                     {item.label}
                   </Link>
                 ))}
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "px-4 py-3 text-base font-medium rounded-lg transition-colors",
+                      pathname.startsWith("/admin")
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                    )}
+                  >
+                    Admin
+                  </Link>
+                )}
                 {hasSession ? (
                   <div className="grid gap-2 pt-2">
                     <Button variant="outline" asChild>
