@@ -20,7 +20,7 @@ if (!connectionString) {
 const prisma = new PrismaClient({
   adapter: new PrismaNeon({ connectionString }),
 })
-const seedAdminId = "6e241a14-726c-41d8-bc50-0dfc24c5dea1"
+const seedAdminId = "c87051d5-fd03-43a5-bfed-a1bb1d691154"
 
 const co2eSourcesByItem = {
   phone: ["apple-per-iphone-16-pro", "apple-per-iphone-15", "apple-per-iphone-16e"],
@@ -33,8 +33,8 @@ const parseDate = (value?: string) => (value ? new Date(value) : null)
 
 async function seedActors() {
   for (const actor of actors) {
-    await prisma.actor.upsert({
-      where: { id: actor.id },
+    const actorRecord = await prisma.actor.upsert({
+      where: { slug: actor.slug },
       update: {
         name: actor.name,
         slug: actor.slug,
@@ -60,7 +60,6 @@ async function seedActors() {
         reviewedAt: new Date(),
       },
       create: {
-        id: actor.id,
         name: actor.name,
         slug: actor.slug,
         category: actor.category,
@@ -86,41 +85,47 @@ async function seedActors() {
       },
     })
 
-    await prisma.actorRepairService.deleteMany({ where: { actorId: actor.id } })
+    await prisma.actorRepairService.deleteMany({ where: { actorId: actorRecord.id } })
     if (actor.repairServices?.length) {
-      await prisma.actorRepairService.createMany({
-        data: actor.repairServices.map((service) => ({
-          actorId: actor.id,
-          problemType: service.problemType,
-          itemTypes: service.itemTypes ?? [],
-          priceMin: service.priceMin,
-          priceMax: service.priceMax,
-          etaDays: service.etaDays ?? null,
-        })),
-      })
+      for (const service of actor.repairServices) {
+        await prisma.actorRepairService.create({
+          data: {
+            actorId: actorRecord.id,
+            problemType: service.problemType,
+            itemTypes: service.itemTypes ?? [],
+            priceMin: service.priceMin,
+            priceMax: service.priceMax,
+            etaDays: service.etaDays ?? null,
+          },
+        })
+      }
     }
 
-    await prisma.actorSource.deleteMany({ where: { actorId: actor.id } })
+    await prisma.actorSource.deleteMany({ where: { actorId: actorRecord.id } })
     if (actor.sources?.length) {
-      await prisma.actorSource.createMany({
-        data: actor.sources.map((source) => ({
-          actorId: actor.id,
-          type: source.type,
-          title: source.title,
-          url: source.url,
-          capturedAt: parseDate(source.capturedAt) ?? undefined,
-          note: source.note ?? null,
-        })),
-      })
+      for (const source of actor.sources) {
+        await prisma.actorSource.create({
+          data: {
+            actorId: actorRecord.id,
+            type: source.type,
+            title: source.title,
+            url: source.url,
+            note: source.note ?? null,
+            ...(source.capturedAt ? { capturedAt: new Date(source.capturedAt) } : {}),
+          },
+        })
+      }
     }
   }
 }
 
 async function seedChallenges() {
   for (const [index, challenge] of challenges.entries()) {
+    const key = challenge.id
     await prisma.challenge.upsert({
-      where: { id: challenge.id },
+      where: { key },
       update: {
+        key,
         title: challenge.title,
         description: challenge.description,
         points: challenge.points,
@@ -129,7 +134,7 @@ async function seedChallenges() {
         sortOrder: index,
       },
       create: {
-        id: challenge.id,
+        key,
         title: challenge.title,
         description: challenge.description,
         points: challenge.points,
@@ -142,22 +147,25 @@ async function seedChallenges() {
 }
 
 async function seedQuiz() {
-  for (const question of quizQuestions) {
-    await prisma.quizQuestion.upsert({
-      where: { id: question.id },
-      update: { question: question.question },
-      create: { id: question.id, question: question.question },
+  for (const [questionIndex, question] of quizQuestions.entries()) {
+    const key = `question-${question.id}`
+    const questionRecord = await prisma.quizQuestion.upsert({
+      where: { key },
+      update: { key, question: question.question, sortOrder: questionIndex },
+      create: { key, question: question.question, sortOrder: questionIndex },
     })
 
-    await prisma.quizOption.deleteMany({ where: { questionId: question.id } })
-    await prisma.quizOption.createMany({
-      data: question.options.map((option, index) => ({
-        questionId: question.id,
-        text: option.text,
-        points: option.points,
-        sortOrder: index,
-      })),
-    })
+    await prisma.quizOption.deleteMany({ where: { questionId: questionRecord.id } })
+    for (const [optionIndex, option] of question.options.entries()) {
+      await prisma.quizOption.create({
+        data: {
+          questionId: questionRecord.id,
+          text: option.text,
+          points: option.points,
+          sortOrder: optionIndex,
+        },
+      })
+    }
   }
 
   for (const [level, result] of Object.entries(quizResults)) {
@@ -222,10 +230,11 @@ async function seedRepairEstimates() {
 
 async function seedFacts() {
   for (const [index, fact] of facts.entries()) {
-    const id = `fact-${index + 1}`
+    const key = `fact-${index + 1}`
     await prisma.fact.upsert({
-      where: { id },
+      where: { key },
       update: {
+        key,
         title: fact.title,
         stat: fact.stat,
         description: fact.description,
@@ -233,7 +242,7 @@ async function seedFacts() {
         sortOrder: index,
       },
       create: {
-        id,
+        key,
         title: fact.title,
         stat: fact.stat,
         description: fact.description,
@@ -244,10 +253,11 @@ async function seedFacts() {
   }
 
   for (const [index, section] of detailedFacts.entries()) {
-    const id = `detailed-fact-${index + 1}`
-    await prisma.detailedFact.upsert({
-      where: { id },
+    const key = `detailed-fact-${index + 1}`
+    const detailedFactRecord = await prisma.detailedFact.upsert({
+      where: { key },
       update: {
+        key,
         category: section.category,
         title: section.title,
         icon: section.icon,
@@ -256,7 +266,7 @@ async function seedFacts() {
         sortOrder: index,
       },
       create: {
-        id,
+        key,
         category: section.category,
         title: section.title,
         icon: section.icon,
@@ -266,53 +276,83 @@ async function seedFacts() {
       },
     })
 
-    await prisma.detailedFactSource.deleteMany({ where: { detailedFactId: id } })
+    await prisma.detailedFactSource.deleteMany({ where: { detailedFactId: detailedFactRecord.id } })
     if (section.sources?.length) {
-      await prisma.detailedFactSource.createMany({
-        data: section.sources.map((source, sourceIndex) => ({
-          detailedFactId: id,
-          name: source.name,
-          url: source.url,
-          sortOrder: sourceIndex,
-        })),
-      })
+      for (const [sourceIndex, source] of section.sources.entries()) {
+        await prisma.detailedFactSource.create({
+          data: {
+            detailedFactId: detailedFactRecord.id,
+            name: source.name,
+            url: source.url,
+            sortOrder: sourceIndex,
+          },
+        })
+      }
     }
   }
 }
 
 async function seedCo2eSources() {
+  const sourceIdsByKey = new Map<string, string>()
   for (const source of co2eSources) {
-    await prisma.co2eSource.upsert({
-      where: { id: source.id },
+    const key = source.id
+    const sourceRecord = await prisma.co2eSource.upsert({
+      where: { key },
       update: {
+        key,
         title: source.title,
         url: source.url,
         capturedAt: parseDate(source.capturedAt) ?? undefined,
         anchors: [...source.anchors],
       },
       create: {
-        id: source.id,
+        key,
         title: source.title,
         url: source.url,
         capturedAt: parseDate(source.capturedAt) ?? undefined,
         anchors: [...source.anchors],
       },
     })
+    sourceIdsByKey.set(key, sourceRecord.id)
   }
 
   await prisma.co2eSourceItem.deleteMany()
-  const co2eItems = Object.entries(co2eSourcesByItem).flatMap(([itemType, ids]) =>
-    ids.map((sourceId) => ({
-      sourceId,
-      itemType: itemType as keyof typeof co2eSourcesByItem,
-    })),
+  const co2eItems = Object.entries(co2eSourcesByItem).flatMap(([itemType, keys]) =>
+    keys.flatMap((key) => {
+      const sourceId = sourceIdsByKey.get(key)
+      if (!sourceId) return []
+      return [
+        {
+          sourceId,
+          itemType: itemType as keyof typeof co2eSourcesByItem,
+        },
+      ]
+    }),
   )
-  if (co2eItems.length > 0) {
-    await prisma.co2eSourceItem.createMany({ data: co2eItems })
+  for (const item of co2eItems) {
+    await prisma.co2eSourceItem.create({ data: item })
   }
 }
 
+async function clearSeedData() {
+  await prisma.actorRepairService.deleteMany()
+  await prisma.actorSource.deleteMany()
+  await prisma.challengeCompletion.deleteMany()
+  await prisma.challenge.deleteMany()
+  await prisma.quizOption.deleteMany()
+  await prisma.quizQuestion.deleteMany()
+  await prisma.quizResult.deleteMany()
+  await prisma.repairEstimate.deleteMany()
+  await prisma.detailedFactSource.deleteMany()
+  await prisma.detailedFact.deleteMany()
+  await prisma.fact.deleteMany()
+  await prisma.co2eSourceItem.deleteMany()
+  await prisma.co2eSource.deleteMany()
+  await prisma.actor.deleteMany()
+}
+
 async function main() {
+  await clearSeedData()
   await seedActors()
   await seedChallenges()
   await seedQuiz()

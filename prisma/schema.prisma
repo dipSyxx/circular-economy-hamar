@@ -275,7 +275,8 @@ model ActorSource {
 }
 
 model Challenge {
-  id          String        @id
+  id          String        @id @default(cuid())
+  key         String        @unique
   title       String
   description String
   points      Int
@@ -290,16 +291,18 @@ model Challenge {
 }
 
 model QuizQuestion {
-  id       Int    @id
-  question String
-  options  QuizOption[]
+  id        String @id @default(cuid())
+  key       String @unique
+  question  String
+  sortOrder Int    @default(0) @map("sort_order")
+  options   QuizOption[]
 
   @@map("quiz_questions")
 }
 
 model QuizOption {
   id         String @id @default(cuid())
-  questionId Int    @map("question_id")
+  questionId String @map("question_id")
   text       String
   points     Int
   sortOrder  Int    @default(0) @map("sort_order")
@@ -311,7 +314,8 @@ model QuizOption {
 }
 
 model QuizResult {
-  level       QuizLevel @id
+  id          String    @id @default(cuid())
+  level       QuizLevel @unique
   title       String
   description String
   tips        String[]
@@ -340,6 +344,7 @@ model RepairEstimate {
 
 model Fact {
   id          String @id @default(cuid())
+  key         String @unique
   title       String
   stat        String
   description String
@@ -352,6 +357,7 @@ model Fact {
 
 model DetailedFact {
   id        String   @id @default(cuid())
+  key       String   @unique
   category  String
   title     String
   icon      String
@@ -379,7 +385,8 @@ model DetailedFactSource {
 }
 
 model Co2eSource {
-  id         String   @id
+  id         String   @id @default(cuid())
+  key        String   @unique
   title      String
   url        String
   capturedAt DateTime? @map("captured_at")
