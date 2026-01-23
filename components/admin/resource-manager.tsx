@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { AddressSearchInput } from "@/components/address-search-input"
 
 type ResourceManagerProps = {
   resourceKey: string
@@ -1205,6 +1206,15 @@ export function ResourceManager({
                         onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
                         disabled={isReadOnly}
                         placeholder="Legg til og trykk Enter"
+                      />
+                    ) : key === "address" && meta.kind === "string" ? (
+                      <AddressSearchInput
+                        id={key}
+                        name={key}
+                        value={formatInputValue(value, meta) as string}
+                        onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
+                        disabled={isReadOnly}
+                        placeholder="Søk adresse"
                       />
                     ) : meta.kind === "object" || isMultiline ? (
                       <Textarea

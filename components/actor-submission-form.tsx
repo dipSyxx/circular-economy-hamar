@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { AddressSearchInput } from "@/components/address-search-input"
 
 type ActorDraft = {
   name: string
@@ -496,15 +497,15 @@ export function ActorSubmissionForm({ variant = "card" }: ActorSubmissionFormPro
           <div>
             <p className="text-sm font-semibold">Kontakt og plassering</p>
             <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="sm:col-span-2">
-                <Label htmlFor="address">Adresse</Label>
-                <Input
-                  id="address"
-                  value={actor.address}
-                  onChange={(event) => updateActor("address", event.target.value)}
-                  placeholder="Gate, postnummer, sted"
-                />
-              </div>
+            <div className="sm:col-span-2">
+              <Label htmlFor="address">Adresse</Label>
+              <AddressSearchInput
+                id="address"
+                value={actor.address}
+                onChange={(value) => updateActor("address", value)}
+                placeholder="Gate, postnummer, sted"
+              />
+            </div>
               <div>
                 <Label htmlFor="lat">Breddegrad</Label>
                 <Input
