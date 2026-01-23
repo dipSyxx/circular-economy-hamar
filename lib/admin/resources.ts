@@ -1,20 +1,28 @@
-export type AdminResourceMeta = {
+﻿export type AdminResourceMeta = {
   key: string
   label: string
   description?: string
 }
 
 export const adminResources: AdminResourceMeta[] = [
-  { key: "actors", label: "Aktorer", description: "Lokale aktorer med kontaktinfo, tags og apningstider." },
-  { key: "actor-repair-services", label: "Reparasjons-tjenester", description: "Pris og omfang for aktorenes tjenester." },
-  { key: "actor-sources", label: "Aktorkilder", description: "Kilder og referanser per aktor." },
+  {
+    key: "actors",
+    label: "Aktører",
+    description: "Lokale aktører med kontaktinfo, tags og åpningstider.",
+  },
+  {
+    key: "actor-repair-services",
+    label: "Reparasjons-tjenester",
+    description: "Pris og omfang for aktørenes tjenester.",
+  },
+  { key: "actor-sources", label: "Aktørkilder", description: "Kilder og referanser per aktør." },
   { key: "challenges", label: "Oppdrag", description: "Oppdragene i appen (poeng og kategori)." },
-  { key: "quiz-questions", label: "Quizsporsmal", description: "Sporsmal og rekkefolge." },
-  { key: "quiz-options", label: "Quizalternativer", description: "Svaralternativer for hvert sporsmal." },
-  { key: "quiz-results", label: "Quizresultater", description: "Resultatnivaer og tips." },
+  { key: "quiz-questions", label: "Quizspørsmål", description: "Spørsmål og rekkefølge." },
+  { key: "quiz-options", label: "Quizalternativer", description: "Svaralternativer for hvert spørsmål." },
+  { key: "quiz-results", label: "Quizresultater", description: "Resultatnivåer og tips." },
   { key: "repair-estimates", label: "Reparasjonsdata", description: "Kostnad og CO2 for kalkulatoren." },
-  { key: "facts", label: "Fakta (kort)", description: "Kortfakta-kort pa /fakta." },
-  { key: "detailed-facts", label: "Fakta (detalj)", description: "Detaljseksjoner pa /fakta." },
+  { key: "facts", label: "Fakta (kort)", description: "Kortfakta-kort på /fakta." },
+  { key: "detailed-facts", label: "Fakta (detalj)", description: "Detaljseksjoner på /fakta." },
   { key: "detailed-fact-sources", label: "Faktakilder", description: "Kilder for detaljfakta." },
   { key: "co2e-sources", label: "CO2e-kilder", description: "Kilder brukt i beslutningsmotoren." },
   { key: "co2e-source-items", label: "CO2e-kildekoblinger", description: "Koblinger mellom CO2e-kilder og itemType." },
@@ -22,13 +30,13 @@ export const adminResources: AdminResourceMeta[] = [
   { key: "user-profiles", label: "Brukerprofiler", description: "Poeng, streaks og status per bruker." },
   { key: "user-actions", label: "Brukerhandlinger", description: "Handlinger og poenglogg." },
   { key: "decisions", label: "Beslutninger", description: "Beslutningsmotorens logg." },
-  { key: "challenge-completions", label: "Oppdrag fullfort", description: "Fullforte oppdrag per bruker." },
-  { key: "quiz-attempts", label: "Quiz forsok", description: "Resultater og svar fra quiz." },
+  { key: "challenge-completions", label: "Oppdrag fullført", description: "Fullførte oppdrag per bruker." },
+  { key: "quiz-attempts", label: "Quiz forsøk", description: "Resultater og svar fra quiz." },
 ]
 
 export const adminResourceDefaults: Record<string, object> = {
   actors: {
-    name: "Eksempel aktor",
+    name: "Eksempel aktør",
     slug: "eksempel-aktor",
     category: "brukt",
     description: "Kort beskrivelse",
@@ -60,8 +68,8 @@ export const adminResourceDefaults: Record<string, object> = {
   },
   challenges: {
     key: "brukt-1",
-    title: "Forste bruktfunn",
-    description: "Kjop en ting brukt denne uka",
+    title: "Første bruktfunn",
+    description: "Kjøp en ting brukt denne uka",
     points: 10,
     icon: "*",
     category: "brukt",
@@ -69,7 +77,7 @@ export const adminResourceDefaults: Record<string, object> = {
   },
   "quiz-questions": {
     key: "question-1",
-    question: "Hva gjor du med klar du ikke bruker lenger?",
+    question: "Hva gjør du med klær du ikke bruker lenger?",
     sortOrder: 0,
   },
   "quiz-options": {
@@ -80,9 +88,9 @@ export const adminResourceDefaults: Record<string, object> = {
   },
   "quiz-results": {
     level: "starter",
-    title: "Sirkular Starter",
+    title: "Sirkulær Starter",
     description: "Du er i gang!",
-    tips: ["Besok en bruktbutikk", "Reparer for du kjoper nytt"],
+    tips: ["Besøk en bruktbutikk", "Reparer før du kjøper nytt"],
     badge: "*",
   },
   "repair-estimates": {
@@ -102,7 +110,7 @@ export const adminResourceDefaults: Record<string, object> = {
     key: "fact-1",
     title: "E-avfall",
     stat: "50 millioner tonn",
-    description: "e-avfall produseres globalt hvert ar.",
+    description: "e-avfall produseres globalt hvert år.",
     icon: "*",
     sortOrder: 0,
   },
@@ -183,3 +191,6 @@ export const adminResourceDefaults: Record<string, object> = {
     answers: {},
   },
 }
+
+
+

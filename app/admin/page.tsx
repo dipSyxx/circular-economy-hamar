@@ -1,4 +1,4 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { adminResources } from "@/lib/admin/resources"
@@ -41,10 +41,10 @@ export default async function AdminPage() {
 
   const stats = [
     { label: "Brukere", value: userCount },
-    { label: "Aktorer", value: actorCount },
-    { label: "Ventende aktorer", value: pendingActorCount },
+    { label: "Aktører", value: actorCount },
+    { label: "Ventende aktører", value: pendingActorCount },
     { label: "Oppdrag", value: challengeCount },
-    { label: "Quizsporsmal", value: quizQuestionCount },
+    { label: "Quizspørsmål", value: quizQuestionCount },
     { label: "Fakta", value: factCount },
   ]
 
@@ -87,3 +87,6 @@ export default async function AdminPage() {
     </div>
   )
 }
+
+
+

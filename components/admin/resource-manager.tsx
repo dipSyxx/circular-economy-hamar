@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react"
 import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react"
@@ -496,7 +496,7 @@ function SearchSelect({
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command>
-          <CommandInput placeholder="Sok..." />
+          <CommandInput placeholder="Søk..." />
           <CommandList>
             <CommandEmpty>{loading ? "Laster..." : "Ingen treff."}</CommandEmpty>
             <CommandGroup>
@@ -936,7 +936,7 @@ export function ResourceManager({
         </div>
         <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
           <Input
-            placeholder="Sok etter felt, eller bruk felt:verdi"
+            placeholder="Søk etter felt, eller bruk felt:verdi"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -1249,3 +1249,6 @@ export function ResourceManager({
     </Card>
   )
 }
+
+
+

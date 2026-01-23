@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -86,18 +86,18 @@ export function PendingActorsPanel({ initialActors, reviewerId }: PendingActorsP
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Ventende aktorer</CardTitle>
-        <CardDescription>Godkjenn eller avvis aktorer som venter pa gjennomgang.</CardDescription>
+        <CardTitle>Ventende aktører</CardTitle>
+        <CardDescription>Godkjenn eller avvis aktører som venter på gjennomgang.</CardDescription>
       </CardHeader>
       <CardContent>
         {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
         {items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Ingen aktorer venter pa gjennomgang.</p>
+          <p className="text-sm text-muted-foreground">Ingen aktører venter på gjennomgang.</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Aktor</TableHead>
+                <TableHead>Aktør</TableHead>
                 <TableHead>Kategori</TableHead>
                 <TableHead>Opprettet av</TableHead>
                 <TableHead>Dato</TableHead>
@@ -144,3 +144,6 @@ export function PendingActorsPanel({ initialActors, reviewerId }: PendingActorsP
     </Card>
   )
 }
+
+
+
