@@ -503,6 +503,13 @@ export function ActorSubmissionForm({ variant = "card" }: ActorSubmissionFormPro
                 id="address"
                 value={actor.address}
                 onChange={(value) => updateActor("address", value)}
+                onCoordinates={(coords) =>
+                  setActor((prev) => ({
+                    ...prev,
+                    lat: coords.lat.toFixed(6),
+                    lng: coords.lng.toFixed(6),
+                  }))
+                }
                 placeholder="Gate, postnummer, sted"
               />
             </div>

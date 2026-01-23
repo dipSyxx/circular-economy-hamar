@@ -18,6 +18,7 @@ type AddressSearchInputProps = {
   name?: string
   value: string
   onChange: (value: string) => void
+  onCoordinates?: (coords: { lat: number; lng: number }) => void
   placeholder?: string
   disabled?: boolean
 }
@@ -33,6 +34,7 @@ export function AddressSearchInput({
   name,
   value,
   onChange,
+  onCoordinates,
   placeholder,
   disabled,
 }: AddressSearchInputProps) {
@@ -104,12 +106,25 @@ export function AddressSearchInput({
     setIsFocused(false)
   }
 
-  const handleSelect = (option: AddressOption) => {
-    onChange(formatAddress(option))
+  const handleSelect = async (option: AddressOption) => {
+    const formatted = formatAddress(option)
+    onChange(formatted)
     setShouldSearch(false)
     setOptions([])
     setError(null)
     setOpen(false)
+
+    if (onCoordinates) {
+      try {
+        const response = await fetch(`/api/address-geocode?query=${encodeURIComponent(formatted)}`)
+        const payload = (await response.json()) as { lat?: number; lng?: number }
+        if (response.ok && typeof payload.lat === "number" && typeof payload.lng === "number") {
+          onCoordinates({ lat: payload.lat, lng: payload.lng })
+        }
+      } catch {
+        // Ignore geocode errors; user can still edit coordinates manually.
+      }
+    }
   }
 
   return (

@@ -1213,6 +1213,18 @@ export function ResourceManager({
                         name={key}
                         value={formatInputValue(value, meta) as string}
                         onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
+                        onCoordinates={(coords) =>
+                          setDraft((prev) => {
+                            const hasLat = Object.prototype.hasOwnProperty.call(prev, "lat")
+                            const hasLng = Object.prototype.hasOwnProperty.call(prev, "lng")
+                            if (!hasLat && !hasLng) return prev
+                            return {
+                              ...prev,
+                              ...(hasLat ? { lat: coords.lat } : {}),
+                              ...(hasLng ? { lng: coords.lng } : {}),
+                            }
+                          })
+                        }
                         disabled={isReadOnly}
                         placeholder="Søk adresse"
                       />
