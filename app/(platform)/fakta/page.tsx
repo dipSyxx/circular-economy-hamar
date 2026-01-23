@@ -1,13 +1,19 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { detailedFacts, facts } from "@/lib/data"
 import { ExternalLink, BookOpen, Lightbulb, AlertTriangle } from "lucide-react"
 import Link from "next/link"
-import { co2eSources, pageCopy } from "@/content/no"
+import { pageCopy } from "@/content/no"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { getCo2eSources, getDetailedFacts, getFacts } from "@/lib/public-data"
 
-export default function FactsPage() {
+export default async function FactsPage() {
+  const [facts, detailedFacts, co2eSources] = await Promise.all([
+    getFacts(),
+    getDetailedFacts(),
+    getCo2eSources(),
+  ])
+
   return (
     <div>
       <section className="py-12 bg-muted/30">
@@ -125,13 +131,13 @@ export default function FactsPage() {
                         {source.capturedAt && (
                           <p className="text-xs text-muted-foreground">Hentet: {source.capturedAt}</p>
                         )}
-                        {source.anchors && (
+                        {source.anchors?.length ? (
                           <ul className="list-disc pl-5 text-sm text-muted-foreground">
                             {source.anchors.map((anchor) => (
                               <li key={anchor}>{anchor}</li>
                             ))}
                           </ul>
-                        )}
+                        ) : null}
                       </div>
                     ))}
                   </AccordionContent>

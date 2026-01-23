@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { co2eSources, decideCopy, pageCopy } from "@/content/no"
+import { decideCopy, pageCopy } from "@/content/no"
 import { evaluateDecision, type DecisionInput, type ItemType, type ProblemType, type Priority } from "@/lib/decision-engine"
-import { actors } from "@/lib/data"
+import type { Actor, Co2eSource, Co2eSourceItem } from "@/lib/data"
 import { formatTime, getOpeningStatus } from "@/lib/opening-hours"
 import { recordAction, recordDecision } from "@/lib/profile-store"
 import { Button } from "@/components/ui/button"
@@ -44,14 +44,13 @@ const matchReasonLabels: Record<MatchReason, string> = {
 
 const formatScore = (value: number) => (Number.isFinite(value) ? value.toFixed(1) : "-")
 
-const co2eSourcesByItem: Record<ItemType, string[]> = {
-  phone: ["apple-per-iphone-16-pro", "apple-per-iphone-15", "apple-per-iphone-16e"],
-  laptop: ["apple-per-macbook-air-2017", "foxway-handprint-2021"],
-  clothing: ["levis-501-lca-2015"],
-  other: ["global-ewaste-monitor-2024-pdf", "global-ewaste-monitor-2024-landing"],
+interface DecisionWizardProps {
+  actors: Actor[]
+  co2eSources: Co2eSource[]
+  co2eSourceItems: Co2eSourceItem[]
 }
 
-export function DecisionWizard() {
+export function DecisionWizard({ actors, co2eSources, co2eSourceItems }: DecisionWizardProps) {
   const [step, setStep] = useState(0)
   const [showResult, setShowResult] = useState(false)
   const [itemType, setItemType] = useState<ItemType | null>(null)
@@ -151,7 +150,7 @@ export function DecisionWizard() {
       if (entry.serviceMatch && budget >= entry.serviceMatch.priceMax) reasons.push("budget_fit")
       return { ...entry, reasons }
     })
-  }, [decision, userLocation, budget, problemType, itemType, timeDays])
+  }, [actors, decision, userLocation, budget, problemType, itemType, timeDays])
 
   const getWhyNotReasons = (option: NonNullable<typeof decision>["options"][number]) => {
     if (!recommendation || option.type === recommendation.type) return []
@@ -176,12 +175,29 @@ export function DecisionWizard() {
     return parts.length ? parts.join(" · ") : null
   }
 
+  const sourcesByItem = useMemo(() => {
+    const sourcesMap = new Map<ItemType, Co2eSource[]>()
+    const sourceById = new Map(co2eSources.map((source) => [source.id, source]))
+
+    for (const item of co2eSourceItems) {
+      const source = sourceById.get(item.sourceId)
+      if (!source) continue
+      const bucket = sourcesMap.get(item.itemType)
+      if (bucket) {
+        bucket.push(source)
+      } else {
+        sourcesMap.set(item.itemType, [source])
+      }
+    }
+
+    return sourcesMap
+  }, [co2eSources, co2eSourceItems])
+
   const co2eLinks = useMemo(() => {
     if (!itemType) return co2eSources
-    const ids = co2eSourcesByItem[itemType] ?? []
-    const selected = co2eSources.filter((source) => ids.includes(source.id))
+    const selected = sourcesByItem.get(itemType) ?? []
     return selected.length ? selected : co2eSources
-  }, [itemType])
+  }, [itemType, co2eSources, sourcesByItem])
 
   useEffect(() => {
     if (!showResult || !decision || !itemType || !problemType) return

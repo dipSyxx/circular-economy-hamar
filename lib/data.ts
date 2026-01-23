@@ -1,12 +1,3 @@
-import {
-  actors as contentActors,
-  challenges as contentChallenges,
-  detailedFacts as contentDetailedFacts,
-  facts as contentFacts,
-  quizQuestions as contentQuizQuestions,
-  quizResults as contentQuizResults,
-  repairData as contentRepairData,
-} from "@/content/no"
 import type { ItemType, ProblemType } from "@/lib/decision-engine"
 
 export type ActorCategory =
@@ -41,16 +32,16 @@ export interface Actor {
   address: string
   lat: number
   lng: number
-  phone?: string
-  email?: string
-  website?: string
-  instagram?: string
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  instagram?: string | null
   openingHours: string[]
-  openingHoursOsm?: string
+  openingHoursOsm?: string | null
   tags: string[]
   benefits: string[]
   howToUse: string[]
-  image: string
+  image?: string | null
   repairServices?: RepairService[]
   sources: Source[]
 }
@@ -64,7 +55,7 @@ export interface RepairService {
 }
 
 export interface QuizQuestion {
-  id: number
+  id: string
   question: string
   options: {
     text: string
@@ -72,8 +63,19 @@ export interface QuizQuestion {
   }[]
 }
 
+export type QuizLevel = "starter" | "pa_vei" | "gjenbrukshelt"
+
+export interface QuizResult {
+  level: QuizLevel
+  title: string
+  description: string
+  tips: string[]
+  badge: string
+}
+
 export interface Challenge {
   id: string
+  key?: string
   title: string
   description: string
   points: number
@@ -82,6 +84,8 @@ export interface Challenge {
 }
 
 export interface RepairEstimate {
+  itemType?: ItemType
+  problemType?: ProblemType
   deviceType: string
   issue: string
   repairCostMin: number
@@ -95,10 +99,38 @@ export interface RepairEstimate {
 
 export type RepairData = Record<string, Record<string, RepairEstimate>>
 
-export const actors: Actor[] = contentActors
-export const quizQuestions: QuizQuestion[] = contentQuizQuestions
-export const quizResults = contentQuizResults
-export const challenges: Challenge[] = contentChallenges
-export const repairData: RepairData = contentRepairData
-export const facts = contentFacts
-export const detailedFacts = contentDetailedFacts
+export interface Fact {
+  title: string
+  stat: string
+  description: string
+  icon: string
+}
+
+export interface DetailedFactSource {
+  name: string
+  url: string
+}
+
+export interface DetailedFact {
+  category: string
+  icon: string
+  title: string
+  content: string[]
+  tips: string[]
+  sources: DetailedFactSource[]
+}
+
+export interface Co2eSource {
+  id: string
+  key?: string
+  title: string
+  url: string
+  capturedAt?: string
+  anchors?: string[]
+}
+
+export interface Co2eSourceItem {
+  id: string
+  sourceId: string
+  itemType: ItemType
+}

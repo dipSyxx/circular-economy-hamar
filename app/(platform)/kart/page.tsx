@@ -1,7 +1,10 @@
-﻿import { pageCopy } from "@/content/no"
+import { pageCopy } from "@/content/no"
 import { MapClient } from "@/components/map-client"
+import { getActors } from "@/lib/public-data"
 
-export default function MapPage() {
+export default async function MapPage() {
+  const actors = await getActors()
+
   return (
     <div>
       <section className="py-8 bg-muted/30">
@@ -13,7 +16,7 @@ export default function MapPage() {
 
       <section className="py-8">
         <div className="container mx-auto px-4">
-          <MapClient />
+          <MapClient actors={actors} />
         </div>
       </section>
     </div>

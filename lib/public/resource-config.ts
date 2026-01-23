@@ -71,10 +71,14 @@ export const publicResourceConfig: Record<string, PublicResourceConfig> = {
     readUsesUser: true,
     listWhere: ({ userId, searchParams }) => {
       const category = searchParams.get("category")
+      const slug = searchParams.get("slug")
       const base = userId
         ? { OR: [{ status: "approved" }, { createdById: userId }] }
         : { status: "approved" }
-      return category ? { AND: [base, { category }] } : base
+      const filters = []
+      if (category) filters.push({ category })
+      if (slug) filters.push({ slug })
+      return filters.length ? { AND: [base, ...filters] } : base
     },
     detailWhere: ({ userId, id }) => {
       const base = userId

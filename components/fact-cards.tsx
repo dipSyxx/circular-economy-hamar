@@ -1,10 +1,14 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { facts } from "@/lib/data"
+import type { Fact } from "@/lib/data"
 import { sectionContent } from "@/content/no"
 
-export function FactCards() {
+interface FactCardsProps {
+  facts: Fact[]
+}
+
+export function FactCards({ facts }: FactCardsProps) {
   return (
     <section className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">

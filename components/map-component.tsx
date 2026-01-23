@@ -14,7 +14,7 @@ import "leaflet/dist/leaflet.css";
 import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
-import { actors, type ActorCategory } from "@/lib/data";
+import type { Actor, ActorCategory } from "@/lib/data";
 import { categoryConfig, categoryOrder } from "@/lib/categories";
 import { formatTime, getOpeningStatus } from "@/lib/opening-hours";
 import { recordAction } from "@/lib/profile-store";
@@ -99,7 +99,11 @@ function MapFocus({ position }: { position: [number, number] | null }) {
   return null;
 }
 
-export function MapComponent() {
+interface MapComponentProps {
+  actors: Actor[]
+}
+
+export function MapComponent({ actors }: MapComponentProps) {
   const [selectedActorId, setSelectedActorId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | ActorCategory>("all");
   const [userLocation, setUserLocation] = useState<[number, number] | null>(
@@ -108,9 +112,7 @@ export function MapComponent() {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [routeStops, setRouteStops] = useState<string[]>([]);
 
-  const isActor = (
-    actor: (typeof actors)[number] | undefined
-  ): actor is (typeof actors)[number] => Boolean(actor);
+  const isActor = (actor: Actor | undefined): actor is Actor => Boolean(actor);
 
   const filteredActors = useMemo(() => {
     const list =
@@ -123,7 +125,7 @@ export function MapComponent() {
       const distB = getDistanceKm(userLocation, [b.lat, b.lng]);
       return distA - distB;
     });
-  }, [filter, userLocation]);
+  }, [actors, filter, userLocation]);
 
   const selectedActor =
     filteredActors.find((actor) => actor.id === selectedActorId) ?? null;
@@ -132,7 +134,7 @@ export function MapComponent() {
       routeStops
         .map((id) => actors.find((actor) => actor.id === id))
         .filter(isActor),
-    [routeStops]
+    [actors, routeStops]
   );
   const routePoints = useMemo(
     () =>

@@ -1,10 +1,12 @@
 import { ActorCard } from "@/components/actor-card"
 import { ActorSubmissionDialog } from "@/components/actor-submission-dialog"
-import { actors } from "@/lib/data"
 import { Badge } from "@/components/ui/badge"
 import { pageCopy } from "@/content/no"
+import { getActors } from "@/lib/public-data"
 
-export default function ActorsPage() {
+export default async function ActorsPage() {
+  const actors = await getActors()
+
   return (
     <div>
       <section className="py-12 bg-muted/30">

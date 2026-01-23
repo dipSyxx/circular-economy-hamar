@@ -1,4 +1,3 @@
-﻿import { actors } from "@/lib/data"
 import { notFound } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -18,20 +17,15 @@ import Link from "next/link"
 import { actorCopy, actorPageCopy } from "@/content/no"
 import type { SourceType } from "@/lib/data"
 import { categoryConfig } from "@/lib/categories"
+import { getActorBySlug } from "@/lib/public-data"
 
 interface ActorPageProps {
   params: Promise<{ slug: string }>
 }
 
-export async function generateStaticParams() {
-  return actors.map((actor) => ({
-    slug: actor.slug,
-  }))
-}
-
 export default async function ActorPage({ params }: ActorPageProps) {
   const { slug } = await params
-  const actor = actors.find((item) => item.slug === slug)
+  const actor = await getActorBySlug(slug)
 
   if (!actor) {
     notFound()

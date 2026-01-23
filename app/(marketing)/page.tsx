@@ -2,10 +2,12 @@
 import { ActorCard } from "@/components/actor-card"
 import { FactCards } from "@/components/fact-cards"
 import { CTASection } from "@/components/cta-section"
-import { actors } from "@/lib/data"
 import { homeContent } from "@/content/no"
+import { getActors, getFacts } from "@/lib/public-data"
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [actors, facts] = await Promise.all([getActors(), getFacts()])
+
   return (
     <div>
       <HeroSection />
@@ -25,7 +27,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <FactCards />
+      <FactCards facts={facts} />
       <CTASection />
     </div>
   )

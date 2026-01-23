@@ -1,7 +1,10 @@
-﻿import { Quiz } from "@/components/quiz"
+import { Quiz } from "@/components/quiz"
 import { pageCopy } from "@/content/no"
+import { getChallenges, getQuizData } from "@/lib/public-data"
 
-export default function QuizPage() {
+export default async function QuizPage() {
+  const [{ quizQuestions, quizResults }, challenges] = await Promise.all([getQuizData(), getChallenges()])
+
   return (
     <div>
       <section className="py-12 bg-muted/30">
@@ -15,7 +18,7 @@ export default function QuizPage() {
 
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <Quiz />
+          <Quiz challenges={challenges} quizQuestions={quizQuestions} quizResults={quizResults} />
         </div>
       </section>
     </div>

@@ -1,7 +1,10 @@
-﻿import { Calculator } from "@/components/calculator"
+import { Calculator } from "@/components/calculator"
 import { pageCopy } from "@/content/no"
+import { getActors, getRepairData } from "@/lib/public-data"
 
-export default function CalculatorPage() {
+export default async function CalculatorPage() {
+  const [actors, repairData] = await Promise.all([getActors(), getRepairData()])
+
   return (
     <div>
       <section className="py-12 bg-muted/30">
@@ -15,7 +18,7 @@ export default function CalculatorPage() {
 
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <Calculator />
+          <Calculator actors={actors} repairData={repairData} />
         </div>
       </section>
     </div>

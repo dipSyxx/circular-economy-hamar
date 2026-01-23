@@ -1,14 +1,18 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { challenges } from "@/lib/data"
+import type { Challenge } from "@/lib/data"
 import { completeChallenge, loadProfile, type ProfileData } from "@/lib/profile-store"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { challengesCopy } from "@/content/no"
 
-export function ChallengesBoard() {
+interface ChallengesBoardProps {
+  challenges: Challenge[]
+}
+
+export function ChallengesBoard({ challenges }: ChallengesBoardProps) {
   const [profile, setProfile] = useState<ProfileData | null>(null)
 
   useEffect(() => {

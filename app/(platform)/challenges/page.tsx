@@ -1,7 +1,10 @@
 import { pageCopy } from "@/content/no"
 import { ChallengesBoard } from "@/components/challenges-board"
+import { getChallenges } from "@/lib/public-data"
 
-export default function ChallengesPage() {
+export default async function ChallengesPage() {
+  const challenges = await getChallenges()
+
   return (
     <div>
       <section className="py-12 bg-muted/30">
@@ -15,7 +18,7 @@ export default function ChallengesPage() {
 
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <ChallengesBoard />
+          <ChallengesBoard challenges={challenges} />
         </div>
       </section>
     </div>

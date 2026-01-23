@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { repairData, actors } from "@/lib/data"
+import type { Actor, RepairData, RepairEstimate } from "@/lib/data"
 import { Wrench, ShoppingBag, ArrowRight, Leaf, Coins, Clock } from "lucide-react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
@@ -23,11 +23,16 @@ interface Result {
   savingsMin: number
   savingsMax: number
   co2Saved: number
-  actors: typeof actors
-  estimate: typeof repairData.phone.screen
+  actors: Actor[]
+  estimate: RepairEstimate
 }
 
-export function Calculator() {
+interface CalculatorProps {
+  actors: Actor[]
+  repairData: RepairData
+}
+
+export function Calculator({ actors, repairData }: CalculatorProps) {
   const [deviceType, setDeviceType] = useState<DeviceType | "">("")
   const [issue, setIssue] = useState<IssueType>("")
   const [result, setResult] = useState<Result | null>(null)

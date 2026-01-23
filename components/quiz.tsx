@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { challenges, quizQuestions, quizResults } from "@/lib/data"
+import type { Challenge, QuizLevel, QuizQuestion, QuizResult } from "@/lib/data"
 import { CheckCircle2, ArrowRight, Share2, RotateCcw, Trophy, Target } from "lucide-react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
@@ -13,9 +13,9 @@ import { quizCopy, site } from "@/content/no"
 
 type QuizState = "intro" | "playing" | "result"
 
-type QuizLevel = keyof typeof quizResults
+type QuizResultsByLevel = Record<QuizLevel, QuizResult>
 
-interface QuizResult {
+interface QuizResultState {
   score: number
   maxScore: number
   level: QuizLevel
@@ -25,11 +25,17 @@ interface QuizResult {
   badge: string
 }
 
-export function Quiz() {
+interface QuizProps {
+  challenges: Challenge[]
+  quizQuestions: QuizQuestion[]
+  quizResults: QuizResultsByLevel
+}
+
+export function Quiz({ challenges, quizQuestions, quizResults }: QuizProps) {
   const [state, setState] = useState<QuizState>("intro")
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<number[]>([])
-  const [result, setResult] = useState<QuizResult | null>(null)
+  const [result, setResult] = useState<QuizResultState | null>(null)
 
   const startQuiz = () => {
     setState("playing")
@@ -83,7 +89,7 @@ export function Quiz() {
     setResult(null)
   }
 
-  const formatShareText = (currentResult: QuizResult) =>
+  const formatShareText = (currentResult: QuizResultState) =>
     quizCopy.shareTemplate
       .replace("{score}", String(currentResult.score))
       .replace("{maxScore}", String(currentResult.maxScore))
