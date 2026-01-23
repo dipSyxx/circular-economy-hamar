@@ -7,9 +7,11 @@ type RouteParams = {
 }
 
 export async function GET(request: Request, { params }: RouteParams) {
-  return listPublicResource(params.resource, request)
+  const { resource } = await Promise.resolve(params)
+  return listPublicResource(resource, request)
 }
 
 export async function POST(request: Request, { params }: RouteParams) {
-  return createPublicResource(params.resource, request)
+  const { resource } = await Promise.resolve(params)
+  return createPublicResource(resource, request)
 }

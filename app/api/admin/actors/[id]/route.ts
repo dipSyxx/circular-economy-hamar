@@ -1,13 +1,16 @@
 import { deleteAdminResource, getAdminResource, updateAdminResource } from "@/app/api/admin/_resource"
 
 export async function GET(_request: Request, { params }: { params: { id: string } }) {
-  return getAdminResource("actors", params.id)
+  const { id } = await Promise.resolve(params)
+  return getAdminResource("actors", id)
 }
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-  return updateAdminResource("actors", params.id, request)
+  const { id } = await Promise.resolve(params)
+  return updateAdminResource("actors", id, request)
 }
 
 export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
-  return deleteAdminResource("actors", params.id)
+  const { id } = await Promise.resolve(params)
+  return deleteAdminResource("actors", id)
 }

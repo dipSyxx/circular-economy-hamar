@@ -12,13 +12,16 @@ type RouteParams = {
 }
 
 export async function GET(_request: Request, { params }: RouteParams) {
-  return getPublicResource(params.resource, params.id)
+  const { id, resource } = await Promise.resolve(params)
+  return getPublicResource(resource, id)
 }
 
 export async function PATCH(request: Request, { params }: RouteParams) {
-  return updatePublicResource(params.resource, params.id, request)
+  const { id, resource } = await Promise.resolve(params)
+  return updatePublicResource(resource, id, request)
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
-  return deletePublicResource(params.resource, params.id)
+  const { id, resource } = await Promise.resolve(params)
+  return deletePublicResource(resource, id)
 }

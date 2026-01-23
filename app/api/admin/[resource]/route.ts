@@ -7,9 +7,11 @@ type RouteParams = {
 }
 
 export async function GET(request: Request, { params }: RouteParams) {
-  return listAdminResource(params.resource)
+  const { resource } = await Promise.resolve(params)
+  return listAdminResource(resource)
 }
 
 export async function POST(request: Request, { params }: RouteParams) {
-  return createAdminResource(params.resource, request)
+  const { resource } = await Promise.resolve(params)
+  return createAdminResource(resource, request)
 }

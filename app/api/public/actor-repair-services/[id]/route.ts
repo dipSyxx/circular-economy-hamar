@@ -1,13 +1,16 @@
 import { deletePublicResource, getPublicResource, updatePublicResource } from "@/app/api/public/_resource"
 
 export async function GET(_request: Request, { params }: { params: { id: string } }) {
-  return getPublicResource("actor-repair-services", params.id)
+  const { id } = await Promise.resolve(params)
+  return getPublicResource("actor-repair-services", id)
 }
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-  return updatePublicResource("actor-repair-services", params.id, request)
+  const { id } = await Promise.resolve(params)
+  return updatePublicResource("actor-repair-services", id, request)
 }
 
 export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
-  return deletePublicResource("actor-repair-services", params.id)
+  const { id } = await Promise.resolve(params)
+  return deletePublicResource("actor-repair-services", id)
 }
