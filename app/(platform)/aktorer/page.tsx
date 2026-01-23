@@ -1,4 +1,5 @@
-﻿import { ActorCard } from "@/components/actor-card"
+import { ActorCard } from "@/components/actor-card"
+import { ActorSubmissionDialog } from "@/components/actor-submission-dialog"
 import { actors } from "@/lib/data"
 import { Badge } from "@/components/ui/badge"
 import { pageCopy } from "@/content/no"
@@ -17,6 +18,12 @@ export default function ActorsPage() {
                   {badge}
                 </Badge>
               ))}
+            </div>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <ActorSubmissionDialog />
+              <span className="text-sm text-muted-foreground">
+                Foreslå en ny aktør som bør være med i oversikten.
+              </span>
             </div>
           </div>
         </div>
