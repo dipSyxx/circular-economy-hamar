@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { AddressSearchInput } from "@/components/address-search-input"
+import { ImageUploadField } from "@/components/image-upload"
 
 export type ActorDraft = {
   name: string
@@ -274,7 +275,6 @@ export function ActorSubmissionForm({
     initialSources?.length ? initialSources : [emptySource()],
   )
   const [slugTouched, setSlugTouched] = useState(mode === "edit")
-  const [imagePreviewError, setImagePreviewError] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -285,8 +285,6 @@ export function ActorSubmissionForm({
       : "Fyll inn alle feltene. Innsendingen blir gjennomgått av en administrator før den publiseres."
 
   const slugPreview = useMemo(() => (slugTouched ? actor.slug : slugify(actor.name)), [actor.name, actor.slug, slugTouched])
-  const imagePreviewUrl = actor.image.trim()
-  const showImagePreview = Boolean(imagePreviewUrl) && !imagePreviewError
   const isDialog = variant === "dialog"
 
   const updateActor = (field: keyof ActorDraft, value: string | string[]) => {
@@ -611,29 +609,18 @@ export function ActorSubmissionForm({
                   placeholder="https://"
                 />
               </div>
-              <div className="sm:col-span-2 lg:col-span-3">
-                <Label htmlFor="image">Bilde-URL</Label>
-                <Input
-                  id="image"
-                  type="url"
-                  value={actor.image}
-                  onChange={(event) => {
-                    setImagePreviewError(false)
-                    updateActor("image", event.target.value)
-                  }}
-                  placeholder="https://"
-                />
-                {showImagePreview && (
-                  <div className="mt-3 overflow-hidden rounded-md border">
-                    <img
-                      src={imagePreviewUrl}
-                      alt="Forhandsvisning av bilde"
-                      className="h-48 w-full object-cover"
-                      onError={() => setImagePreviewError(true)}
-                    />
-                  </div>
-                )}
-              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold">Bilde</p>
+            <div className="mt-3">
+              <ImageUploadField
+                id="image"
+                value={actor.image}
+                onChange={(value) => updateActor("image", value)}
+                folder="actors"
+              />
             </div>
           </div>
 

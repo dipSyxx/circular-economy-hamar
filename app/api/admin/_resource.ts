@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { adminResourceConfig } from "@/lib/admin/resource-config"
 import { requireAdminApi, sanitizePayload } from "@/app/api/admin/_helpers"
+import { safeDeleteBlob } from "@/lib/blob"
 
 const getResourceConfig = (resource: string) => adminResourceConfig[resource]
 
@@ -82,7 +83,20 @@ export const deleteAdminResource = async (resource: string, id: string) => {
     return NextResponse.json({ error: "Unknown resource" }, { status: 404 })
   }
 
+  let imageToDelete: string | null = null
+  if (resource === "actors") {
+    const actor = await prisma.actor.findUnique({ where: { id }, select: { image: true } })
+    if (!actor) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 })
+    }
+    imageToDelete = actor.image
+  }
+
   const model = (prisma as Record<string, any>)[config.model]
   await model.delete({ where: { id } })
+
+  if (imageToDelete) {
+    await safeDeleteBlob(imageToDelete)
+  }
   return NextResponse.json({ ok: true })
 }

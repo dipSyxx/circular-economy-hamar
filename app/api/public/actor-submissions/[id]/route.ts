@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { ActorCategory, ItemType, ProblemType, SourceType } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { getPublicUser, jsonError } from "@/app/api/public/_helpers"
+import { safeDeleteBlob } from "@/lib/blob"
 
 const parseDate = (value: unknown) => {
   if (typeof value !== "string" || !value) return null
@@ -280,5 +281,6 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
   if (existing.createdById !== user.id) return jsonError("Forbidden", 403)
 
   await prisma.actor.delete({ where: { id } })
+  await safeDeleteBlob(existing.image)
   return NextResponse.json({ ok: true })
 }

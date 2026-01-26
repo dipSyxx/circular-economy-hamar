@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AddressSearchInput } from "@/components/address-search-input"
+import { ImageUploadField } from "@/components/image-upload"
 
 type ResourceManagerProps = {
   resourceKey: string
@@ -277,7 +278,7 @@ const formatDisplay = (item: AdminRow) => {
 
 const isLongTextField = (key: string, value: unknown) => {
   if (typeof value === "string" && value.length > 120) return true
-  return /description|content|explainability|howToUse|openingHours|benefits|tips|note/i.test(key)
+  return /description|content|explainability|howToUse|openingHours|benefits|tips|note|image/i.test(key)
 }
 
 const truncate = (value: string, limit = 80) => {
@@ -1323,6 +1324,14 @@ export function ResourceManager({
                         }
                         disabled={isReadOnly}
                         placeholder="Søk adresse"
+                      />
+                    ) : key === "image" && meta.kind === "string" ? (
+                      <ImageUploadField
+                        id={key}
+                        value={typeof value === "string" ? value : ""}
+                        onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
+                        disabled={isReadOnly}
+                        folder={resourceKey}
                       />
                     ) : meta.kind === "object" || isMultiline ? (
                       <Textarea
