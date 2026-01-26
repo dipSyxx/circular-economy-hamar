@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { AddressSearchInput } from "@/components/address-search-input"
 
-type ActorDraft = {
+export type ActorDraft = {
   name: string
   slug: string
   category: string
@@ -37,7 +37,7 @@ type ActorDraft = {
   image: string
 }
 
-type RepairServiceDraft = {
+export type RepairServiceDraft = {
   problemType: string
   itemTypes: string[]
   priceMin: string
@@ -45,7 +45,7 @@ type RepairServiceDraft = {
   etaDays: string
 }
 
-type SourceDraft = {
+export type SourceDraft = {
   type: string
   title: string
   url: string
@@ -55,6 +55,13 @@ type SourceDraft = {
 
 type ActorSubmissionFormProps = {
   variant?: "card" | "dialog"
+  mode?: "create" | "edit"
+  actorId?: string
+  initialActor?: ActorDraft
+  initialRepairServices?: RepairServiceDraft[]
+  initialSources?: SourceDraft[]
+  submitLabel?: string
+  onSuccess?: (actorId: string) => void | Promise<void>
 }
 
 const categoryOptions = [
@@ -247,20 +254,35 @@ function MultiSelect({ value, options, onChange }: MultiSelectProps) {
   )
 }
 
-export function ActorSubmissionForm({ variant = "card" }: ActorSubmissionFormProps) {
+export function ActorSubmissionForm({
+  variant = "card",
+  mode = "create",
+  actorId,
+  initialActor,
+  initialRepairServices,
+  initialSources,
+  submitLabel,
+  onSuccess,
+}: ActorSubmissionFormProps) {
   const { data } = authClient.useSession()
   const isSignedIn = Boolean(data?.session)
-  const [actor, setActor] = useState<ActorDraft>(emptyActor)
-  const [repairServices, setRepairServices] = useState<RepairServiceDraft[]>([emptyRepairService()])
-  const [sources, setSources] = useState<SourceDraft[]>([emptySource()])
-  const [slugTouched, setSlugTouched] = useState(false)
+  const [actor, setActor] = useState<ActorDraft>(initialActor ?? emptyActor)
+  const [repairServices, setRepairServices] = useState<RepairServiceDraft[]>(
+    initialRepairServices?.length ? initialRepairServices : [emptyRepairService()],
+  )
+  const [sources, setSources] = useState<SourceDraft[]>(
+    initialSources?.length ? initialSources : [emptySource()],
+  )
+  const [slugTouched, setSlugTouched] = useState(mode === "edit")
   const [imagePreviewError, setImagePreviewError] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const headingTitle = "Registrer ny aktør"
+  const headingTitle = mode === "edit" ? "Oppdater aktør" : "Registrer ny aktør"
   const headingDescription =
-    "Fyll inn alle feltene. Innsendingen blir gjennomgått av en administrator før den publiseres."
+    mode === "edit"
+      ? "Oppdater feltene og send inn på nytt for godkjenning."
+      : "Fyll inn alle feltene. Innsendingen blir gjennomgått av en administrator før den publiseres."
 
   const slugPreview = useMemo(() => (slugTouched ? actor.slug : slugify(actor.name)), [actor.name, actor.slug, slugTouched])
   const imagePreviewUrl = actor.image.trim()
@@ -346,6 +368,7 @@ export function ActorSubmissionForm({ variant = "card" }: ActorSubmissionFormPro
 
     setSubmitting(true)
     try {
+      const isEdit = mode === "edit" && Boolean(actorId)
       const payload = {
         actor: {
           name: actor.name.trim(),
@@ -383,22 +406,37 @@ export function ActorSubmissionForm({ variant = "card" }: ActorSubmissionFormPro
         })),
       }
 
-      const response = await fetch("/api/public/actor-submissions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
+      const response = await fetch(
+        isEdit ? `/api/public/actor-submissions/${actorId}` : "/api/public/actor-submissions",
+        {
+          method: isEdit ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      )
 
       if (!response.ok) {
         const data = (await response.json().catch(() => null)) as { error?: string } | null
         throw new Error(data?.error || "Kunne ikke sende inn aktøren.")
       }
 
-      setSuccess("Takk! Aktøren er sendt inn og venter på godkjenning.")
-      setActor(emptyActor)
-      setRepairServices([emptyRepairService()])
-      setSources([emptySource()])
-      setSlugTouched(false)
+      const data = (await response.json().catch(() => null)) as { actor?: { id?: string } } | null
+      const resolvedId = data?.actor?.id ?? actorId ?? ""
+
+      setSuccess(
+        mode === "edit"
+          ? "Aktøren er oppdatert og sendt inn på nytt."
+          : "Takk! Aktøren er sendt inn og venter på godkjenning.",
+      )
+      if (mode === "create") {
+        setActor(emptyActor)
+        setRepairServices([emptyRepairService()])
+        setSources([emptySource()])
+        setSlugTouched(false)
+      }
+      if (resolvedId) {
+        await onSuccess?.(resolvedId)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Noe gikk galt.")
     } finally {
@@ -870,7 +908,7 @@ export function ActorSubmissionForm({ variant = "card" }: ActorSubmissionFormPro
         <>
           <DialogFooter>
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Sender..." : "Send inn aktør"}
+              {submitting ? "Sender..." : submitLabel ?? (mode === "edit" ? "Oppdater aktør" : "Send inn aktør")}
             </Button>
           </DialogFooter>
           <span className="text-xs text-muted-foreground">
@@ -880,7 +918,7 @@ export function ActorSubmissionForm({ variant = "card" }: ActorSubmissionFormPro
       ) : (
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={submitting}>
-            {submitting ? "Sender..." : "Send inn aktør"}
+            {submitting ? "Sender..." : submitLabel ?? (mode === "edit" ? "Oppdater aktør" : "Send inn aktør")}
           </Button>
           <span className="text-xs text-muted-foreground">
             Aktøren får status "pending" til den er godkjent av administrator.

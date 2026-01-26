@@ -26,7 +26,11 @@ export default async function AdminPage() {
 
   const pendingActors = await prisma.actor.findMany({
     where: { status: "pending" },
-    include: { createdBy: { select: { name: true, email: true } } },
+    include: {
+      createdBy: { select: { id: true, name: true, email: true } },
+      repairServices: true,
+      sources: true,
+    },
     orderBy: { createdAt: "desc" },
     take: 12,
   })
@@ -34,9 +38,44 @@ export default async function AdminPage() {
   const pendingActorPayload = pendingActors.map((actor) => ({
     id: actor.id,
     name: actor.name,
+    slug: actor.slug,
     category: actor.category,
+    description: actor.description,
+    longDescription: actor.longDescription,
+    address: actor.address,
+    lat: actor.lat,
+    lng: actor.lng,
+    phone: actor.phone,
+    email: actor.email,
+    website: actor.website,
+    instagram: actor.instagram,
+    openingHours: actor.openingHours,
+    openingHoursOsm: actor.openingHoursOsm,
+    tags: actor.tags,
+    benefits: actor.benefits,
+    howToUse: actor.howToUse,
+    image: actor.image,
+    status: actor.status,
+    reviewNote: actor.reviewNote,
     createdAt: actor.createdAt.toISOString(),
+    updatedAt: actor.updatedAt.toISOString(),
     createdBy: actor.createdBy ? { name: actor.createdBy.name, email: actor.createdBy.email } : null,
+    repairServices: actor.repairServices.map((service) => ({
+      id: service.id,
+      problemType: service.problemType,
+      itemTypes: service.itemTypes,
+      priceMin: service.priceMin,
+      priceMax: service.priceMax,
+      etaDays: service.etaDays,
+    })),
+    sources: actor.sources.map((source) => ({
+      id: source.id,
+      type: source.type,
+      title: source.title,
+      url: source.url,
+      capturedAt: source.capturedAt ? source.capturedAt.toISOString() : null,
+      note: source.note,
+    })),
   }))
 
   const stats = [

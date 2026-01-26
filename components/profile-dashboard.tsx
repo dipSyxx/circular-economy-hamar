@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { loadProfile, type ProfileData } from "@/lib/profile-store"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { MyActorsPanel } from "@/components/my-actors-panel"
 import { profileCopy } from "@/content/no"
 
 export function ProfileDashboard() {
@@ -112,6 +113,8 @@ export function ProfileDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <MyActorsPanel />
     </div>
   )
 }
