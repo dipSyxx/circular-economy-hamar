@@ -184,7 +184,7 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Sok etter aktorer, tagger eller adresse"
+            placeholder="Søk etter aktorer, tagger eller adresse"
             className="pl-9 pr-10"
           />
           {query && (
@@ -192,7 +192,7 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
               type="button"
               onClick={() => setQuery("")}
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition hover:text-foreground"
-              aria-label="Fjern sok"
+              aria-label="Fjern søk"
             >
               <X className="size-3" />
             </button>
@@ -273,7 +273,7 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
                 <Input
                   value={tagQuery}
                   onChange={(event) => setTagQuery(event.target.value)}
-                  placeholder="Sok tagger"
+                  placeholder="Søk tagger"
                   className="mt-2"
                 />
                 <ScrollArea className="mt-2 h-40 pr-3">

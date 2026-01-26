@@ -1,7 +1,7 @@
 ﻿"use client"
 
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react"
-import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react"
+import { CheckIcon, ChevronsUpDownIcon, Search, SlidersHorizontal, XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -290,6 +290,18 @@ const formatColumnLabel = (key: string) => {
     return key.replace(/Id$/, "")
   }
   return key
+}
+
+const formatFilterValue = (resourceKey: string, field: string, value: string | boolean | null | undefined) => {
+  if (value === null || value === undefined || value === "") return ""
+  const enumOptions = getEnumOptions(resourceKey, field)
+  if (enumOptions && typeof value === "string") {
+    return formatEnumLabel(value)
+  }
+  if (typeof value === "boolean") {
+    return value ? "True" : "False"
+  }
+  return String(value)
 }
 
 const normalizeSearchValue = (value: unknown): string => {
@@ -654,6 +666,15 @@ export function ResourceManager({
     ).length
   }, [filters])
 
+  const activeFilterEntries = useMemo(() => {
+    return Object.entries(filters).filter(
+      ([, value]) => value !== null && value !== undefined && value !== "",
+    )
+  }, [filters])
+
+  const hasSearch = query.trim().length > 0
+  const hasAnyFilter = activeFilterCount > 0 || hasSearch
+
   const lookupResources = useMemo(() => {
     const resources = new Set<string>()
     const keys = new Set([...columnKeys, ...formKeys])
@@ -769,7 +790,7 @@ export function ResourceManager({
     return next
   }
 
-  const resolveLookupLabel = (field: string, value: unknown) => {
+  function resolveLookupLabel(field: string, value: unknown) {
     if (typeof value !== "string") return null
     const config = lookupConfigByField[field]
     if (!config) return null
@@ -784,7 +805,7 @@ export function ResourceManager({
     return match.id ?? "Ukjent"
   }
 
-  const getLookupLabel = (resource: string, item: AdminRow) => {
+  function getLookupLabel(resource: string, item: AdminRow) {
     const config = Object.values(lookupConfigByField).find((entry) => entry.resource === resource)
     const labelFields = config?.labelFields ?? ["title", "name", "key", "slug", "email"]
     for (const fieldKey of labelFields) {
@@ -795,7 +816,7 @@ export function ResourceManager({
     return String(item.id ?? "Ukjent")
   }
 
-  const getLookupSearchValue = (resource: string, item: AdminRow) => {
+  function getLookupSearchValue(resource: string, item: AdminRow) {
     const config = Object.values(lookupConfigByField).find((entry) => entry.resource === resource)
     const searchFields = config?.searchFields ?? ["title", "name", "key", "slug", "email", "id"]
     return searchFields.map((field) => item[field]).filter(Boolean).join(" ")
@@ -920,6 +941,11 @@ export function ResourceManager({
     setFilters({})
   }
 
+  const clearAllFilters = () => {
+    setQuery("")
+    clearFilters()
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -936,11 +962,25 @@ export function ResourceManager({
           </div>
         </div>
         <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
-          <Input
-            placeholder="Søk etter felt, eller bruk felt:verdi"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Sok etter felt, eller bruk felt:verdi"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              className="pl-9 pr-9"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition hover:text-foreground"
+                aria-label="Fjern sok"
+              >
+                <XIcon className="size-3" />
+              </button>
+            )}
+          </div>
           <div className="flex flex-wrap items-center gap-2">
             <Select
               value={sortKey ?? NONE_VALUE}
@@ -973,81 +1013,137 @@ export function ResourceManager({
               {sortDirection === "asc" ? "Asc" : "Desc"}
             </Button>
             {hasFilters && (
-              <Button variant="outline" onClick={() => setFiltersOpen((prev) => !prev)}>
-                {filtersOpen ? "Skjul filtre" : `Filtre${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
-              </Button>
+              <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <SlidersHorizontal className="size-4" />
+                    Filtre
+                    {activeFilterCount > 0 && (
+                      <Badge variant="secondary" className="rounded-full px-2 py-0 text-xs">
+                        {activeFilterCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[320px] p-4" align="end">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Filtre</span>
+                    {activeFilterCount > 0 && (
+                      <Button variant="ghost" size="sm" onClick={clearFilters}>
+                        Nullstill
+                      </Button>
+                    )}
+                  </div>
+                  <div className="mt-3 grid gap-3">
+                    {enumFilterFields.map((field) => {
+                      const options = enumOptionsByResource[resourceKey]?.[field] ?? []
+                      return (
+                        <div key={field}>
+                          <Label className="text-xs">{formatColumnLabel(field)}</Label>
+                          <Select
+                            value={
+                              typeof filters[field] === "string" && filters[field]
+                                ? String(filters[field])
+                                : NONE_VALUE
+                            }
+                            onValueChange={(next) =>
+                              setFilters((prev) => ({
+                                ...prev,
+                                [field]: next === NONE_VALUE ? null : next,
+                              }))
+                            }
+                          >
+                            <SelectTrigger className="mt-1 w-full">
+                              <SelectValue placeholder={`Alle ${formatColumnLabel(field)}`} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={NONE_VALUE}>Alle</SelectItem>
+                              {options.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {formatEnumLabel(option)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )
+                    })}
+                    {booleanFilterFields.map((field) => (
+                      <div key={field}>
+                        <Label className="text-xs">{formatColumnLabel(field)}</Label>
+                        <Select
+                          value={
+                            filters[field] === null || filters[field] === undefined
+                              ? NONE_VALUE
+                              : String(filters[field])
+                          }
+                          onValueChange={(next) =>
+                            setFilters((prev) => ({
+                              ...prev,
+                              [field]: next === NONE_VALUE ? null : next === "true",
+                            }))
+                          }
+                        >
+                          <SelectTrigger className="mt-1 w-full">
+                            <SelectValue placeholder={`Alle ${formatColumnLabel(field)}`} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={NONE_VALUE}>Alle</SelectItem>
+                            <SelectItem value="true">True</SelectItem>
+                            <SelectItem value="false">False</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             )}
           </div>
         </div>
-        {filtersOpen && hasFilters && (
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {enumFilterFields.map((field) => {
-              const options = enumOptionsByResource[resourceKey]?.[field] ?? []
-              return (
-                <div key={field}>
-                  <Label className="text-xs">{formatColumnLabel(field)}</Label>
-                  <Select
-                    value={
-                      typeof filters[field] === "string" && filters[field]
-                        ? String(filters[field])
-                        : NONE_VALUE
-                    }
-                    onValueChange={(next) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        [field]: next === NONE_VALUE ? null : next,
-                      }))
-                    }
-                  >
-                    <SelectTrigger className="mt-1 w-full">
-                      <SelectValue placeholder={`Alle ${formatColumnLabel(field)}`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={NONE_VALUE}>Alle</SelectItem>
-                      {options.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {formatEnumLabel(option)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )
-            })}
-            {booleanFilterFields.map((field) => (
-              <div key={field}>
-                <Label className="text-xs">{formatColumnLabel(field)}</Label>
-                <Select
-                  value={
-                    filters[field] === null || filters[field] === undefined
-                      ? NONE_VALUE
-                      : String(filters[field])
-                  }
-                  onValueChange={(next) =>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+          <span>
+            Viser {sortedItems.length} av {items.length}
+          </span>
+          {hasAnyFilter && (
+            <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+              Nullstill alt
+            </Button>
+          )}
+        </div>
+        {hasAnyFilter && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {hasSearch && (
+              <Badge variant="outline" className="gap-1">
+                Sok: {query}
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Fjern sok"
+                >
+                  <XIcon className="size-3" />
+                </button>
+              </Badge>
+            )}
+            {activeFilterEntries.map(([field, value]) => (
+              <Badge key={field} variant="outline" className="gap-1">
+                {formatColumnLabel(field)}: {formatFilterValue(resourceKey, field, value as string | boolean)}
+                <button
+                  type="button"
+                  onClick={() =>
                     setFilters((prev) => ({
                       ...prev,
-                      [field]: next === NONE_VALUE ? null : next === "true",
+                      [field]: null,
                     }))
                   }
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label={`Fjern ${formatColumnLabel(field)}`}
                 >
-                  <SelectTrigger className="mt-1 w-full">
-                    <SelectValue placeholder={`Alle ${formatColumnLabel(field)}`} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE_VALUE}>Alle</SelectItem>
-                    <SelectItem value="true">True</SelectItem>
-                    <SelectItem value="false">False</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <XIcon className="size-3" />
+                </button>
+              </Badge>
             ))}
-            {activeFilterCount > 0 && (
-              <div className="flex items-end">
-                <Button variant="ghost" onClick={clearFilters}>
-                  Fjern filtre
-                </Button>
-              </div>
-            )}
           </div>
         )}
       </CardHeader>

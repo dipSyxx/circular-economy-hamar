@@ -505,7 +505,7 @@ export function MapComponent({ actors }: MapComponentProps) {
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Sok i kartlisten"
+              placeholder="Søk i kartlisten"
               className="pl-9 pr-10"
             />
             {query && (
@@ -513,7 +513,7 @@ export function MapComponent({ actors }: MapComponentProps) {
                 type="button"
                 onClick={() => setQuery("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition hover:text-foreground"
-                aria-label="Fjern sok"
+                aria-label="Fjern søk"
               >
                 <X className="size-3" />
               </button>
@@ -570,7 +570,7 @@ export function MapComponent({ actors }: MapComponentProps) {
                     <Input
                       value={tagQuery}
                       onChange={(event) => setTagQuery(event.target.value)}
-                      placeholder="Sok tagger"
+                      placeholder="Søk tagger"
                       className="mt-2"
                     />
                     <ScrollArea className="mt-2 h-36 pr-3">
@@ -722,7 +722,7 @@ export function MapComponent({ actors }: MapComponentProps) {
         <div className="space-y-3 max-h-[550px] overflow-y-auto pt-0.5 pl-0.5 pr-2">
           {filteredActors.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-              Ingen aktorer matcher soket ditt.
+              Ingen aktører matcher søket ditt.
             </div>
           ) : (
             <AnimatePresence mode="popLayout">
