@@ -224,7 +224,7 @@ export const pageCopy = {
   },
   profile: {
     title: "Profil",
-    description: "Se poeng, historikk og hvilke utfordringer du har fullført.",
+    description: "Se poeng, historikk og hvilke utfordringer du har fullført. Du kan også administrere dine egne aktører.",
   },
 };
 

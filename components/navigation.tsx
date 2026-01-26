@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { UserButton } from "@neondatabase/auth/react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, Recycle, Shield } from "lucide-react"
+import { Menu, Recycle, Shield, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { navigation, navigationCopy, site } from "@/content/no"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -17,6 +17,7 @@ const authRoutes = {
   signIn: "/auth/sign-in",
   signUp: "/auth/sign-up",
   signOut: "/auth/sign-out",
+  accountProfile: "/account/profile",
   accountSettings: "/account/settings",
 }
 
@@ -26,6 +27,27 @@ export function Navigation() {
   const { data } = authClient.useSession()
   const hasSession = Boolean(data?.session)
   const [isAdmin, setIsAdmin] = useState(false)
+  const additionalLinks = hasSession
+    ? [
+        {
+          href: authRoutes.accountProfile,
+          label: "Profil",
+          icon: <User className="mr-2 h-4 w-4" />,
+          signedIn: true,
+        },
+        ...(isAdmin
+          ? [
+              {
+                href: "/admin",
+                label: "Admin",
+                icon: <Shield className="mr-2 h-4 w-4" />,
+                signedIn: true,
+                separator: true,
+              },
+            ]
+          : []),
+      ]
+    : undefined
 
   useEffect(() => {
     let active = true
@@ -82,19 +104,7 @@ export function Navigation() {
             <UserButton
               size="icon"
               localization={accountLocalization}
-              additionalLinks={
-                isAdmin
-                  ? [
-                      {
-                        href: "/admin",
-                        label: "Admin",
-                        icon: <Shield className="mr-2 h-4 w-4" />,
-                        signedIn: true,
-                        separator: true,
-                      },
-                    ]
-                  : undefined
-              }
+              additionalLinks={additionalLinks}
             />
           ) : (
             <div className="hidden md:flex items-center gap-2">
