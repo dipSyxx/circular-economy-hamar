@@ -138,19 +138,19 @@ type Co2eSourceItemRecord = {
 }
 
 const getBaseUrl = async () => {
+  const headerList = await headers()
+  const host = headerList.get("x-forwarded-host") ?? headerList.get("host")
+  const proto = headerList.get("x-forwarded-proto") ?? "http"
+  if (host) {
+    return `${proto}://${host}`
+  }
+
   const envUrl =
     process.env.NEXT_PUBLIC_SITE_URL ??
     process.env.NEXT_PUBLIC_APP_URL ??
     process.env.VERCEL_URL
   if (envUrl) {
     return envUrl.startsWith("http") ? envUrl : `https://${envUrl}`
-  }
-
-  const headerList = await headers()
-  const host = headerList.get("x-forwarded-host") ?? headerList.get("host")
-  const proto = headerList.get("x-forwarded-proto") ?? "http"
-  if (host) {
-    return `${proto}://${host}`
   }
 
   return "http://localhost:3000"
