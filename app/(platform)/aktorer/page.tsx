@@ -1,5 +1,5 @@
-import { ActorCard } from "@/components/actor-card"
 import { ActorSubmissionDialog } from "@/components/actor-submission-dialog"
+import { ActorsExplorer } from "@/components/actors-explorer"
 import { Badge } from "@/components/ui/badge"
 import { pageCopy } from "@/content/no"
 import { getActors } from "@/lib/public-data"
@@ -33,11 +33,7 @@ export default async function ActorsPage() {
 
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {actors.map((actor) => (
-              <ActorCard key={actor.id} actor={actor} />
-            ))}
-          </div>
+          <ActorsExplorer actors={actors} />
         </div>
       </section>
     </div>

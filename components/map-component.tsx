@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   MapContainer,
   TileLayer,
@@ -18,10 +19,25 @@ import type { Actor, ActorCategory } from "@/lib/data";
 import { categoryConfig, categoryOrder } from "@/lib/categories";
 import { formatTime, getOpeningStatus } from "@/lib/opening-hours";
 import { recordAction } from "@/lib/profile-store";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Crosshair, ExternalLink, Layers, MapPin } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import {
+  Crosshair,
+  ExternalLink,
+  Layers,
+  MapPin,
+  Search,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { mapCopy } from "@/content/no";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -87,6 +103,27 @@ const getFilterButtonStyle = (active: boolean, color: string) => ({
   borderColor: color,
 });
 
+type SortKey = "default" | "distance" | "name_asc" | "name_desc" | "category";
+
+type TagOption = {
+  tag: string;
+  count: number;
+};
+
+const sortOptions: { value: SortKey; label: string }[] = [
+  { value: "default", label: "Standard" },
+  { value: "distance", label: "Naermest meg" },
+  { value: "name_asc", label: "Navn A-Z" },
+  { value: "name_desc", label: "Navn Z-A" },
+  { value: "category", label: "Kategori" },
+];
+
+const normalizeText = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
 function MapFocus({ position }: { position: [number, number] | null }) {
   const map = useMap();
 
@@ -106,26 +143,134 @@ interface MapComponentProps {
 export function MapComponent({ actors }: MapComponentProps) {
   const [selectedActorId, setSelectedActorId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | ActorCategory>("all");
+  const [query, setQuery] = useState("");
+  const [tagFilters, setTagFilters] = useState<string[]>([]);
+  const [tagQuery, setTagQuery] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("default");
   const [userLocation, setUserLocation] = useState<[number, number] | null>(
     null
   );
   const [locationError, setLocationError] = useState<string | null>(null);
   const [routeStops, setRouteStops] = useState<string[]>([]);
 
+  const categoryIndex = useMemo(
+    () => new Map(categoryOrder.map((category, index) => [category, index])),
+    []
+  );
+
   const isActor = (actor: Actor | undefined): actor is Actor => Boolean(actor);
 
-  const filteredActors = useMemo(() => {
-    const list =
+  const categoryFiltered = useMemo(
+    () =>
       filter === "all"
         ? actors
-        : actors.filter((actor) => actor.category === filter);
-    if (!userLocation) return list;
-    return [...list].sort((a, b) => {
+        : actors.filter((actor) => actor.category === filter),
+    [actors, filter]
+  );
+
+  const tagOptions = useMemo<TagOption[]>(() => {
+    const counts = new Map<string, number>();
+    categoryFiltered.forEach((actor) => {
+      actor.tags.forEach((tag) => {
+        counts.set(tag, (counts.get(tag) ?? 0) + 1);
+      });
+    });
+    return Array.from(counts.entries())
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) =>
+        a.tag.localeCompare(b.tag, "no", {
+          sensitivity: "base",
+          numeric: true,
+        })
+      );
+  }, [categoryFiltered]);
+
+  const filteredTagOptions = useMemo(() => {
+    const normalized = normalizeText(tagQuery.trim());
+    if (!normalized) return tagOptions;
+    return tagOptions.filter((option) =>
+      normalizeText(option.tag).includes(normalized)
+    );
+  }, [tagOptions, tagQuery]);
+
+  const normalizedQuery = normalizeText(query.trim());
+
+  const filteredActors = useMemo(() => {
+    const list = categoryFiltered.filter((actor) => {
+      if (tagFilters.length) {
+        const actorTags = actor.tags ?? [];
+        if (!tagFilters.some((tag) => actorTags.includes(tag))) {
+          return false;
+        }
+      }
+
+      if (!normalizedQuery) return true;
+
+      const searchText = normalizeText(
+        [
+          actor.name,
+          actor.description,
+          actor.longDescription,
+          actor.address,
+          actor.tags.join(" "),
+          mapCopy.categoryLabels[actor.category] ?? "",
+        ].join(" ")
+      );
+      return searchText.includes(normalizedQuery);
+    });
+
+    const sorted = [...list];
+
+    if (sortKey === "distance") {
+      if (!userLocation) return sorted;
+      return sorted.sort((a, b) => {
+        const distA = getDistanceKm(userLocation, [a.lat, a.lng]);
+        const distB = getDistanceKm(userLocation, [b.lat, b.lng]);
+        return distA - distB;
+      });
+    }
+
+    if (sortKey === "name_asc") {
+      return sorted.sort((a, b) =>
+        a.name.localeCompare(b.name, "no", { sensitivity: "base", numeric: true })
+      );
+    }
+
+    if (sortKey === "name_desc") {
+      return sorted.sort((a, b) =>
+        b.name.localeCompare(a.name, "no", { sensitivity: "base", numeric: true })
+      );
+    }
+
+    if (sortKey === "category") {
+      return sorted.sort((a, b) => {
+        const left = categoryIndex.get(a.category) ?? 999;
+        const right = categoryIndex.get(b.category) ?? 999;
+        if (left !== right) return left - right;
+        return a.name.localeCompare(b.name, "no", {
+          sensitivity: "base",
+          numeric: true,
+        });
+      });
+    }
+
+    if (!userLocation) return sorted;
+    return sorted.sort((a, b) => {
       const distA = getDistanceKm(userLocation, [a.lat, a.lng]);
       const distB = getDistanceKm(userLocation, [b.lat, b.lng]);
       return distA - distB;
     });
-  }, [actors, filter, userLocation]);
+  }, [
+    categoryFiltered,
+    tagFilters,
+    normalizedQuery,
+    sortKey,
+    userLocation,
+    categoryIndex,
+  ]);
+
+  const activeFilterCount = (filter === "all" ? 0 : 1) + tagFilters.length;
+  const hasAnyFilter = activeFilterCount > 0 || Boolean(query.trim());
 
   const selectedActor =
     filteredActors.find((actor) => actor.id === selectedActorId) ?? null;
@@ -186,6 +331,19 @@ export function MapComponent({ actors }: MapComponentProps) {
       setSelectedActorId(null);
     }
   }, [filteredActors, selectedActorId]);
+
+  const toggleTag = (tag: string) => {
+    setTagFilters((prev) =>
+      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]
+    );
+  };
+
+  const clearAllFilters = () => {
+    setQuery("");
+    setTagFilters([]);
+    setTagQuery("");
+    setFilter("all");
+  };
 
   const addRouteStop = (actorId: string) => {
     setRouteStops((prev) => {
@@ -330,9 +488,175 @@ export function MapComponent({ actors }: MapComponentProps) {
       </div>
 
       <div className="space-y-4">
-        <h3 className="font-semibold text-lg">
-          {mapCopy.listTitle} ({filteredActors.length})
-        </h3>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-semibold text-lg">
+            {mapCopy.listTitle} ({filteredActors.length})
+          </h3>
+          {hasAnyFilter && (
+            <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+              Nullstill alt
+            </Button>
+          )}
+        </div>
+
+        <div className="grid gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Sok i kartlisten"
+              className="pl-9 pr-10"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition hover:text-foreground"
+                aria-label="Fjern sok"
+              >
+                <X className="size-3" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Sorter" />
+              </SelectTrigger>
+              <SelectContent>
+                {sortOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between gap-2 sm:w-auto">
+                  <span className="inline-flex items-center gap-2">
+                    <SlidersHorizontal className="size-4" />
+                    Filtre
+                  </span>
+                  {activeFilterCount > 0 && (
+                    <Badge variant="secondary" className="rounded-full px-2 py-0 text-xs">
+                      {activeFilterCount}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[280px] p-4" align="end">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Filtre</span>
+                  {tagFilters.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setTagFilters([]);
+                        setTagQuery("");
+                      }}
+                    >
+                      Nullstill
+                    </Button>
+                  )}
+                </div>
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">Tagger</p>
+                    <Input
+                      value={tagQuery}
+                      onChange={(event) => setTagQuery(event.target.value)}
+                      placeholder="Sok tagger"
+                      className="mt-2"
+                    />
+                    <ScrollArea className="mt-2 h-36 pr-3">
+                      <div className="grid gap-2">
+                        {filteredTagOptions.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">Ingen tagger.</p>
+                        ) : (
+                          filteredTagOptions.map((option) => {
+                            const isChecked = tagFilters.includes(option.tag);
+                            return (
+                              <label
+                                key={option.tag}
+                                className={cn(
+                                  "flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition",
+                                  isChecked && "border-primary/40 bg-primary/5"
+                                )}
+                              >
+                                <Checkbox
+                                  checked={isChecked}
+                                  onCheckedChange={() => toggleTag(option.tag)}
+                                />
+                                <span className="truncate">{option.tag}</span>
+                                <span className="ml-auto text-xs text-muted-foreground">
+                                  {option.count}
+                                </span>
+                              </label>
+                            );
+                          })
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                  {filter !== "all" && (
+                    <>
+                      <Separator />
+                      <div className="text-xs text-muted-foreground">
+                        Aktiv kategori:{" "}
+                        <span className="text-foreground">
+                          {mapCopy.categoryLabels[filter]}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {activeFilterCount > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              className="flex flex-wrap gap-2"
+            >
+              {filter !== "all" && (
+                <Badge variant="outline" className="gap-1">
+                  {mapCopy.categoryLabels[filter]}
+                  <button
+                    type="button"
+                    onClick={() => setFilter("all")}
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label="Fjern kategori"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              )}
+              {tagFilters.map((tag) => (
+                <Badge key={tag} variant="outline" className="gap-1">
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label={`Fjern ${tag}`}
+                  >
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <Card className="p-4 space-y-3">
           <div className="flex items-center justify-between">
@@ -396,90 +720,107 @@ export function MapComponent({ actors }: MapComponentProps) {
         </Card>
 
         <div className="space-y-3 max-h-[550px] overflow-y-auto pt-0.5 pl-0.5 pr-2">
-          {filteredActors.map((actor) => {
-            const meta = categoryConfig[actor.category];
-            const Icon = meta.icon;
-            const distance =
-              userLocation &&
-              `${getDistanceKm(userLocation, [actor.lat, actor.lng]).toFixed(
-                1
-              )} ${mapCopy.distanceUnit}`;
-            const openStatus = getOpeningStatus(actor.openingHoursOsm);
-            const statusLabel =
-              openStatus.state === "open"
-                ? mapCopy.openNowLabel
-                : openStatus.state === "closed"
-                ? mapCopy.closedNowLabel
-                : mapCopy.hoursFallbackLabel;
-            const statusDetail =
-              openStatus.state === "unknown" || !openStatus.nextChange
-                ? null
-                : `${
-                    openStatus.state === "open"
-                      ? mapCopy.closesAtLabel
-                      : mapCopy.opensAtLabel
-                  } ${formatTime(openStatus.nextChange)}`;
+          {filteredActors.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
+              Ingen aktorer matcher soket ditt.
+            </div>
+          ) : (
+            <AnimatePresence mode="popLayout">
+              {filteredActors.map((actor) => {
+                const meta = categoryConfig[actor.category];
+                const Icon = meta.icon;
+                const distance =
+                  userLocation &&
+                  `${getDistanceKm(userLocation, [actor.lat, actor.lng]).toFixed(
+                    1
+                  )} ${mapCopy.distanceUnit}`;
+                const openStatus = getOpeningStatus(actor.openingHoursOsm ?? undefined);
+                const statusLabel =
+                  openStatus.state === "open"
+                    ? mapCopy.openNowLabel
+                    : openStatus.state === "closed"
+                    ? mapCopy.closedNowLabel
+                    : mapCopy.hoursFallbackLabel;
+                const statusDetail =
+                  openStatus.state === "unknown" || !openStatus.nextChange
+                    ? null
+                    : `${
+                        openStatus.state === "open"
+                          ? mapCopy.closesAtLabel
+                          : mapCopy.opensAtLabel
+                      } ${formatTime(openStatus.nextChange)}`;
 
-            return (
-              <Card
-                key={actor.id}
-                className={`p-4 cursor-pointer transition-all hover:shadow-md ${
-                  selectedActorId === actor.id ? "ring-2 ring-primary" : ""
-                }`}
-                onClick={() => setSelectedActorId(actor.id)}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h4 className="font-semibold">{actor.name}</h4>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                      <MapPin className="h-3 w-3" />
-                      {actor.address}
-                    </p>
-                    {distance && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {distance}
-                      </p>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {statusLabel}
-                      {statusDetail ? ` - ${statusDetail}` : ""}
-                    </p>
-                    <Badge
-                      className="mt-2 flex items-center gap-1"
-                      style={{ backgroundColor: meta.color, color: "#fff" }}
+                return (
+                  <motion.div
+                    key={actor.id}
+                    layout
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Card
+                      className={`p-4 cursor-pointer transition-all hover:shadow-md ${
+                        selectedActorId === actor.id ? "ring-2 ring-primary" : ""
+                      }`}
+                      onClick={() => setSelectedActorId(actor.id)}
                     >
-                      <Icon className="h-3 w-3" />
-                      {mapCopy.categoryLabels[actor.category]}
-                    </Badge>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => addRouteStop(actor.id)}
-                      disabled={
-                        routeStops.includes(actor.id) || routeStops.length >= 3
-                      }
-                    >
-                      {routeStops.includes(actor.id)
-                        ? mapCopy.routeAddedLabel
-                        : mapCopy.routeAddLabel}
-                    </Button>
-                    <Button size="sm" variant="ghost" asChild>
-                      <Link
-                        href={`/aktorer/${actor.slug}`}
-                        onClick={() =>
-                          recordAction("open_actor", { actorId: actor.id })
-                        }
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h4 className="font-semibold">{actor.name}</h4>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                            <MapPin className="h-3 w-3" />
+                            {actor.address}
+                          </p>
+                          {distance && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {distance}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {statusLabel}
+                            {statusDetail ? ` - ${statusDetail}` : ""}
+                          </p>
+                          <Badge
+                            className="mt-2 flex items-center gap-1"
+                            style={{ backgroundColor: meta.color, color: "#fff" }}
+                          >
+                            <Icon className="h-3 w-3" />
+                            {mapCopy.categoryLabels[actor.category]}
+                          </Badge>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => addRouteStop(actor.id)}
+                            disabled={
+                              routeStops.includes(actor.id) ||
+                              routeStops.length >= 3
+                            }
+                          >
+                            {routeStops.includes(actor.id)
+                              ? mapCopy.routeAddedLabel
+                              : mapCopy.routeAddLabel}
+                          </Button>
+                          <Button size="sm" variant="ghost" asChild>
+                            <Link
+                              href={`/aktorer/${actor.slug}`}
+                              onClick={() =>
+                                recordAction("open_actor", { actorId: actor.id })
+                              }
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          )}
         </div>
       </div>
     </div>
