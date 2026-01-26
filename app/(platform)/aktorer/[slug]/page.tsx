@@ -45,6 +45,13 @@ export default async function ActorPage({ params }: ActorPageProps) {
     article: "Artikkel",
     map: "Kart",
   }
+  const mapDeltaLat = 0.005
+  const mapDeltaLng = 0.008
+  const mapEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${actor.lng - mapDeltaLng},${
+    actor.lat - mapDeltaLat
+  },${actor.lng + mapDeltaLng},${actor.lat + mapDeltaLat}&layer=mapnik&marker=${actor.lat},${actor.lng}`
+  const mapLink = `https://www.openstreetmap.org/?mlat=${actor.lat}&mlon=${actor.lng}#map=16/${actor.lat}/${actor.lng}`
+  const mapGoogleLink = `https://www.google.com/maps/search/?api=1&query=${actor.lat},${actor.lng}`
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -111,6 +118,40 @@ export default async function ActorPage({ params }: ActorPageProps) {
                   </li>
                 ))}
               </ol>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Kart</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="overflow-hidden rounded-lg border">
+                <iframe
+                  title={`Kart for ${actor.name}`}
+                  src={mapEmbedUrl}
+                  className="h-80 w-full"
+                  loading="lazy"
+                />
+              </div>
+              <div className="flex flex-wrap gap-3 text-sm">
+                <a
+                  href={mapLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Åpne i OpenStreetMap
+                </a>
+                <a
+                  href={mapGoogleLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Åpne i Google Maps
+                </a>
+              </div>
             </CardContent>
           </Card>
         </div>
