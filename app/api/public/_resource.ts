@@ -48,7 +48,7 @@ export const listPublicResource = async (resource: string, request: Request) => 
   if (!config) return jsonError("Unknown resource", 404)
 
   const requiresAuth = !isPublicReadAllowed(config)
-  const { user, error } = await getPublicUser(requiresAuth || Boolean(config.readUsesUser))
+  const { user, error } = await getPublicUser(requiresAuth)
   if (error) return error
 
   const url = new URL(request.url)
@@ -99,7 +99,7 @@ export const getPublicResource = async (resource: string, id: string) => {
   if (!config) return jsonError("Unknown resource", 404)
 
   const requiresAuth = !isPublicReadAllowed(config)
-  const { user, error } = await getPublicUser(requiresAuth || Boolean(config.readUsesUser))
+  const { user, error } = await getPublicUser(requiresAuth)
   if (error) return error
 
   const where = config.detailWhere?.({ userId: user?.id ?? null, id }) ?? { id }
