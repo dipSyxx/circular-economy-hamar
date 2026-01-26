@@ -69,12 +69,10 @@ export const publicResourceConfig: Record<string, PublicResourceConfig> = {
     orderBy: { updatedAt: "desc" },
     allowUnauthenticatedRead: true,
     readUsesUser: true,
-    listWhere: ({ userId, searchParams }) => {
+    listWhere: ({ searchParams }) => {
       const category = searchParams.get("category")
       const slug = searchParams.get("slug")
-      const base = userId
-        ? { OR: [{ status: "approved" }, { createdById: userId }] }
-        : { status: "approved" }
+      const base = { status: "approved" }
       const filters = []
       if (category) filters.push({ category })
       if (slug) filters.push({ slug })
