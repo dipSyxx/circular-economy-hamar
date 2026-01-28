@@ -186,6 +186,8 @@ export function MapComponent({ actors }: MapComponentProps) {
         const data = (await response.json()) as Array<{ actorId: string }>;
         if (!active) return;
         setFavoriteIds(new Set(data.map((item) => item.actorId)));
+      } catch {
+        // ignore errors for optional favorites
       }
     };
 
