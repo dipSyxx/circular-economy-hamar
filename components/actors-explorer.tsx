@@ -1,10 +1,11 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { Search, SlidersHorizontal, X } from "lucide-react"
 import type { Actor, ActorCategory } from "@/lib/data"
 import { ActorCard } from "@/components/actor-card"
+import { authClient } from "@/lib/auth/client"
 import { actorCopy } from "@/content/no"
 import { categoryConfig, categoryOrder } from "@/lib/categories"
 import { Badge } from "@/components/ui/badge"
@@ -17,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
-type SortKey = "default" | "name_asc" | "name_desc" | "category"
+type SortKey = "default" | "favorite" | "name_asc" | "name_desc" | "category"
 
 type TagOption = {
   tag: string
@@ -26,6 +27,7 @@ type TagOption = {
 
 const sortOptions: { value: SortKey; label: string }[] = [
   { value: "default", label: "Standard" },
+  { value: "favorite", label: "Favoritter forst" },
   { value: "name_asc", label: "Navn A-Z" },
   { value: "name_desc", label: "Navn Z-A" },
   { value: "category", label: "Kategori" },
@@ -45,24 +47,34 @@ type ActorsExplorerProps = {
 }
 
 export function ActorsExplorer({ actors }: ActorsExplorerProps) {
+  const { data } = authClient.useSession()
+  const isSignedIn = Boolean(data?.session)
   const [query, setQuery] = useState("")
   const [sortKey, setSortKey] = useState<SortKey>("default")
   const [categoryFilters, setCategoryFilters] = useState<ActorCategory[]>([])
   const [tagFilters, setTagFilters] = useState<string[]>([])
   const [tagQuery, setTagQuery] = useState("")
+  const [favoriteOnly, setFavoriteOnly] = useState(false)
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
+  const [favoritesLoaded, setFavoritesLoaded] = useState(false)
 
   const categoryIndex = useMemo(() => {
     return new Map(categoryOrder.map((category, index) => [category, index]))
   }, [])
 
+  const baseActors = useMemo(() => {
+    if (!favoriteOnly) return actors
+    return actors.filter((actor) => favoriteIds.has(actor.id))
+  }, [actors, favoriteIds, favoriteOnly])
+
   const availableCategories = useMemo(() => {
-    const set = new Set(actors.map((actor) => actor.category))
+    const set = new Set(baseActors.map((actor) => actor.category))
     return categoryOrder.filter((category) => set.has(category))
-  }, [actors])
+  }, [baseActors])
 
   const tagOptions = useMemo<TagOption[]>(() => {
     const counts = new Map<string, number>()
-    actors.forEach((actor) => {
+    baseActors.forEach((actor) => {
       actor.tags.forEach((tag) => {
         counts.set(tag, (counts.get(tag) ?? 0) + 1)
       })
@@ -72,7 +84,7 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
       .sort((a, b) =>
         a.tag.localeCompare(b.tag, "no", { sensitivity: "base", numeric: true }),
       )
-  }, [actors])
+  }, [baseActors])
 
   const filteredTagOptions = useMemo(() => {
     const normalized = normalizeText(tagQuery.trim())
@@ -85,7 +97,7 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
   const normalizedQuery = normalizeText(query.trim())
 
   const filteredActors = useMemo(() => {
-    return actors.filter((actor) => {
+    return baseActors.filter((actor) => {
       if (categoryFilters.length && !categoryFilters.includes(actor.category)) {
         return false
       }
@@ -112,12 +124,21 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
       )
       return searchText.includes(normalizedQuery)
     })
-  }, [actors, categoryFilters, tagFilters, normalizedQuery])
+  }, [baseActors, categoryFilters, tagFilters, normalizedQuery])
 
   const sortedActors = useMemo(() => {
     if (sortKey === "default") return filteredActors
 
     const sorted = [...filteredActors]
+    if (sortKey === "favorite") {
+      sorted.sort((a, b) => {
+        const left = favoriteIds.has(a.id) ? 1 : 0
+        const right = favoriteIds.has(b.id) ? 1 : 0
+        if (left !== right) return right - left
+        return a.name.localeCompare(b.name, "no", { sensitivity: "base", numeric: true })
+      })
+      return sorted
+    }
     if (sortKey === "name_asc") {
       sorted.sort((a, b) =>
         a.name.localeCompare(b.name, "no", { sensitivity: "base", numeric: true }),
@@ -146,9 +167,9 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
     }
 
     return sorted
-  }, [categoryIndex, filteredActors, sortKey])
+  }, [categoryIndex, filteredActors, sortKey, favoriteIds])
 
-  const activeFilterCount = categoryFilters.length + tagFilters.length
+  const activeFilterCount = categoryFilters.length + tagFilters.length + (favoriteOnly ? 1 : 0)
   const hasAnyFilter = activeFilterCount > 0 || Boolean(query.trim())
 
   const toggleCategory = (category: ActorCategory) => {
@@ -169,11 +190,77 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
     setCategoryFilters([])
     setTagFilters([])
     setTagQuery("")
+    setFavoriteOnly(false)
   }
 
   const clearAllFilters = () => {
     setQuery("")
+    setFavoriteOnly(false)
     clearFilterSelections()
+  }
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      setFavoriteIds(new Set())
+      setFavoritesLoaded(true)
+      return
+    }
+
+    let active = true
+    const loadFavorites = async () => {
+      try {
+        const response = await fetch("/api/public/favorites")
+        if (!response.ok) return
+        const data = (await response.json()) as Array<{ actorId: string }>
+        if (!active) return
+        setFavoriteIds(new Set(data.map((item) => item.actorId)))
+      } finally {
+        if (active) setFavoritesLoaded(true)
+      }
+    }
+
+    void loadFavorites()
+    return () => {
+      active = false
+    }
+  }, [isSignedIn])
+
+  const toggleFavorite = async (actorId: string) => {
+    if (!isSignedIn) {
+      window.location.href = "/auth/sign-in"
+      return
+    }
+
+    const isFavorite = favoriteIds.has(actorId)
+    setFavoriteIds((prev) => {
+      const next = new Set(prev)
+      if (isFavorite) {
+        next.delete(actorId)
+      } else {
+        next.add(actorId)
+      }
+      return next
+    })
+
+    const response = isFavorite
+      ? await fetch(`/api/public/favorites/${actorId}`, { method: "DELETE" })
+      : await fetch("/api/public/favorites", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ actorId }),
+        })
+
+    if (!response.ok) {
+      setFavoriteIds((prev) => {
+        const next = new Set(prev)
+        if (isFavorite) {
+          next.add(actorId)
+        } else {
+          next.delete(actorId)
+        }
+        return next
+      })
+    }
   }
 
   return (
@@ -237,6 +324,31 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
             </div>
 
             <div className="mt-4 space-y-4">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Favoritter</p>
+                <label
+                  className={cn(
+                    "mt-2 flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition",
+                    favoriteOnly && "border-primary/40 bg-primary/5",
+                    !isSignedIn && "opacity-60",
+                  )}
+                >
+                  <Checkbox
+                    checked={favoriteOnly}
+                    onCheckedChange={(next) => setFavoriteOnly(Boolean(next))}
+                    disabled={!isSignedIn}
+                  />
+                  <span>Vis bare favoritter</span>
+                </label>
+                {!isSignedIn && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Logg inn for a bruke favoritter.
+                  </p>
+                )}
+              </div>
+
+              <Separator />
+
               <div>
                 <p className="text-xs font-medium text-muted-foreground">Kategori</p>
                 <div className="mt-2 grid gap-2">
@@ -330,6 +442,19 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
             exit={{ opacity: 0, y: -6 }}
             className="flex flex-wrap gap-2"
           >
+            {favoriteOnly && (
+              <Badge variant="outline" className="gap-1">
+                Favoritter
+                <button
+                  type="button"
+                  onClick={() => setFavoriteOnly(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Fjern favoritter"
+                >
+                  <X className="size-3" />
+                </button>
+              </Badge>
+            )}
             {categoryFilters.map((category) => (
               <Badge key={category} variant="outline" className="gap-1">
                 {formatCategoryLabel(category)}
@@ -383,7 +508,12 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
                   exit={{ opacity: 0, y: -12 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <ActorCard actor={actor} />
+                  <ActorCard
+                    actor={actor}
+                    showFavorite={favoritesLoaded}
+                    isFavorite={favoriteIds.has(actor.id)}
+                    onToggleFavorite={toggleFavorite}
+                  />
                 </motion.div>
               ))}
             </AnimatePresence>

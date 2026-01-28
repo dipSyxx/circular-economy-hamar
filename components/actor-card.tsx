@@ -9,18 +9,22 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, ExternalLink } from "lucide-react";
+import { ExternalLink, Heart, MapPin } from "lucide-react";
 import Link from "next/link";
 import type { Actor } from "@/lib/data";
 import { actorCopy } from "@/content/no";
 import { recordAction } from "@/lib/profile-store";
 import { categoryConfig } from "@/lib/categories";
+import { cn } from "@/lib/utils";
 
 interface ActorCardProps {
   actor: Actor;
+  isFavorite?: boolean;
+  showFavorite?: boolean;
+  onToggleFavorite?: (actorId: string) => void;
 }
 
-export function ActorCard({ actor }: ActorCardProps) {
+export function ActorCard({ actor, isFavorite, showFavorite, onToggleFavorite }: ActorCardProps) {
   const categoryColor = categoryConfig[actor.category]?.color ?? "#64748b";
   const badgeStyle = {
     backgroundColor: `${categoryColor}1A`,
@@ -41,6 +45,26 @@ export function ActorCard({ actor }: ActorCardProps) {
             {actorCopy.categoryLabels[actor.category]}
           </Badge>
         </div>
+        {showFavorite && (
+          <Button
+            type="button"
+            size="icon"
+            variant="secondary"
+            className="absolute right-3 top-3 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onToggleFavorite?.(actor.id);
+            }}
+          >
+            <Heart
+              className={cn(
+                "h-4 w-4",
+                isFavorite ? "fill-rose-500 text-rose-500" : "text-muted-foreground"
+              )}
+            />
+          </Button>
+        )}
       </div>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">

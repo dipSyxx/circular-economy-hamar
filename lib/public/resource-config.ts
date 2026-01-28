@@ -72,10 +72,20 @@ export const publicResourceConfig: Record<string, PublicResourceConfig> = {
     listWhere: ({ searchParams }) => {
       const category = searchParams.get("category")
       const slug = searchParams.get("slug")
+      const id = searchParams.get("id")
+      const idsParam = searchParams.get("ids")
+      const ids = idsParam
+        ? idsParam
+            .split(",")
+            .map((value) => value.trim())
+            .filter(Boolean)
+        : []
       const base = { status: "approved" }
       const filters = []
       if (category) filters.push({ category })
       if (slug) filters.push({ slug })
+      if (id) filters.push({ id })
+      if (ids.length) filters.push({ id: { in: ids } })
       return filters.length ? { AND: [base, ...filters] } : base
     },
     detailWhere: ({ userId, id }) => {

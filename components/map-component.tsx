@@ -29,6 +29,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { authClient } from "@/lib/auth/client";
 import {
   Crosshair,
   ExternalLink,
@@ -103,7 +104,13 @@ const getFilterButtonStyle = (active: boolean, color: string) => ({
   borderColor: color,
 });
 
-type SortKey = "default" | "distance" | "name_asc" | "name_desc" | "category";
+type SortKey =
+  | "default"
+  | "favorite"
+  | "distance"
+  | "name_asc"
+  | "name_desc"
+  | "category";
 
 type TagOption = {
   tag: string;
@@ -112,6 +119,7 @@ type TagOption = {
 
 const sortOptions: { value: SortKey; label: string }[] = [
   { value: "default", label: "Standard" },
+  { value: "favorite", label: "Favoritter forst" },
   { value: "distance", label: "Naermest meg" },
   { value: "name_asc", label: "Navn A-Z" },
   { value: "name_desc", label: "Navn Z-A" },
@@ -141,12 +149,16 @@ interface MapComponentProps {
 }
 
 export function MapComponent({ actors }: MapComponentProps) {
+  const { data } = authClient.useSession();
+  const isSignedIn = Boolean(data?.session);
   const [selectedActorId, setSelectedActorId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | ActorCategory>("all");
   const [query, setQuery] = useState("");
   const [tagFilters, setTagFilters] = useState<string[]>([]);
   const [tagQuery, setTagQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("default");
+  const [favoriteOnly, setFavoriteOnly] = useState(false);
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [userLocation, setUserLocation] = useState<[number, number] | null>(
     null
   );
@@ -160,12 +172,40 @@ export function MapComponent({ actors }: MapComponentProps) {
 
   const isActor = (actor: Actor | undefined): actor is Actor => Boolean(actor);
 
+  useEffect(() => {
+    if (!isSignedIn) {
+      setFavoriteIds(new Set());
+      return;
+    }
+
+    let active = true;
+    const loadFavorites = async () => {
+      try {
+        const response = await fetch("/api/public/favorites");
+        if (!response.ok) return;
+        const data = (await response.json()) as Array<{ actorId: string }>;
+        if (!active) return;
+        setFavoriteIds(new Set(data.map((item) => item.actorId)));
+      }
+    };
+
+    void loadFavorites();
+    return () => {
+      active = false;
+    };
+  }, [isSignedIn]);
+
+  const baseActors = useMemo(() => {
+    if (!favoriteOnly) return actors;
+    return actors.filter((actor) => favoriteIds.has(actor.id));
+  }, [actors, favoriteIds, favoriteOnly]);
+
   const categoryFiltered = useMemo(
     () =>
       filter === "all"
-        ? actors
-        : actors.filter((actor) => actor.category === filter),
-    [actors, filter]
+        ? baseActors
+        : baseActors.filter((actor) => actor.category === filter),
+    [baseActors, filter]
   );
 
   const tagOptions = useMemo<TagOption[]>(() => {
@@ -221,6 +261,18 @@ export function MapComponent({ actors }: MapComponentProps) {
 
     const sorted = [...list];
 
+    if (sortKey === "favorite") {
+      return sorted.sort((a, b) => {
+        const left = favoriteIds.has(a.id) ? 1 : 0;
+        const right = favoriteIds.has(b.id) ? 1 : 0;
+        if (left !== right) return right - left;
+        return a.name.localeCompare(b.name, "no", {
+          sensitivity: "base",
+          numeric: true,
+        });
+      });
+    }
+
     if (sortKey === "distance") {
       if (!userLocation) return sorted;
       return sorted.sort((a, b) => {
@@ -267,9 +319,11 @@ export function MapComponent({ actors }: MapComponentProps) {
     sortKey,
     userLocation,
     categoryIndex,
+    favoriteIds,
   ]);
 
-  const activeFilterCount = (filter === "all" ? 0 : 1) + tagFilters.length;
+  const activeFilterCount =
+    (filter === "all" ? 0 : 1) + tagFilters.length + (favoriteOnly ? 1 : 0);
   const hasAnyFilter = activeFilterCount > 0 || Boolean(query.trim());
 
   const selectedActor =
@@ -343,6 +397,7 @@ export function MapComponent({ actors }: MapComponentProps) {
     setTagFilters([]);
     setTagQuery("");
     setFilter("all");
+    setFavoriteOnly(false);
   };
 
   const addRouteStop = (actorId: string) => {
@@ -551,13 +606,14 @@ export function MapComponent({ actors }: MapComponentProps) {
               <PopoverContent className="w-[280px] p-4" align="end">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Filtre</span>
-                  {tagFilters.length > 0 && (
+                  {activeFilterCount > 0 && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => {
                         setTagFilters([]);
                         setTagQuery("");
+                        setFavoriteOnly(false);
                       }}
                     >
                       Nullstill
@@ -565,6 +621,33 @@ export function MapComponent({ actors }: MapComponentProps) {
                   )}
                 </div>
                 <div className="mt-4 space-y-4">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Favoritter
+                    </p>
+                    <label
+                      className={cn(
+                        "mt-2 flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition",
+                        favoriteOnly && "border-primary/40 bg-primary/5",
+                        !isSignedIn && "opacity-60"
+                      )}
+                    >
+                      <Checkbox
+                        checked={favoriteOnly}
+                        onCheckedChange={(next) => setFavoriteOnly(Boolean(next))}
+                        disabled={!isSignedIn}
+                      />
+                      <span>Vis bare favoritter</span>
+                    </label>
+                    {!isSignedIn && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Logg inn for a bruke favoritter.
+                      </p>
+                    )}
+                  </div>
+
+                  <Separator />
+
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">Tagger</p>
                     <Input
@@ -628,6 +711,19 @@ export function MapComponent({ actors }: MapComponentProps) {
               exit={{ opacity: 0, y: -6 }}
               className="flex flex-wrap gap-2"
             >
+              {favoriteOnly && (
+                <Badge variant="outline" className="gap-1">
+                  Favoritter
+                  <button
+                    type="button"
+                    onClick={() => setFavoriteOnly(false)}
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label="Fjern favoritter"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              )}
               {filter !== "all" && (
                 <Badge variant="outline" className="gap-1">
                   {mapCopy.categoryLabels[filter]}

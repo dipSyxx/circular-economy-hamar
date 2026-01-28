@@ -18,6 +18,7 @@ import { actorCopy, actorPageCopy } from "@/content/no"
 import type { SourceType } from "@/lib/data"
 import { categoryConfig } from "@/lib/categories"
 import { getActorBySlug } from "@/lib/public-data"
+import { FavoriteButton } from "@/components/favorite-button"
 
 interface ActorPageProps {
   params: Promise<{ slug: string }>
@@ -80,7 +81,10 @@ export default async function ActorPage({ params }: ActorPageProps) {
               ))}
             </div>
 
-            <h1 className="text-4xl font-bold mb-4">{actor.name}</h1>
+            <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+              <h1 className="text-4xl font-bold">{actor.name}</h1>
+              <FavoriteButton actorId={actor.id} />
+            </div>
             <p className="text-lg text-muted-foreground">{actor.longDescription}</p>
           </div>
 

@@ -113,6 +113,7 @@ model User {
   quizAttempts         QuizAttempt[]
   actorsCreated        Actor[] @relation("ActorCreatedBy")
   actorsReviewed       Actor[] @relation("ActorReviewedBy")
+  favoriteActors       ActorFavorite[]
 
   @@map("users")
 }
@@ -238,10 +239,26 @@ model Actor {
 
   repairServices ActorRepairService[]
   sources        ActorSource[]
+  favorites      ActorFavorite[]
 
   @@index([status, category])
   @@index([createdById, createdAt])
   @@map("actors")
+}
+
+model ActorFavorite {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  actorId   String   @map("actor_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actor Actor @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, actorId])
+  @@index([userId, createdAt])
+  @@index([actorId])
+  @@map("actor_favorites")
 }
 
 model ActorRepairService {
