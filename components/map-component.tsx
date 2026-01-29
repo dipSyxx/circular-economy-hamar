@@ -24,9 +24,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth/client";
@@ -84,10 +94,10 @@ const buildMarkerIcon = (
     color?: string;
     size?: number;
     strokeWidth?: number;
-  }>
+  }>,
 ) => {
   const svg = renderToStaticMarkup(
-    <Icon color="white" size={16} strokeWidth={2} />
+    <Icon color="white" size={16} strokeWidth={2} />,
   );
   return L.divIcon({
     className: "",
@@ -119,12 +129,15 @@ type TagOption = {
 
 const sortOptions: { value: SortKey; label: string }[] = [
   { value: "default", label: "Standard" },
-  { value: "favorite", label: "Favoritter forst" },
+  { value: "favorite", label: "Favoritter først" },
   { value: "distance", label: "Naermest meg" },
   { value: "name_asc", label: "Navn A-Z" },
   { value: "name_desc", label: "Navn Z-A" },
   { value: "category", label: "Kategori" },
 ];
+
+const STORAGE_KEY = "map-component-state";
+const LOCATION_TTL_MS = 1000 * 60 * 60 * 24;
 
 const normalizeText = (value: string) =>
   value
@@ -145,7 +158,7 @@ function MapFocus({ position }: { position: [number, number] | null }) {
 }
 
 interface MapComponentProps {
-  actors: Actor[]
+  actors: Actor[];
 }
 
 export function MapComponent({ actors }: MapComponentProps) {
@@ -160,14 +173,18 @@ export function MapComponent({ actors }: MapComponentProps) {
   const [favoriteOnly, setFavoriteOnly] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [userLocation, setUserLocation] = useState<[number, number] | null>(
-    null
+    null,
   );
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [locationUpdatedAt, setLocationUpdatedAt] = useState<number | null>(
+    null,
+  );
+  const [hasRestoredState, setHasRestoredState] = useState(false);
   const [routeStops, setRouteStops] = useState<string[]>([]);
 
   const categoryIndex = useMemo(
     () => new Map(categoryOrder.map((category, index) => [category, index])),
-    []
+    [],
   );
 
   const isActor = (actor: Actor | undefined): actor is Actor => Boolean(actor);
@@ -207,7 +224,7 @@ export function MapComponent({ actors }: MapComponentProps) {
       filter === "all"
         ? baseActors
         : baseActors.filter((actor) => actor.category === filter),
-    [baseActors, filter]
+    [baseActors, filter],
   );
 
   const tagOptions = useMemo<TagOption[]>(() => {
@@ -223,7 +240,7 @@ export function MapComponent({ actors }: MapComponentProps) {
         a.tag.localeCompare(b.tag, "no", {
           sensitivity: "base",
           numeric: true,
-        })
+        }),
       );
   }, [categoryFiltered]);
 
@@ -231,7 +248,7 @@ export function MapComponent({ actors }: MapComponentProps) {
     const normalized = normalizeText(tagQuery.trim());
     if (!normalized) return tagOptions;
     return tagOptions.filter((option) =>
-      normalizeText(option.tag).includes(normalized)
+      normalizeText(option.tag).includes(normalized),
     );
   }, [tagOptions, tagQuery]);
 
@@ -256,7 +273,7 @@ export function MapComponent({ actors }: MapComponentProps) {
           actor.address,
           actor.tags.join(" "),
           mapCopy.categoryLabels[actor.category] ?? "",
-        ].join(" ")
+        ].join(" "),
       );
       return searchText.includes(normalizedQuery);
     });
@@ -286,13 +303,19 @@ export function MapComponent({ actors }: MapComponentProps) {
 
     if (sortKey === "name_asc") {
       return sorted.sort((a, b) =>
-        a.name.localeCompare(b.name, "no", { sensitivity: "base", numeric: true })
+        a.name.localeCompare(b.name, "no", {
+          sensitivity: "base",
+          numeric: true,
+        }),
       );
     }
 
     if (sortKey === "name_desc") {
       return sorted.sort((a, b) =>
-        b.name.localeCompare(a.name, "no", { sensitivity: "base", numeric: true })
+        b.name.localeCompare(a.name, "no", {
+          sensitivity: "base",
+          numeric: true,
+        }),
       );
     }
 
@@ -335,12 +358,12 @@ export function MapComponent({ actors }: MapComponentProps) {
       routeStops
         .map((id) => actors.find((actor) => actor.id === id))
         .filter(isActor),
-    [actors, routeStops]
+    [actors, routeStops],
   );
   const routePoints = useMemo(
     () =>
       routeActors.map((actor) => [actor.lat, actor.lng] as [number, number]),
-    [routeActors]
+    [routeActors],
   );
 
   const routeDistance = useMemo(() => {
@@ -361,7 +384,7 @@ export function MapComponent({ actors }: MapComponentProps) {
       : formatCoords(routeActors[0].lat, routeActors[0].lng);
     const destination = formatCoords(
       routeActors[routeActors.length - 1].lat,
-      routeActors[routeActors.length - 1].lng
+      routeActors[routeActors.length - 1].lng,
     );
     const waypoints = userLocation
       ? routeActors.slice(0, -1)
@@ -371,11 +394,11 @@ export function MapComponent({ actors }: MapComponentProps) {
         ? `&waypoints=${encodeURIComponent(
             waypoints
               .map((actor) => formatCoords(actor.lat, actor.lng))
-              .join("|")
+              .join("|"),
           )}`
         : "";
     return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
-      origin
+      origin,
     )}&destination=${encodeURIComponent(destination)}${waypointParam}`;
   }, [routeActors, userLocation]);
 
@@ -390,7 +413,7 @@ export function MapComponent({ actors }: MapComponentProps) {
 
   const toggleTag = (tag: string) => {
     setTagFilters((prev) =>
-      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]
+      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
     );
   };
 
@@ -418,11 +441,14 @@ export function MapComponent({ actors }: MapComponentProps) {
   };
 
   const icons = useMemo(() => {
-    const categoryIcons = categoryOrder.reduce((acc, category) => {
-      const meta = categoryConfig[category];
-      acc[category] = buildMarkerIcon(meta.color, meta.icon);
-      return acc;
-    }, {} as Record<ActorCategory, L.DivIcon>);
+    const categoryIcons = categoryOrder.reduce(
+      (acc, category) => {
+        const meta = categoryConfig[category];
+        acc[category] = buildMarkerIcon(meta.color, meta.icon);
+        return acc;
+      },
+      {} as Record<ActorCategory, L.DivIcon>,
+    );
 
     return {
       ...categoryIcons,
@@ -439,14 +465,96 @@ export function MapComponent({ actors }: MapComponentProps) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setUserLocation([position.coords.latitude, position.coords.longitude]);
+        setLocationUpdatedAt(Date.now());
         setLocationError(null);
       },
       () => {
         setLocationError(mapCopy.locationError);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000 },
     );
   };
+
+  useEffect(() => {
+    const raw =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem(STORAGE_KEY)
+        : null;
+    if (raw) {
+      try {
+        const stored = JSON.parse(raw) as {
+          filter?: "all" | ActorCategory;
+          query?: string;
+          tagFilters?: string[];
+          tagQuery?: string;
+          sortKey?: SortKey;
+          favoriteOnly?: boolean;
+          userLocation?: [number, number];
+          locationUpdatedAt?: number;
+        };
+
+        if (
+          stored.filter &&
+          (stored.filter === "all" || categoryOrder.includes(stored.filter))
+        ) {
+          setFilter(stored.filter);
+        }
+        if (typeof stored.query === "string") setQuery(stored.query);
+        if (Array.isArray(stored.tagFilters)) {
+          setTagFilters(
+            stored.tagFilters.filter((tag) => typeof tag === "string"),
+          );
+        }
+        if (typeof stored.tagQuery === "string") setTagQuery(stored.tagQuery);
+        if (sortOptions.some((option) => option.value === stored.sortKey)) {
+          setSortKey(stored.sortKey as SortKey);
+        }
+        if (typeof stored.favoriteOnly === "boolean")
+          setFavoriteOnly(stored.favoriteOnly);
+
+        if (
+          Array.isArray(stored.userLocation) &&
+          stored.userLocation.length === 2 &&
+          typeof stored.userLocation[0] === "number" &&
+          typeof stored.userLocation[1] === "number" &&
+          Number.isFinite(stored.locationUpdatedAt) &&
+          Date.now() - (stored.locationUpdatedAt as number) < LOCATION_TTL_MS
+        ) {
+          setUserLocation([stored.userLocation[0], stored.userLocation[1]]);
+          setLocationUpdatedAt(stored.locationUpdatedAt as number);
+        }
+      } catch {
+        // ignore storage errors
+      }
+    }
+    setHasRestoredState(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!hasRestoredState) return;
+    const payload = {
+      filter,
+      query,
+      tagFilters,
+      tagQuery,
+      sortKey,
+      favoriteOnly,
+      userLocation,
+      locationUpdatedAt,
+    };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }, [
+    hasRestoredState,
+    filter,
+    query,
+    tagFilters,
+    tagQuery,
+    sortKey,
+    favoriteOnly,
+    userLocation,
+    locationUpdatedAt,
+  ]);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_350px]">
@@ -578,7 +686,10 @@ export function MapComponent({ actors }: MapComponentProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
+            <Select
+              value={sortKey}
+              onValueChange={(value) => setSortKey(value as SortKey)}
+            >
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Sorter" />
               </SelectTrigger>
@@ -593,13 +704,19 @@ export function MapComponent({ actors }: MapComponentProps) {
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-between gap-2 sm:w-auto">
+                <Button
+                  variant="outline"
+                  className="w-full justify-between gap-2 sm:w-auto"
+                >
                   <span className="inline-flex items-center gap-2">
                     <SlidersHorizontal className="size-4" />
                     Filtre
                   </span>
                   {activeFilterCount > 0 && (
-                    <Badge variant="secondary" className="rounded-full px-2 py-0 text-xs">
+                    <Badge
+                      variant="secondary"
+                      className="rounded-full px-2 py-0 text-xs"
+                    >
                       {activeFilterCount}
                     </Badge>
                   )}
@@ -631,12 +748,14 @@ export function MapComponent({ actors }: MapComponentProps) {
                       className={cn(
                         "mt-2 flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition",
                         favoriteOnly && "border-primary/40 bg-primary/5",
-                        !isSignedIn && "opacity-60"
+                        !isSignedIn && "opacity-60",
                       )}
                     >
                       <Checkbox
                         checked={favoriteOnly}
-                        onCheckedChange={(next) => setFavoriteOnly(Boolean(next))}
+                        onCheckedChange={(next) =>
+                          setFavoriteOnly(Boolean(next))
+                        }
                         disabled={!isSignedIn}
                       />
                       <span>Vis bare favoritter</span>
@@ -651,7 +770,9 @@ export function MapComponent({ actors }: MapComponentProps) {
                   <Separator />
 
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground">Tagger</p>
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Tagger
+                    </p>
                     <Input
                       value={tagQuery}
                       onChange={(event) => setTagQuery(event.target.value)}
@@ -661,7 +782,9 @@ export function MapComponent({ actors }: MapComponentProps) {
                     <ScrollArea className="mt-2 h-36 pr-3">
                       <div className="grid gap-2">
                         {filteredTagOptions.length === 0 ? (
-                          <p className="text-sm text-muted-foreground">Ingen tagger.</p>
+                          <p className="text-sm text-muted-foreground">
+                            Ingen tagger.
+                          </p>
                         ) : (
                           filteredTagOptions.map((option) => {
                             const isChecked = tagFilters.includes(option.tag);
@@ -670,7 +793,7 @@ export function MapComponent({ actors }: MapComponentProps) {
                                 key={option.tag}
                                 className={cn(
                                   "flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition",
-                                  isChecked && "border-primary/40 bg-primary/5"
+                                  isChecked && "border-primary/40 bg-primary/5",
                                 )}
                               >
                                 <Checkbox
@@ -829,16 +952,19 @@ export function MapComponent({ actors }: MapComponentProps) {
                 const Icon = meta.icon;
                 const distance =
                   userLocation &&
-                  `${getDistanceKm(userLocation, [actor.lat, actor.lng]).toFixed(
-                    1
-                  )} ${mapCopy.distanceUnit}`;
-                const openStatus = getOpeningStatus(actor.openingHoursOsm ?? undefined);
+                  `${getDistanceKm(userLocation, [
+                    actor.lat,
+                    actor.lng,
+                  ]).toFixed(1)} ${mapCopy.distanceUnit}`;
+                const openStatus = getOpeningStatus(
+                  actor.openingHoursOsm ?? undefined,
+                );
                 const statusLabel =
                   openStatus.state === "open"
                     ? mapCopy.openNowLabel
                     : openStatus.state === "closed"
-                    ? mapCopy.closedNowLabel
-                    : mapCopy.hoursFallbackLabel;
+                      ? mapCopy.closedNowLabel
+                      : mapCopy.hoursFallbackLabel;
                 const statusDetail =
                   openStatus.state === "unknown" || !openStatus.nextChange
                     ? null
@@ -859,7 +985,9 @@ export function MapComponent({ actors }: MapComponentProps) {
                   >
                     <Card
                       className={`p-4 cursor-pointer transition-all hover:shadow-md ${
-                        selectedActorId === actor.id ? "ring-2 ring-primary" : ""
+                        selectedActorId === actor.id
+                          ? "ring-2 ring-primary"
+                          : ""
                       }`}
                       onClick={() => setSelectedActorId(actor.id)}
                     >
@@ -881,7 +1009,10 @@ export function MapComponent({ actors }: MapComponentProps) {
                           </p>
                           <Badge
                             className="mt-2 flex items-center gap-1"
-                            style={{ backgroundColor: meta.color, color: "#fff" }}
+                            style={{
+                              backgroundColor: meta.color,
+                              color: "#fff",
+                            }}
                           >
                             <Icon className="h-3 w-3" />
                             {mapCopy.categoryLabels[actor.category]}
@@ -905,7 +1036,9 @@ export function MapComponent({ actors }: MapComponentProps) {
                             <Link
                               href={`/aktorer/${actor.slug}`}
                               onClick={() =>
-                                recordAction("open_actor", { actorId: actor.id })
+                                recordAction("open_actor", {
+                                  actorId: actor.id,
+                                })
                               }
                             >
                               <ExternalLink className="h-4 w-4" />

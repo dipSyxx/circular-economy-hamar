@@ -1,133 +1,164 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
-import { Crosshair, Search, SlidersHorizontal, X } from "lucide-react"
-import type { Actor, ActorCategory } from "@/lib/data"
-import { ActorCard } from "@/components/actor-card"
-import { authClient } from "@/lib/auth/client"
-import { actorCopy, mapCopy } from "@/content/no"
-import { categoryConfig, categoryOrder } from "@/lib/categories"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { cn } from "@/lib/utils"
+import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Crosshair, Search, SlidersHorizontal, X } from "lucide-react";
+import type { Actor, ActorCategory } from "@/lib/data";
+import { ActorCard } from "@/components/actor-card";
+import { authClient } from "@/lib/auth/client";
+import { actorCopy, mapCopy } from "@/content/no";
+import { categoryConfig, categoryOrder } from "@/lib/categories";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
-type SortKey = "default" | "favorite" | "distance" | "name_asc" | "name_desc" | "category"
+type SortKey =
+  | "default"
+  | "favorite"
+  | "distance"
+  | "name_asc"
+  | "name_desc"
+  | "category";
 
 type TagOption = {
-  tag: string
-  count: number
-}
+  tag: string;
+  count: number;
+};
 
 const sortOptions: { value: SortKey; label: string }[] = [
   { value: "default", label: "Standard" },
-  { value: "favorite", label: "Favoritter forst" },
+  { value: "favorite", label: "Favoritter først" },
   { value: "distance", label: "Naermest meg" },
   { value: "name_asc", label: "Navn A-Z" },
   { value: "name_desc", label: "Navn Z-A" },
   { value: "category", label: "Kategori" },
-]
+];
+
+const STORAGE_KEY = "actors-explorer-state";
+const LOCATION_TTL_MS = 1000 * 60 * 60 * 24;
 
 const normalizeText = (value: string) =>
   value
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\u0300-\u036f]/g, "");
 
 const getDistanceKm = (from: [number, number], to: [number, number]) => {
-  const [lat1, lon1] = from
-  const [lat2, lon2] = to
-  const toRad = (value: number) => (value * Math.PI) / 180
-  const dLat = toRad(lat2 - lat1)
-  const dLon = toRad(lon2 - lon1)
+  const [lat1, lon1] = from;
+  const [lat2, lon2] = to;
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return 6371 * c
-}
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return 6371 * c;
+};
 
 const formatCategoryLabel = (category: ActorCategory) =>
-  actorCopy.categoryLabels[category] ?? category
+  actorCopy.categoryLabels[category] ?? category;
 
 type ActorsExplorerProps = {
-  actors: Actor[]
-}
+  actors: Actor[];
+};
 
 export function ActorsExplorer({ actors }: ActorsExplorerProps) {
-  const { data } = authClient.useSession()
-  const isSignedIn = Boolean(data?.session)
-  const [query, setQuery] = useState("")
-  const [sortKey, setSortKey] = useState<SortKey>("default")
-  const [categoryFilters, setCategoryFilters] = useState<ActorCategory[]>([])
-  const [tagFilters, setTagFilters] = useState<string[]>([])
-  const [tagQuery, setTagQuery] = useState("")
-  const [favoriteOnly, setFavoriteOnly] = useState(false)
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
-  const [favoritesLoaded, setFavoritesLoaded] = useState(false)
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
-  const [locationError, setLocationError] = useState<string | null>(null)
+  const { data } = authClient.useSession();
+  const isSignedIn = Boolean(data?.session);
+  const [query, setQuery] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("default");
+  const [categoryFilters, setCategoryFilters] = useState<ActorCategory[]>([]);
+  const [tagFilters, setTagFilters] = useState<string[]>([]);
+  const [tagQuery, setTagQuery] = useState("");
+  const [favoriteOnly, setFavoriteOnly] = useState(false);
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const [favoritesLoaded, setFavoritesLoaded] = useState(false);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(
+    null,
+  );
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [locationUpdatedAt, setLocationUpdatedAt] = useState<number | null>(
+    null,
+  );
+  const [hasRestoredState, setHasRestoredState] = useState(false);
 
   const categoryIndex = useMemo(() => {
-    return new Map(categoryOrder.map((category, index) => [category, index]))
-  }, [])
+    return new Map(categoryOrder.map((category, index) => [category, index]));
+  }, []);
 
   const baseActors = useMemo(() => {
-    if (!favoriteOnly) return actors
-    return actors.filter((actor) => favoriteIds.has(actor.id))
-  }, [actors, favoriteIds, favoriteOnly])
+    if (!favoriteOnly) return actors;
+    return actors.filter((actor) => favoriteIds.has(actor.id));
+  }, [actors, favoriteIds, favoriteOnly]);
 
   const availableCategories = useMemo(() => {
-    const set = new Set(baseActors.map((actor) => actor.category))
-    return categoryOrder.filter((category) => set.has(category))
-  }, [baseActors])
+    const set = new Set(baseActors.map((actor) => actor.category));
+    return categoryOrder.filter((category) => set.has(category));
+  }, [baseActors]);
 
   const tagOptions = useMemo<TagOption[]>(() => {
-    const counts = new Map<string, number>()
+    const counts = new Map<string, number>();
     baseActors.forEach((actor) => {
       actor.tags.forEach((tag) => {
-        counts.set(tag, (counts.get(tag) ?? 0) + 1)
-      })
-    })
+        counts.set(tag, (counts.get(tag) ?? 0) + 1);
+      });
+    });
     return Array.from(counts.entries())
       .map(([tag, count]) => ({ tag, count }))
       .sort((a, b) =>
-        a.tag.localeCompare(b.tag, "no", { sensitivity: "base", numeric: true }),
-      )
-  }, [baseActors])
+        a.tag.localeCompare(b.tag, "no", {
+          sensitivity: "base",
+          numeric: true,
+        }),
+      );
+  }, [baseActors]);
 
   const filteredTagOptions = useMemo(() => {
-    const normalized = normalizeText(tagQuery.trim())
-    if (!normalized) return tagOptions
+    const normalized = normalizeText(tagQuery.trim());
+    if (!normalized) return tagOptions;
     return tagOptions.filter((option) =>
       normalizeText(option.tag).includes(normalized),
-    )
-  }, [tagOptions, tagQuery])
+    );
+  }, [tagOptions, tagQuery]);
 
-  const normalizedQuery = normalizeText(query.trim())
+  const normalizedQuery = normalizeText(query.trim());
 
   const filteredActors = useMemo(() => {
     return baseActors.filter((actor) => {
       if (categoryFilters.length && !categoryFilters.includes(actor.category)) {
-        return false
+        return false;
       }
 
       if (tagFilters.length) {
-        const actorTags = actor.tags ?? []
+        const actorTags = actor.tags ?? [];
         if (!tagFilters.some((tag) => actorTags.includes(tag))) {
-          return false
+          return false;
         }
       }
 
-      if (!normalizedQuery) return true
+      if (!normalizedQuery) return true;
 
-      const categoryLabel = formatCategoryLabel(actor.category)
+      const categoryLabel = formatCategoryLabel(actor.category);
       const searchText = normalizeText(
         [
           actor.name,
@@ -137,157 +168,248 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
           actor.tags.join(" "),
           categoryLabel,
         ].join(" "),
-      )
-      return searchText.includes(normalizedQuery)
-    })
-  }, [baseActors, categoryFilters, tagFilters, normalizedQuery])
+      );
+      return searchText.includes(normalizedQuery);
+    });
+  }, [baseActors, categoryFilters, tagFilters, normalizedQuery]);
 
   const sortedActors = useMemo(() => {
-    const sorted = [...filteredActors]
+    const sorted = [...filteredActors];
     if (sortKey === "favorite") {
       sorted.sort((a, b) => {
-        const left = favoriteIds.has(a.id) ? 1 : 0
-        const right = favoriteIds.has(b.id) ? 1 : 0
-        if (left !== right) return right - left
-        return a.name.localeCompare(b.name, "no", { sensitivity: "base", numeric: true })
-      })
-      return sorted
+        const left = favoriteIds.has(a.id) ? 1 : 0;
+        const right = favoriteIds.has(b.id) ? 1 : 0;
+        if (left !== right) return right - left;
+        return a.name.localeCompare(b.name, "no", {
+          sensitivity: "base",
+          numeric: true,
+        });
+      });
+      return sorted;
     }
 
     if (sortKey === "distance") {
-      if (!userLocation) return sorted
+      if (!userLocation) return sorted;
       return sorted.sort((a, b) => {
-        const distA = getDistanceKm(userLocation, [a.lat, a.lng])
-        const distB = getDistanceKm(userLocation, [b.lat, b.lng])
-        return distA - distB
-      })
+        const distA = getDistanceKm(userLocation, [a.lat, a.lng]);
+        const distB = getDistanceKm(userLocation, [b.lat, b.lng]);
+        return distA - distB;
+      });
     }
 
     if (sortKey === "name_asc") {
       sorted.sort((a, b) =>
-        a.name.localeCompare(b.name, "no", { sensitivity: "base", numeric: true }),
-      )
-      return sorted
+        a.name.localeCompare(b.name, "no", {
+          sensitivity: "base",
+          numeric: true,
+        }),
+      );
+      return sorted;
     }
 
     if (sortKey === "name_desc") {
       sorted.sort((a, b) =>
-        b.name.localeCompare(a.name, "no", { sensitivity: "base", numeric: true }),
-      )
-      return sorted
+        b.name.localeCompare(a.name, "no", {
+          sensitivity: "base",
+          numeric: true,
+        }),
+      );
+      return sorted;
     }
 
     if (sortKey === "category") {
       sorted.sort((a, b) => {
-        const left = categoryIndex.get(a.category) ?? 999
-        const right = categoryIndex.get(b.category) ?? 999
-        if (left !== right) return left - right
+        const left = categoryIndex.get(a.category) ?? 999;
+        const right = categoryIndex.get(b.category) ?? 999;
+        if (left !== right) return left - right;
         return a.name.localeCompare(b.name, "no", {
           sensitivity: "base",
           numeric: true,
-        })
-      })
-      return sorted
+        });
+      });
+      return sorted;
     }
 
-    if (!userLocation) return filteredActors
+    if (!userLocation) return filteredActors;
     return sorted.sort((a, b) => {
-      const distA = getDistanceKm(userLocation, [a.lat, a.lng])
-      const distB = getDistanceKm(userLocation, [b.lat, b.lng])
-      return distA - distB
-    })
-  }, [categoryIndex, filteredActors, sortKey, favoriteIds, userLocation])
+      const distA = getDistanceKm(userLocation, [a.lat, a.lng]);
+      const distB = getDistanceKm(userLocation, [b.lat, b.lng]);
+      return distA - distB;
+    });
+  }, [categoryIndex, filteredActors, sortKey, favoriteIds, userLocation]);
 
-  const activeFilterCount = categoryFilters.length + tagFilters.length + (favoriteOnly ? 1 : 0)
-  const hasAnyFilter = activeFilterCount > 0 || Boolean(query.trim())
+  const activeFilterCount =
+    categoryFilters.length + tagFilters.length + (favoriteOnly ? 1 : 0);
+  const hasAnyFilter = activeFilterCount > 0 || Boolean(query.trim());
 
   const toggleCategory = (category: ActorCategory) => {
     setCategoryFilters((prev) =>
       prev.includes(category)
         ? prev.filter((item) => item !== category)
         : [...prev, category],
-    )
-  }
+    );
+  };
 
   const toggleTag = (tag: string) => {
     setTagFilters((prev) =>
       prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
-    )
-  }
+    );
+  };
 
   const clearFilterSelections = () => {
-    setCategoryFilters([])
-    setTagFilters([])
-    setTagQuery("")
-    setFavoriteOnly(false)
-  }
+    setCategoryFilters([]);
+    setTagFilters([]);
+    setTagQuery("");
+    setFavoriteOnly(false);
+  };
 
   const clearAllFilters = () => {
-    setQuery("")
-    setFavoriteOnly(false)
-    clearFilterSelections()
-  }
+    setQuery("");
+    setFavoriteOnly(false);
+    clearFilterSelections();
+  };
 
   const requestLocation = () => {
     if (!navigator.geolocation) {
-      setLocationError(mapCopy.locationError)
-      return
+      setLocationError(mapCopy.locationError);
+      return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setUserLocation([position.coords.latitude, position.coords.longitude])
-        setLocationError(null)
+        setUserLocation([position.coords.latitude, position.coords.longitude]);
+        setLocationUpdatedAt(Date.now());
+        setLocationError(null);
       },
       () => {
-        setLocationError(mapCopy.locationError)
+        setLocationError(mapCopy.locationError);
       },
       { enableHighAccuracy: true, timeout: 10000 },
-    )
-  }
+    );
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      try {
+        const stored = JSON.parse(raw) as {
+          query?: string;
+          sortKey?: SortKey;
+          categoryFilters?: ActorCategory[];
+          tagFilters?: string[];
+          tagQuery?: string;
+          favoriteOnly?: boolean;
+          userLocation?: [number, number];
+          locationUpdatedAt?: number;
+        };
+
+        if (typeof stored.query === "string") setQuery(stored.query);
+        if (sortOptions.some((option) => option.value === stored.sortKey)) {
+          setSortKey(stored.sortKey as SortKey);
+        }
+        if (Array.isArray(stored.categoryFilters)) {
+          setCategoryFilters(
+            stored.categoryFilters.filter((category) =>
+              categoryOrder.includes(category),
+            ),
+          );
+        }
+        if (Array.isArray(stored.tagFilters)) {
+          setTagFilters(
+            stored.tagFilters.filter((tag) => typeof tag === "string"),
+          );
+        }
+        if (typeof stored.tagQuery === "string") setTagQuery(stored.tagQuery);
+        if (typeof stored.favoriteOnly === "boolean")
+          setFavoriteOnly(stored.favoriteOnly);
+
+        if (
+          Array.isArray(stored.userLocation) &&
+          stored.userLocation.length === 2 &&
+          typeof stored.userLocation[0] === "number" &&
+          typeof stored.userLocation[1] === "number" &&
+          Number.isFinite(stored.locationUpdatedAt) &&
+          Date.now() - (stored.locationUpdatedAt as number) < LOCATION_TTL_MS
+        ) {
+          setUserLocation([stored.userLocation[0], stored.userLocation[1]]);
+          setLocationUpdatedAt(stored.locationUpdatedAt as number);
+        }
+      } catch {
+        // ignore storage errors
+      }
+    }
+    setHasRestoredState(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!hasRestoredState) return;
+    const payload = {
+      query,
+      sortKey,
+      categoryFilters,
+      tagFilters,
+      tagQuery,
+      favoriteOnly,
+      userLocation,
+      locationUpdatedAt,
+    };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }, [
+    hasRestoredState,
+    query,
+    sortKey,
+    categoryFilters,
+    tagFilters,
+    tagQuery,
+    favoriteOnly,
+    userLocation,
+    locationUpdatedAt,
+  ]);
 
   useEffect(() => {
     if (!isSignedIn) {
-      setFavoriteIds(new Set())
-      setFavoritesLoaded(true)
-      return
+      setFavoriteIds(new Set());
+      setFavoritesLoaded(true);
+      return;
     }
 
-    let active = true
+    let active = true;
     const loadFavorites = async () => {
       try {
-        const response = await fetch("/api/public/favorites")
-        if (!response.ok) return
-        const data = (await response.json()) as Array<{ actorId: string }>
-        if (!active) return
-        setFavoriteIds(new Set(data.map((item) => item.actorId)))
+        const response = await fetch("/api/public/favorites");
+        if (!response.ok) return;
+        const data = (await response.json()) as Array<{ actorId: string }>;
+        if (!active) return;
+        setFavoriteIds(new Set(data.map((item) => item.actorId)));
       } finally {
-        if (active) setFavoritesLoaded(true)
+        if (active) setFavoritesLoaded(true);
       }
-    }
+    };
 
-    void loadFavorites()
+    void loadFavorites();
     return () => {
-      active = false
-    }
-  }, [isSignedIn])
+      active = false;
+    };
+  }, [isSignedIn]);
 
   const toggleFavorite = async (actorId: string) => {
     if (!isSignedIn) {
-      window.location.href = "/auth/sign-in"
-      return
+      window.location.href = "/auth/sign-in";
+      return;
     }
 
-    const isFavorite = favoriteIds.has(actorId)
+    const isFavorite = favoriteIds.has(actorId);
     setFavoriteIds((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (isFavorite) {
-        next.delete(actorId)
+        next.delete(actorId);
       } else {
-        next.add(actorId)
+        next.add(actorId);
       }
-      return next
-    })
+      return next;
+    });
 
     const response = isFavorite
       ? await fetch(`/api/public/favorites/${actorId}`, { method: "DELETE" })
@@ -295,20 +417,20 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ actorId }),
-        })
+        });
 
     if (!response.ok) {
       setFavoriteIds((prev) => {
-        const next = new Set(prev)
+        const next = new Set(prev);
         if (isFavorite) {
-          next.add(actorId)
+          next.add(actorId);
         } else {
-          next.delete(actorId)
+          next.delete(actorId);
         }
-        return next
-      })
+        return next;
+      });
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -333,7 +455,10 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
           )}
         </div>
 
-        <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
+        <Select
+          value={sortKey}
+          onValueChange={(value) => setSortKey(value as SortKey)}
+        >
           <SelectTrigger className="w-full lg:w-[180px]">
             <SelectValue placeholder="Sorter" />
           </SelectTrigger>
@@ -346,20 +471,30 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
           </SelectContent>
         </Select>
 
-        <Button variant="outline" className="w-full gap-2 lg:w-auto" onClick={requestLocation}>
+        <Button
+          variant="outline"
+          className="w-full gap-2 lg:w-auto"
+          onClick={requestLocation}
+        >
           <Crosshair className="size-4" />
           {mapCopy.nearMeLabel}
         </Button>
 
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="w-full justify-between gap-2 lg:w-auto">
+            <Button
+              variant="outline"
+              className="w-full justify-between gap-2 lg:w-auto"
+            >
               <span className="inline-flex items-center gap-2">
                 <SlidersHorizontal className="size-4" />
                 Filtre
               </span>
               {activeFilterCount > 0 && (
-                <Badge variant="secondary" className="rounded-full px-2 py-0 text-xs">
+                <Badge
+                  variant="secondary"
+                  className="rounded-full px-2 py-0 text-xs"
+                >
                   {activeFilterCount}
                 </Badge>
               )}
@@ -369,7 +504,11 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Filtre</span>
               {activeFilterCount > 0 && (
-                <Button variant="ghost" size="sm" onClick={clearFilterSelections}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilterSelections}
+                >
                   Nullstill
                 </Button>
               )}
@@ -377,7 +516,9 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
 
             <div className="mt-4 space-y-4">
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Favoritter</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Favoritter
+                </p>
                 <label
                   className={cn(
                     "mt-2 flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition",
@@ -402,11 +543,13 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
               <Separator />
 
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Kategori</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Kategori
+                </p>
                 <div className="mt-2 grid gap-2">
                   {availableCategories.map((category) => {
-                    const isChecked = categoryFilters.includes(category)
-                    const color = categoryConfig[category]?.color ?? "#64748b"
+                    const isChecked = categoryFilters.includes(category);
+                    const color = categoryConfig[category]?.color ?? "#64748b";
                     return (
                       <label
                         key={category}
@@ -423,9 +566,11 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
                           className="h-2 w-2 rounded-full"
                           style={{ backgroundColor: color }}
                         />
-                        <span className="truncate">{formatCategoryLabel(category)}</span>
+                        <span className="truncate">
+                          {formatCategoryLabel(category)}
+                        </span>
                       </label>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -433,7 +578,9 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
               <Separator />
 
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Tagger</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Tagger
+                </p>
                 <Input
                   value={tagQuery}
                   onChange={(event) => setTagQuery(event.target.value)}
@@ -443,10 +590,12 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
                 <ScrollArea className="mt-2 h-40 pr-3">
                   <div className="grid gap-2">
                     {filteredTagOptions.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">Ingen tagger.</p>
+                      <p className="text-sm text-muted-foreground">
+                        Ingen tagger.
+                      </p>
                     ) : (
                       filteredTagOptions.map((option) => {
-                        const isChecked = tagFilters.includes(option.tag)
+                        const isChecked = tagFilters.includes(option.tag);
                         return (
                           <label
                             key={option.tag}
@@ -464,7 +613,7 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
                               {option.count}
                             </span>
                           </label>
-                        )
+                        );
                       })
                     )}
                   </div>
@@ -475,7 +624,9 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
         </Popover>
       </div>
 
-      {locationError && <p className="text-sm text-destructive">{locationError}</p>}
+      {locationError && (
+        <p className="text-sm text-destructive">{locationError}</p>
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
         <span>
@@ -556,7 +707,7 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
               {sortedActors.map((actor) => {
                 const distanceLabel =
                   userLocation &&
-                  `${getDistanceKm(userLocation, [actor.lat, actor.lng]).toFixed(1)} ${mapCopy.distanceUnit}`
+                  `${getDistanceKm(userLocation, [actor.lat, actor.lng]).toFixed(1)} ${mapCopy.distanceUnit}`;
 
                 return (
                   <motion.div
@@ -575,12 +726,12 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
                       distanceLabel={distanceLabel || undefined}
                     />
                   </motion.div>
-                )
+                );
               })}
             </AnimatePresence>
           </div>
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }
