@@ -22,9 +22,16 @@ interface ActorCardProps {
   isFavorite?: boolean;
   showFavorite?: boolean;
   onToggleFavorite?: (actorId: string) => void;
+  distanceLabel?: string;
 }
 
-export function ActorCard({ actor, isFavorite, showFavorite, onToggleFavorite }: ActorCardProps) {
+export function ActorCard({
+  actor,
+  isFavorite,
+  showFavorite,
+  onToggleFavorite,
+  distanceLabel,
+}: ActorCardProps) {
   const categoryColor = categoryConfig[actor.category]?.color ?? "#64748b";
   const badgeStyle = {
     backgroundColor: `${categoryColor}1A`,
@@ -74,6 +81,9 @@ export function ActorCard({ actor, isFavorite, showFavorite, onToggleFavorite }:
           <MapPin className="h-3 w-3" />
           {actor.address}
         </CardDescription>
+        {distanceLabel && (
+          <p className="text-xs text-muted-foreground mt-1">{distanceLabel}</p>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">{actor.description}</p>

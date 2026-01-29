@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { Search, SlidersHorizontal, X } from "lucide-react"
+import { Crosshair, Search, SlidersHorizontal, X } from "lucide-react"
 import type { Actor, ActorCategory } from "@/lib/data"
 import { ActorCard } from "@/components/actor-card"
 import { authClient } from "@/lib/auth/client"
-import { actorCopy } from "@/content/no"
+import { actorCopy, mapCopy } from "@/content/no"
 import { categoryConfig, categoryOrder } from "@/lib/categories"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
-type SortKey = "default" | "favorite" | "name_asc" | "name_desc" | "category"
+type SortKey = "default" | "favorite" | "distance" | "name_asc" | "name_desc" | "category"
 
 type TagOption = {
   tag: string
@@ -28,6 +28,7 @@ type TagOption = {
 const sortOptions: { value: SortKey; label: string }[] = [
   { value: "default", label: "Standard" },
   { value: "favorite", label: "Favoritter forst" },
+  { value: "distance", label: "Naermest meg" },
   { value: "name_asc", label: "Navn A-Z" },
   { value: "name_desc", label: "Navn Z-A" },
   { value: "category", label: "Kategori" },
@@ -38,6 +39,19 @@ const normalizeText = (value: string) =>
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
+
+const getDistanceKm = (from: [number, number], to: [number, number]) => {
+  const [lat1, lon1] = from
+  const [lat2, lon2] = to
+  const toRad = (value: number) => (value * Math.PI) / 180
+  const dLat = toRad(lat2 - lat1)
+  const dLon = toRad(lon2 - lon1)
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return 6371 * c
+}
 
 const formatCategoryLabel = (category: ActorCategory) =>
   actorCopy.categoryLabels[category] ?? category
@@ -57,6 +71,8 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
   const [favoriteOnly, setFavoriteOnly] = useState(false)
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
   const [favoritesLoaded, setFavoritesLoaded] = useState(false)
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
+  const [locationError, setLocationError] = useState<string | null>(null)
 
   const categoryIndex = useMemo(() => {
     return new Map(categoryOrder.map((category, index) => [category, index]))
@@ -127,8 +143,6 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
   }, [baseActors, categoryFilters, tagFilters, normalizedQuery])
 
   const sortedActors = useMemo(() => {
-    if (sortKey === "default") return filteredActors
-
     const sorted = [...filteredActors]
     if (sortKey === "favorite") {
       sorted.sort((a, b) => {
@@ -139,6 +153,16 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
       })
       return sorted
     }
+
+    if (sortKey === "distance") {
+      if (!userLocation) return sorted
+      return sorted.sort((a, b) => {
+        const distA = getDistanceKm(userLocation, [a.lat, a.lng])
+        const distB = getDistanceKm(userLocation, [b.lat, b.lng])
+        return distA - distB
+      })
+    }
+
     if (sortKey === "name_asc") {
       sorted.sort((a, b) =>
         a.name.localeCompare(b.name, "no", { sensitivity: "base", numeric: true }),
@@ -166,8 +190,13 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
       return sorted
     }
 
-    return sorted
-  }, [categoryIndex, filteredActors, sortKey, favoriteIds])
+    if (!userLocation) return filteredActors
+    return sorted.sort((a, b) => {
+      const distA = getDistanceKm(userLocation, [a.lat, a.lng])
+      const distB = getDistanceKm(userLocation, [b.lat, b.lng])
+      return distA - distB
+    })
+  }, [categoryIndex, filteredActors, sortKey, favoriteIds, userLocation])
 
   const activeFilterCount = categoryFilters.length + tagFilters.length + (favoriteOnly ? 1 : 0)
   const hasAnyFilter = activeFilterCount > 0 || Boolean(query.trim())
@@ -197,6 +226,24 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
     setQuery("")
     setFavoriteOnly(false)
     clearFilterSelections()
+  }
+
+  const requestLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError(mapCopy.locationError)
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation([position.coords.latitude, position.coords.longitude])
+        setLocationError(null)
+      },
+      () => {
+        setLocationError(mapCopy.locationError)
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    )
   }
 
   useEffect(() => {
@@ -265,7 +312,7 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-center">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto_auto] lg:items-center">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -298,6 +345,11 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
             ))}
           </SelectContent>
         </Select>
+
+        <Button variant="outline" className="w-full gap-2 lg:w-auto" onClick={requestLocation}>
+          <Crosshair className="size-4" />
+          {mapCopy.nearMeLabel}
+        </Button>
 
         <Popover>
           <PopoverTrigger asChild>
@@ -423,6 +475,8 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
         </Popover>
       </div>
 
+      {locationError && <p className="text-sm text-destructive">{locationError}</p>}
+
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
         <span>
           Viser {sortedActors.length} av {actors.length} aktorer
@@ -499,23 +553,30 @@ export function ActorsExplorer({ actors }: ActorsExplorerProps) {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <AnimatePresence mode="popLayout">
-              {sortedActors.map((actor) => (
-                <motion.div
-                  key={actor.id}
-                  layout
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <ActorCard
-                    actor={actor}
-                    showFavorite={favoritesLoaded}
-                    isFavorite={favoriteIds.has(actor.id)}
-                    onToggleFavorite={toggleFavorite}
-                  />
-                </motion.div>
-              ))}
+              {sortedActors.map((actor) => {
+                const distanceLabel =
+                  userLocation &&
+                  `${getDistanceKm(userLocation, [actor.lat, actor.lng]).toFixed(1)} ${mapCopy.distanceUnit}`
+
+                return (
+                  <motion.div
+                    key={actor.id}
+                    layout
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ActorCard
+                      actor={actor}
+                      showFavorite={favoritesLoaded}
+                      isFavorite={favoriteIds.has(actor.id)}
+                      onToggleFavorite={toggleFavorite}
+                      distanceLabel={distanceLabel || undefined}
+                    />
+                  </motion.div>
+                )
+              })}
             </AnimatePresence>
           </div>
         )}
