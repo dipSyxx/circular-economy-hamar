@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { actorCopy } from "@/content/no"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -126,6 +126,7 @@ export function PendingActorsPanel({ initialActors, reviewerId }: PendingActorsP
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set())
   const [selectedActor, setSelectedActor] = useState<PendingActor | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [imagePreviewError, setImagePreviewError] = useState(false)
 
   const formatter = useMemo(
     () => new Intl.DateTimeFormat("no-NO", { dateStyle: "medium" }),
@@ -191,6 +192,10 @@ export function PendingActorsPanel({ initialActors, reviewerId }: PendingActorsP
   }
 
   const dialogLoading = selectedActor ? loadingIds.has(selectedActor.id) : false
+
+  useEffect(() => {
+    setImagePreviewError(false)
+  }, [selectedActor?.image])
 
   return (
     <Card>
@@ -364,13 +369,18 @@ export function PendingActorsPanel({ initialActors, reviewerId }: PendingActorsP
                   </div>
                   <div className="sm:col-span-2 lg:col-span-3">
                     <p className="text-xs text-muted-foreground">Bilde</p>
-                    {selectedActor.image ? (
-                      <div className="mt-2 overflow-hidden rounded-lg border">
-                        <img src={selectedActor.image} alt={selectedActor.name} className="h-48 w-full object-cover" />
-                      </div>
-                    ) : (
-                      <p className="text-sm">-</p>
-                    )}
+                  {selectedActor.image ? (
+                    <div className="mt-2 inline-flex max-w-full overflow-hidden rounded-lg border bg-muted/20">
+                      <img
+                        src={imagePreviewError ? "/placeholder.svg" : selectedActor.image}
+                        alt={selectedActor.name}
+                        className="h-auto w-auto max-h-80 max-w-full object-contain"
+                        onError={() => setImagePreviewError(true)}
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-sm">-</p>
+                  )}
                   </div>
                 </div>
               </section>
