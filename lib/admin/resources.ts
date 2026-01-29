@@ -1,37 +1,166 @@
-﻿export type AdminResourceMeta = {
-  key: string
+export type AdminResourceGroupKey = "actors" | "tasks" | "quiz" | "facts" | "co2e" | "users"
+
+export type AdminResourceGroupMeta = {
+  key: AdminResourceGroupKey
   label: string
   description?: string
 }
+
+export type AdminResourceMeta = {
+  key: string
+  label: string
+  description?: string
+  group: AdminResourceGroupKey
+}
+
+export const adminResourceGroups: AdminResourceGroupMeta[] = [
+  {
+    key: "actors",
+    label: "Aktører",
+    description: "Aktører og tilknyttede tjenester og kilder.",
+  },
+  {
+    key: "tasks",
+    label: "Oppdrag",
+    description: "Oppdrag og fullføringer.",
+  },
+  {
+    key: "quiz",
+    label: "Quiz",
+    description: "Spørsmål, alternativer og resultater.",
+  },
+  {
+    key: "facts",
+    label: "Fakta",
+    description: "Fakta og kilder.",
+  },
+  {
+    key: "co2e",
+    label: "CO2e & kalkulator",
+    description: "CO2e-kilder og reparasjonsdata.",
+  },
+  {
+    key: "users",
+    label: "Brukere & aktivitet",
+    description: "Brukerdata, handlinger og beslutninger.",
+  },
+]
 
 export const adminResources: AdminResourceMeta[] = [
   {
     key: "actors",
     label: "Aktører",
     description: "Lokale aktører med kontaktinfo, tags og åpningstider.",
+    group: "actors",
   },
   {
     key: "actor-repair-services",
     label: "Reparasjons-tjenester",
     description: "Pris og omfang for aktørenes tjenester.",
+    group: "actors",
   },
-  { key: "actor-sources", label: "Aktørkilder", description: "Kilder og referanser per aktør." },
-  { key: "challenges", label: "Oppdrag", description: "Oppdragene i appen (poeng og kategori)." },
-  { key: "quiz-questions", label: "Quizspørsmål", description: "Spørsmål og rekkefølge." },
-  { key: "quiz-options", label: "Quizalternativer", description: "Svaralternativer for hvert spørsmål." },
-  { key: "quiz-results", label: "Quizresultater", description: "Resultatnivåer og tips." },
-  { key: "repair-estimates", label: "Reparasjonsdata", description: "Kostnad og CO2 for kalkulatoren." },
-  { key: "facts", label: "Fakta (kort)", description: "Kortfakta-kort på /fakta." },
-  { key: "detailed-facts", label: "Fakta (detalj)", description: "Detaljseksjoner på /fakta." },
-  { key: "detailed-fact-sources", label: "Faktakilder", description: "Kilder for detaljfakta." },
-  { key: "co2e-sources", label: "CO2e-kilder", description: "Kilder brukt i beslutningsmotoren." },
-  { key: "co2e-source-items", label: "CO2e-kildekoblinger", description: "Koblinger mellom CO2e-kilder og itemType." },
-  { key: "users", label: "Brukere", description: "Brukere og roller fra Neon Auth." },
-  { key: "user-profiles", label: "Brukerprofiler", description: "Poeng, streaks og status per bruker." },
-  { key: "user-actions", label: "Brukerhandlinger", description: "Handlinger og poenglogg." },
-  { key: "decisions", label: "Beslutninger", description: "Beslutningsmotorens logg." },
-  { key: "challenge-completions", label: "Oppdrag fullført", description: "Fullførte oppdrag per bruker." },
-  { key: "quiz-attempts", label: "Quiz forsøk", description: "Resultater og svar fra quiz." },
+  {
+    key: "actor-sources",
+    label: "Aktørkilder",
+    description: "Kilder og referanser per aktør.",
+    group: "actors",
+  },
+  {
+    key: "challenges",
+    label: "Oppdrag",
+    description: "Oppdragene i appen (poeng og kategori).",
+    group: "tasks",
+  },
+  {
+    key: "challenge-completions",
+    label: "Oppdrag fullført",
+    description: "Fullførte oppdrag per bruker.",
+    group: "tasks",
+  },
+  {
+    key: "quiz-questions",
+    label: "Quizspørsmål",
+    description: "Spørsmål og rekkefølge.",
+    group: "quiz",
+  },
+  {
+    key: "quiz-options",
+    label: "Quizalternativer",
+    description: "Svaralternativer for hvert spørsmål.",
+    group: "quiz",
+  },
+  {
+    key: "quiz-results",
+    label: "Quizresultater",
+    description: "Resultatnivåer og tips.",
+    group: "quiz",
+  },
+  {
+    key: "quiz-attempts",
+    label: "Quiz forsøk",
+    description: "Resultater og svar fra quiz.",
+    group: "quiz",
+  },
+  {
+    key: "facts",
+    label: "Fakta (kort)",
+    description: "Kortfakta-kort på /fakta.",
+    group: "facts",
+  },
+  {
+    key: "detailed-facts",
+    label: "Fakta (detalj)",
+    description: "Detaljseksjoner på /fakta.",
+    group: "facts",
+  },
+  {
+    key: "detailed-fact-sources",
+    label: "Faktakilder",
+    description: "Kilder for detaljfakta.",
+    group: "facts",
+  },
+  {
+    key: "repair-estimates",
+    label: "Reparasjonsdata",
+    description: "Kostnad og CO2 for kalkulatoren.",
+    group: "co2e",
+  },
+  {
+    key: "co2e-sources",
+    label: "CO2e-kilder",
+    description: "Kilder brukt i beslutningsmotoren.",
+    group: "co2e",
+  },
+  {
+    key: "co2e-source-items",
+    label: "CO2e-kildekoblinger",
+    description: "Koblinger mellom CO2e-kilder og itemType.",
+    group: "co2e",
+  },
+  {
+    key: "users",
+    label: "Brukere",
+    description: "Brukere og roller fra Neon Auth.",
+    group: "users",
+  },
+  {
+    key: "user-profiles",
+    label: "Brukerprofiler",
+    description: "Poeng, streaks og status per bruker.",
+    group: "users",
+  },
+  {
+    key: "user-actions",
+    label: "Brukerhandlinger",
+    description: "Handlinger og poenglogg.",
+    group: "users",
+  },
+  {
+    key: "decisions",
+    label: "Beslutninger",
+    description: "Beslutningsmotorens logg.",
+    group: "users",
+  },
 ]
 
 export const adminResourceDefaults: Record<string, object> = {
@@ -191,6 +320,3 @@ export const adminResourceDefaults: Record<string, object> = {
     answers: {},
   },
 }
-
-
-

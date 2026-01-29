@@ -1,9 +1,10 @@
 ﻿import Link from "next/link"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { adminResources } from "@/lib/admin/resources"
+import { adminResourceGroups, adminResources } from "@/lib/admin/resources"
 import { PendingActorsPanel } from "@/components/admin/pending-actors"
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default async function AdminPage() {
   const { dbUser } = await requireAdmin()
@@ -87,6 +88,15 @@ export default async function AdminPage() {
     { label: "Fakta", value: factCount },
   ]
 
+  const resourceGroups = adminResourceGroups
+    .map((group) => ({
+      ...group,
+      resources: adminResources
+        .filter((resource) => resource.group === group.key)
+        .sort((left, right) => left.label.localeCompare(right.label, "no")),
+    }))
+    .filter((group) => group.resources.length > 0)
+
   return (
     <div className="space-y-8">
       <div>
@@ -112,15 +122,22 @@ export default async function AdminPage() {
         <p className="text-muted-foreground">Detaljert redigering per ressurs.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {adminResources.map((resource) => (
-          <Link key={resource.key} href={`/admin/${resource.key}`}>
-            <Card className="h-full transition hover:shadow-md">
-              <CardHeader>
-                <CardTitle>{resource.label}</CardTitle>
-                {resource.description && <CardDescription>{resource.description}</CardDescription>}
-              </CardHeader>
-            </Card>
-          </Link>
+        {resourceGroups.map((group) => (
+          <Card key={group.key} className="h-full">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">{group.label}</CardTitle>
+              {group.description && <CardDescription>{group.description}</CardDescription>}
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+              {group.resources.map((resource) => (
+                <Badge key={resource.key} variant="secondary" asChild>
+                  <Link href={`/admin/${resource.key}`} title={resource.description ?? resource.label}>
+                    {resource.label}
+                  </Link>
+                </Badge>
+              ))}
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>
