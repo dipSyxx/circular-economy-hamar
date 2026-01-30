@@ -1,4 +1,5 @@
 import type { Actor, Challenge } from "@/lib/data";
+import { itemTypeLabels, problemTypeLabels } from "@/lib/enum-labels";
 
 export const site = {
   name: "SirkulærHamar",
@@ -248,22 +249,8 @@ export const profileCopy = {
     emptyDecisions: "Ingen beslutninger ennå.",
     emptyActions: "Ingen handlinger ennå.",
   },
-  itemLabels: {
-    phone: "Telefon",
-    laptop: "PC/Laptop",
-    clothing: "Klær",
-    other: "Annet",
-  },
-  problemLabels: {
-    screen: "Skjerm",
-    battery: "Batteri",
-    slow: "Treg",
-    no_power: "Starter ikke",
-    water: "Vannskade",
-    zipper: "Glidelås",
-    seam: "Søm",
-    other: "Annet",
-  },
+  itemLabels: itemTypeLabels,
+  problemLabels: problemTypeLabels,
   recommendationLabels: {
     repair: "Reparer",
     buy_used: "Kjøp brukt",
@@ -471,6 +458,91 @@ export const mapCopy = {
   },
 };
 
+const decideProblemOptionsElectronics = [
+  { value: "screen", label: "Knust skjerm" },
+  { value: "battery", label: "Dårlig batteri" },
+  { value: "slow", label: "Treg ytelse" },
+  { value: "no_power", label: "Starter ikke" },
+  { value: "overheating", label: "Overoppheting" },
+  { value: "charging_port", label: "Ladeport fungerer ikke" },
+  { value: "speaker", label: "Lyd fungerer ikke" },
+  { value: "microphone", label: "Mikrofon fungerer ikke" },
+  { value: "camera", label: "Kamera fungerer ikke" },
+  { value: "keyboard", label: "Tastatur fungerer ikke" },
+  { value: "trackpad", label: "Styreflate fungerer ikke" },
+  { value: "storage", label: "Lagring/minne" },
+  { value: "software", label: "Programvare/oppdatering" },
+  { value: "connectivity", label: "Tilkobling" },
+  { value: "water", label: "Vannskade" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsDisplay = [
+  { value: "screen", label: "Skjermproblem" },
+  { value: "no_power", label: "Starter ikke" },
+  { value: "connectivity", label: "Tilkobling" },
+  { value: "speaker", label: "Lyd fungerer ikke" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsPrinter = [
+  { value: "no_power", label: "Starter ikke" },
+  { value: "connectivity", label: "Tilkobling" },
+  { value: "software", label: "Programvare/driver" },
+  { value: "broken_part", label: "Ødelagt del" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsAudio = [
+  { value: "battery", label: "Dårlig batteri" },
+  { value: "charging_port", label: "Ladeport" },
+  { value: "speaker", label: "Lyd fungerer ikke" },
+  { value: "microphone", label: "Mikrofon fungerer ikke" },
+  { value: "connectivity", label: "Tilkobling" },
+  { value: "water", label: "Vannskade" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsAppliance = [
+  { value: "no_power", label: "Starter ikke" },
+  { value: "leak", label: "Lekkasjer" },
+  { value: "noise", label: "Unormal støy" },
+  { value: "motor", label: "Motor/kompressor" },
+  { value: "broken_part", label: "Ødelagt del" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsBike = [
+  { value: "chain", label: "Kjede" },
+  { value: "brake", label: "Bremser" },
+  { value: "tire", label: "Dekk" },
+  { value: "wheel", label: "Hjul" },
+  { value: "broken_part", label: "Ødelagt del" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsFurniture = [
+  { value: "broken_part", label: "Ødelagt del" },
+  { value: "cosmetic", label: "Skade/riper" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsClothing = [
+  { value: "zipper", label: "Ødelagt glidelås" },
+  { value: "seam", label: "Revet søm" },
+  { value: "tear", label: "Rift/hull" },
+  { value: "stain", label: "Flekker" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsFootwear = [
+  { value: "sole", label: "Såle" },
+  { value: "seam", label: "Revet søm" },
+  { value: "tear", label: "Rift/hull" },
+  { value: "stain", label: "Flekker" },
+  { value: "other", label: "Annet" },
+];
+
 export const decideCopy = {
   stepLabel: "Steg",
   nextLabel: "Neste",
@@ -487,31 +559,41 @@ export const decideCopy = {
   itemOptions: [
     { value: "phone", label: "Telefon" },
     { value: "laptop", label: "PC/Laptop" },
+    { value: "tablet", label: "Nettbrett" },
+    { value: "desktop", label: "Stasjonær PC" },
+    { value: "smartwatch", label: "Smartklokke" },
+    { value: "tv", label: "TV" },
+    { value: "monitor", label: "Skjerm/Monitor" },
+    { value: "printer", label: "Skriver" },
+    { value: "camera", label: "Kamera" },
+    { value: "gaming_console", label: "Spillkonsoll" },
+    { value: "audio", label: "Lydutstyr" },
+    { value: "small_appliance", label: "Småapparat" },
+    { value: "large_appliance", label: "Hvitevare" },
+    { value: "bicycle", label: "Sykkel" },
+    { value: "furniture", label: "Møbel" },
     { value: "clothing", label: "Klær" },
+    { value: "footwear", label: "Sko" },
     { value: "other", label: "Annet" },
   ],
   problemOptions: {
-    phone: [
-      { value: "screen", label: "Knust skjerm" },
-      { value: "battery", label: "Dårlig batteri" },
-      { value: "slow", label: "Treg ytelse" },
-      { value: "no_power", label: "Starter ikke" },
-      { value: "water", label: "Vannskade" },
-      { value: "other", label: "Annet" },
-    ],
-    laptop: [
-      { value: "screen", label: "Knust skjerm" },
-      { value: "battery", label: "Dårlig batteri" },
-      { value: "slow", label: "Treg ytelse" },
-      { value: "no_power", label: "Starter ikke" },
-      { value: "water", label: "Vannskade" },
-      { value: "other", label: "Annet" },
-    ],
-    clothing: [
-      { value: "zipper", label: "Ødelagt glidelås" },
-      { value: "seam", label: "Revet søm" },
-      { value: "other", label: "Annet" },
-    ],
+    phone: decideProblemOptionsElectronics,
+    laptop: decideProblemOptionsElectronics,
+    tablet: decideProblemOptionsElectronics,
+    desktop: decideProblemOptionsElectronics,
+    smartwatch: decideProblemOptionsElectronics,
+    tv: decideProblemOptionsDisplay,
+    monitor: decideProblemOptionsDisplay,
+    printer: decideProblemOptionsPrinter,
+    camera: decideProblemOptionsElectronics,
+    gaming_console: decideProblemOptionsElectronics,
+    audio: decideProblemOptionsAudio,
+    small_appliance: decideProblemOptionsAppliance,
+    large_appliance: decideProblemOptionsAppliance,
+    bicycle: decideProblemOptionsBike,
+    furniture: decideProblemOptionsFurniture,
+    clothing: decideProblemOptionsClothing,
+    footwear: decideProblemOptionsFootwear,
     other: [{ value: "other", label: "Annet" }],
   },
   priorityOptions: [

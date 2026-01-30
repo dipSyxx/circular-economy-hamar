@@ -18,6 +18,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AddressSearchInput } from "@/components/address-search-input"
 import { ImageUploadField } from "@/components/image-upload"
+import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
+import { SearchableSelect } from "@/components/ui/searchable-select"
+import { formatEnumLabel, formatItemTypeLabel, formatProblemTypeLabel } from "@/lib/enum-labels"
 
 type ResourceManagerProps = {
   resourceKey: string
@@ -60,8 +63,8 @@ const actorCategory = [
 
 const actorStatus = ["pending", "approved", "rejected", "archived"]
 const sourceType = ["website", "social", "google_reviews", "article", "map"]
-const itemType = ["phone", "laptop", "clothing", "other"]
-const problemType = ["screen", "battery", "slow", "no_power", "water", "zipper", "seam", "other"]
+const itemType = ITEM_TYPES
+const problemType = PROBLEM_TYPES
 const priority = ["save_money", "save_time", "save_impact", "balanced"]
 const recommendation = ["repair", "buy_used", "donate", "recycle"]
 const decisionStatus = ["feasible", "not_fully_feasible"]
@@ -70,7 +73,7 @@ const actionType = ["decision_complete", "go_call", "go_directions", "go_website
 const quizLevel = ["starter", "pa_vei", "gjenbrukshelt"]
 const userRole = ["user", "admin"]
 
-const enumOptionsByResource: Record<string, Record<string, string[]>> = {
+const enumOptionsByResource: Record<string, Record<string, ReadonlyArray<string>>> = {
   actors: {
     category: actorCategory,
     status: actorStatus,
@@ -126,12 +129,48 @@ const lookupConfigByField: Record<string, LookupConfig> = {
   sourceId: { resource: "co2e-sources", labelFields: ["title", "key"], searchFields: ["title", "key"] },
 }
 
-const formatEnumLabel = (value: string) => {
-  return value.replace(/_/g, " ").replace(/\b\w/g, (match) => match.toUpperCase())
-}
+const actorFormSections = [
+  {
+    title: "Grunninfo",
+    keys: ["name", "slug", "category", "description", "longDescription"],
+  },
+  {
+    title: "Kontakt og plassering",
+    keys: ["address", "lat", "lng", "phone", "email", "website", "instagram"],
+  },
+  {
+    title: "Bilde",
+    keys: ["image"],
+    layout: "stack",
+  },
+  {
+    title: "Detaljer og innhold",
+    keys: ["openingHours", "openingHoursOsm", "tags", "benefits", "howToUse"],
+  },
+  {
+    title: "Administrasjon",
+    keys: ["status", "reviewNote", "createdById", "reviewedById", "reviewedAt"],
+  },
+  {
+    title: "System",
+    keys: ["id", "createdAt", "updatedAt"],
+  },
+]
+
+const actorFieldOrder = actorFormSections.flatMap((section) => section.keys)
 
 const getEnumOptions = (resourceKey: string, field: string) => {
   return enumOptionsByResource[resourceKey]?.[field]
+}
+
+const formatEnumValue = (field: string, value: string) => {
+  if (field === "itemType" || field === "itemTypes") {
+    return formatItemTypeLabel(value)
+  }
+  if (field === "problemType" || field === "problemTypes") {
+    return formatProblemTypeLabel(value)
+  }
+  return formatEnumLabel(value)
 }
 
 const stripReadOnlyFields = (value: AdminRow, options?: { keepId?: boolean }) => {
@@ -277,6 +316,7 @@ const formatDisplay = (item: AdminRow) => {
 }
 
 const isLongTextField = (key: string, value: unknown) => {
+  if (key === "openingHoursOsm") return false
   if (typeof value === "string" && value.length > 120) return true
   return /description|content|explainability|howToUse|openingHours|benefits|tips|note|image/i.test(key)
 }
@@ -297,7 +337,7 @@ const formatFilterValue = (resourceKey: string, field: string, value: string | b
   if (value === null || value === undefined || value === "") return ""
   const enumOptions = getEnumOptions(resourceKey, field)
   if (enumOptions && typeof value === "string") {
-    return formatEnumLabel(value)
+    return formatEnumValue(field, value)
   }
   if (typeof value === "boolean") {
     return value ? "True" : "False"
@@ -425,12 +465,13 @@ function TagInput({ value, onChange, placeholder, disabled }: TagInputProps) {
 
 type MultiSelectProps = {
   value: string[]
-  options: string[]
+  options: ReadonlyArray<string>
+  getLabel?: (value: string) => string
   onChange: (value: string[]) => void
   disabled?: boolean
 }
 
-function MultiSelect({ value, options, onChange, disabled }: MultiSelectProps) {
+function MultiSelect({ value, options, getLabel, onChange, disabled }: MultiSelectProps) {
   const current = Array.isArray(value) ? value : []
 
   const toggle = (option: string, checked: boolean) => {
@@ -445,6 +486,7 @@ function MultiSelect({ value, options, onChange, disabled }: MultiSelectProps) {
     <div className="grid gap-2 sm:grid-cols-2">
       {options.map((option) => {
         const checked = current.includes(option)
+        const label = getLabel ? getLabel(option) : formatEnumLabel(option)
         return (
           <label
             key={option}
@@ -459,7 +501,7 @@ function MultiSelect({ value, options, onChange, disabled }: MultiSelectProps) {
               onCheckedChange={(next) => toggle(option, Boolean(next))}
               disabled={disabled}
             />
-            <span>{formatEnumLabel(option)}</span>
+            <span>{label}</span>
           </label>
         )
       })}
@@ -621,11 +663,22 @@ export function ResourceManager({
   }, [items, defaultPayload])
 
   const formKeys = useMemo(() => {
-    if (!columnKeys.length && defaultPayload) return Object.keys(defaultPayload)
-    const readOnly = columnKeys.filter((key) => READ_ONLY_FIELDS.has(key))
-    const editable = columnKeys.filter((key) => !READ_ONLY_FIELDS.has(key))
-    return [...editable, ...readOnly]
-  }, [columnKeys, defaultPayload])
+    let baseKeys: string[] = []
+    if (!columnKeys.length && defaultPayload) {
+      baseKeys = Object.keys(defaultPayload)
+    } else {
+      const readOnly = columnKeys.filter((key) => READ_ONLY_FIELDS.has(key))
+      const editable = columnKeys.filter((key) => !READ_ONLY_FIELDS.has(key))
+      baseKeys = [...editable, ...readOnly]
+    }
+
+    if (resourceKey !== "actors") {
+      return baseKeys
+    }
+
+    const remaining = baseKeys.filter((key) => !actorFieldOrder.includes(key))
+    return [...actorFieldOrder, ...remaining]
+  }, [columnKeys, defaultPayload, resourceKey])
 
   const fieldMeta = useMemo(() => {
     const meta: Record<string, FieldMeta> = {}
@@ -830,12 +883,12 @@ export function ResourceManager({
     const enumOptions = getEnumOptions(resourceKey, key)
     if (Array.isArray(value)) {
       if (enumOptions) {
-        return value.map((item) => formatEnumLabel(String(item))).join(", ")
+        return value.map((item) => formatEnumValue(key, String(item))).join(", ")
       }
       return value.map((item) => String(item)).join(", ")
     }
     if (enumOptions && typeof value === "string") {
-      return formatEnumLabel(value)
+      return formatEnumValue(key, value)
     }
     if (typeof value === "boolean") {
       return value ? "true" : "false"
@@ -945,6 +998,176 @@ export function ResourceManager({
   const clearAllFilters = () => {
     setQuery("")
     clearFilters()
+  }
+
+  const isActorResource = resourceKey === "actors"
+  const actorExtraKeys = isActorResource ? formKeys.filter((key) => !actorFieldOrder.includes(key)) : []
+
+  const renderField = (key: string) => {
+    const meta = fieldMeta[key] ?? { kind: "string" }
+    const value = draft[key]
+    const enumOptions = getEnumOptions(resourceKey, key)
+    const enumOptionItems = enumOptions
+      ? enumOptions.map((option) => ({
+          value: option,
+          label: formatEnumValue(key, option),
+          keywords: option,
+        }))
+      : []
+    const useSearchableSelect = Boolean(enumOptions && enumOptions.length > 8)
+    const lookupConfig = lookupConfigByField[key]
+    const isEditableId = allowIdOnCreate && mode === "create" && key === "id"
+    const isReadOnly = READ_ONLY_FIELDS.has(key) && !isEditableId
+    const isMultiline = meta.kind === "array" || meta.kind === "object" || isLongTextField(key, value)
+
+    const commonProps = {
+      id: key,
+      name: key,
+      disabled: isReadOnly,
+    }
+
+    return (
+      <div key={key} className={isMultiline ? "sm:col-span-2 lg:col-span-3" : ""}>
+        <Label htmlFor={key} className="text-sm">
+          {key}
+        </Label>
+        <div className="mt-2">
+          {lookupConfig ? (
+            <SearchSelect
+              value={typeof value === "string" ? value : null}
+              options={lookups[lookupConfig.resource] ?? []}
+              loading={lookupLoading && !(lookups[lookupConfig.resource] ?? []).length}
+              onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
+              disabled={isReadOnly}
+              getLabel={(item) => getLookupLabel(lookupConfig.resource, item)}
+              getSearchValue={(item) => getLookupSearchValue(lookupConfig.resource, item)}
+              placeholder={`Velg ${formatColumnLabel(key)}`}
+            />
+          ) : enumOptions && meta.kind !== "array" ? (
+            useSearchableSelect ? (
+              <SearchableSelect
+                value={typeof value === "string" ? value : NONE_VALUE}
+                onChange={(next) =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    [key]: next === NONE_VALUE ? null : next,
+                  }))
+                }
+                options={[
+                  { value: NONE_VALUE, label: "Ingen", keywords: "none" },
+                  ...enumOptionItems,
+                ]}
+                placeholder={`Velg ${formatColumnLabel(key)}`}
+                disabled={isReadOnly}
+              />
+            ) : (
+              <Select
+                value={typeof value === "string" ? value : NONE_VALUE}
+                onValueChange={(next) =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    [key]: next === NONE_VALUE ? null : next,
+                  }))
+                }
+                disabled={isReadOnly}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={`Velg ${key}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE_VALUE}>Ingen</SelectItem>
+                  {enumOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {formatEnumValue(key, option)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )
+          ) : enumOptions && meta.kind === "array" ? (
+            <MultiSelect
+              value={Array.isArray(value) ? value : []}
+              options={enumOptions}
+              getLabel={(option) => formatEnumValue(key, option)}
+              onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
+              disabled={isReadOnly}
+            />
+          ) : meta.kind === "boolean" ? (
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={Boolean(value)}
+                onCheckedChange={(checked) => {
+                  if (isReadOnly) return
+                  setDraft((prev) => ({ ...prev, [key]: checked }))
+                }}
+                disabled={isReadOnly}
+              />
+              <span className="text-xs text-muted-foreground">{Boolean(value) ? "true" : "false"}</span>
+            </div>
+          ) : meta.kind === "array" && meta.arrayItemKind === "string" ? (
+            <TagInput
+              value={Array.isArray(value) ? value : []}
+              onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
+              disabled={isReadOnly}
+              placeholder="Legg til og trykk Enter"
+            />
+          ) : key === "address" && meta.kind === "string" ? (
+            <AddressSearchInput
+              id={key}
+              name={key}
+              value={formatInputValue(value, meta) as string}
+              onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
+              onCoordinates={(coords) =>
+                setDraft((prev) => {
+                  const hasLat = Object.prototype.hasOwnProperty.call(prev, "lat")
+                  const hasLng = Object.prototype.hasOwnProperty.call(prev, "lng")
+                  if (!hasLat && !hasLng) return prev
+                  return {
+                    ...prev,
+                    ...(hasLat ? { lat: coords.lat } : {}),
+                    ...(hasLng ? { lng: coords.lng } : {}),
+                  }
+                })
+              }
+              disabled={isReadOnly}
+              placeholder="Søk adresse"
+            />
+          ) : key === "image" && meta.kind === "string" ? (
+            <ImageUploadField
+              id={key}
+              value={typeof value === "string" ? value : ""}
+              onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
+              disabled={isReadOnly}
+              folder={resourceKey}
+            />
+          ) : meta.kind === "object" || isMultiline ? (
+            <Textarea
+              {...commonProps}
+              value={formatInputValue(value, meta) as string}
+              onChange={(event) => setDraft((prev) => ({ ...prev, [key]: event.target.value }))}
+              className="min-h-[140px] font-mono text-xs"
+            />
+          ) : (
+            <Input
+              {...commonProps}
+              type={meta.kind === "number" ? "number" : "text"}
+              value={formatInputValue(value, meta) as string}
+              onChange={(event) =>
+                setDraft((prev) => ({
+                  ...prev,
+                  [key]:
+                    meta.kind === "number"
+                      ? event.target.value === ""
+                        ? null
+                        : Number(event.target.value)
+                      : event.target.value,
+                }))
+              }
+            />
+          )}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -1061,7 +1284,7 @@ export function ResourceManager({
                               <SelectItem value={NONE_VALUE}>Alle</SelectItem>
                               {options.map((option) => (
                                 <SelectItem key={option} value={option}>
-                                  {formatEnumLabel(option)}
+                                  {formatEnumValue(field, option)}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -1219,150 +1442,36 @@ export function ResourceManager({
             <DialogTitle>{mode === "create" ? `Ny ${label}` : `Rediger ${label}`}</DialogTitle>
             <DialogDescription>Oppdater feltene og lagre endringer.</DialogDescription>
           </DialogHeader>
-          <div className="grid max-h-[70vh] p-1 gap-4 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
-            {formKeys.map((key) => {
-              const meta = fieldMeta[key] ?? { kind: "string" }
-              const value = draft[key]
-              const enumOptions = getEnumOptions(resourceKey, key)
-              const lookupConfig = lookupConfigByField[key]
-              const isEditableId = allowIdOnCreate && mode === "create" && key === "id"
-              const isReadOnly = READ_ONLY_FIELDS.has(key) && !isEditableId
-              const isMultiline =
-                meta.kind === "array" || meta.kind === "object" || isLongTextField(key, value)
-
-              const commonProps = {
-                id: key,
-                name: key,
-                disabled: isReadOnly,
-              }
-
-              return (
-                <div key={key} className={isMultiline ? "sm:col-span-2 lg:col-span-3" : ""}>
-                  <Label htmlFor={key} className="text-sm">
-                    {key}
-                  </Label>
-                  <div className="mt-2">
-                    {lookupConfig ? (
-                      <SearchSelect
-                        value={typeof value === "string" ? value : null}
-                        options={lookups[lookupConfig.resource] ?? []}
-                        loading={lookupLoading && !(lookups[lookupConfig.resource] ?? []).length}
-                        onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
-                        disabled={isReadOnly}
-                        getLabel={(item) => getLookupLabel(lookupConfig.resource, item)}
-                        getSearchValue={(item) => getLookupSearchValue(lookupConfig.resource, item)}
-                        placeholder={`Velg ${formatColumnLabel(key)}`}
-                      />
-                    ) : enumOptions && meta.kind !== "array" ? (
-                      <Select
-                        value={typeof value === "string" ? value : NONE_VALUE}
-                        onValueChange={(next) =>
-                          setDraft((prev) => ({
-                            ...prev,
-                            [key]: next === NONE_VALUE ? null : next,
-                          }))
-                        }
-                        disabled={isReadOnly}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder={`Velg ${key}`} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={NONE_VALUE}>Ingen</SelectItem>
-                          {enumOptions.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {formatEnumLabel(option)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : enumOptions && meta.kind === "array" ? (
-                      <MultiSelect
-                        value={Array.isArray(value) ? value : []}
-                        options={enumOptions}
-                        onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
-                        disabled={isReadOnly}
-                      />
-                    ) : meta.kind === "boolean" ? (
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={Boolean(value)}
-                          onCheckedChange={(checked) => {
-                            if (isReadOnly) return
-                            setDraft((prev) => ({ ...prev, [key]: checked }))
-                          }}
-                          disabled={isReadOnly}
-                        />
-                        <span className="text-xs text-muted-foreground">
-                          {Boolean(value) ? "true" : "false"}
-                        </span>
-                      </div>
-                    ) : meta.kind === "array" && meta.arrayItemKind === "string" ? (
-                      <TagInput
-                        value={Array.isArray(value) ? value : []}
-                        onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
-                        disabled={isReadOnly}
-                        placeholder="Legg til og trykk Enter"
-                      />
-                    ) : key === "address" && meta.kind === "string" ? (
-                      <AddressSearchInput
-                        id={key}
-                        name={key}
-                        value={formatInputValue(value, meta) as string}
-                        onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
-                        onCoordinates={(coords) =>
-                          setDraft((prev) => {
-                            const hasLat = Object.prototype.hasOwnProperty.call(prev, "lat")
-                            const hasLng = Object.prototype.hasOwnProperty.call(prev, "lng")
-                            if (!hasLat && !hasLng) return prev
-                            return {
-                              ...prev,
-                              ...(hasLat ? { lat: coords.lat } : {}),
-                              ...(hasLng ? { lng: coords.lng } : {}),
-                            }
-                          })
-                        }
-                        disabled={isReadOnly}
-                        placeholder="Søk adresse"
-                      />
-                    ) : key === "image" && meta.kind === "string" ? (
-                      <ImageUploadField
-                        id={key}
-                        value={typeof value === "string" ? value : ""}
-                        onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
-                        disabled={isReadOnly}
-                        folder={resourceKey}
-                      />
-                    ) : meta.kind === "object" || isMultiline ? (
-                      <Textarea
-                        {...commonProps}
-                        value={formatInputValue(value, meta) as string}
-                        onChange={(event) => setDraft((prev) => ({ ...prev, [key]: event.target.value }))}
-                        className="min-h-[140px] font-mono text-xs"
-                      />
-                    ) : (
-                      <Input
-                        {...commonProps}
-                        type={meta.kind === "number" ? "number" : "text"}
-                        value={formatInputValue(value, meta) as string}
-                        onChange={(event) =>
-                          setDraft((prev) => ({
-                            ...prev,
-                            [key]:
-                              meta.kind === "number"
-                                ? event.target.value === ""
-                                  ? null
-                                  : Number(event.target.value)
-                                : event.target.value,
-                          }))
-                        }
-                      />
-                    )}
+          {isActorResource ? (
+            <div className="grid max-h-[70vh] gap-6 overflow-y-auto p-1 pr-1">
+              {actorFormSections.map((section) => {
+                const keys = section.keys.filter((key) => formKeys.includes(key))
+                if (!keys.length) return null
+                const gridClassName =
+                  section.layout === "stack"
+                    ? "mt-3 grid gap-4"
+                    : "mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                return (
+                  <div key={section.title}>
+                    <p className="text-sm font-semibold">{section.title}</p>
+                    <div className={gridClassName}>{keys.map((key) => renderField(key))}</div>
+                  </div>
+                )
+              })}
+              {actorExtraKeys.length > 0 && (
+                <div>
+                  <p className="text-sm font-semibold">Andre felt</p>
+                  <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {actorExtraKeys.map((key) => renderField(key))}
                   </div>
                 </div>
-              )
-            })}
-          </div>
+              )}
+            </div>
+          ) : (
+            <div className="grid max-h-[70vh] p-1 gap-4 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
+              {formKeys.map((key) => renderField(key))}
+            </div>
+          )}
           <DialogFooter>
             <Button variant="ghost" onClick={() => setDialogOpen(false)}>
               Avbryt

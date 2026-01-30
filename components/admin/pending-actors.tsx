@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { actorCopy } from "@/content/no"
+import { formatEnumLabel, formatItemTypeLabel, formatProblemTypeLabel } from "@/lib/enum-labels"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -83,9 +84,6 @@ const formatOwner = (actor: PendingActor) => {
   if (!actor.createdBy) return "Ukjent bruker"
   return actor.createdBy.name || actor.createdBy.email || "Ukjent bruker"
 }
-
-const formatEnumLabel = (value: string) =>
-  value.replace(/_/g, " ").replace(/\b\w/g, (match) => match.toUpperCase())
 
 const categoryLabels = actorCopy.categoryLabels as Record<string, string>
 const formatCategory = (value: string) => categoryLabels[value] ?? formatEnumLabel(value)
@@ -394,13 +392,13 @@ export function PendingActorsPanel({ initialActors, reviewerId }: PendingActorsP
                     selectedActor.repairServices.map((service) => (
                       <div key={service.id} className="rounded-lg border p-3 space-y-2">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <p className="text-sm font-medium">{formatEnumLabel(service.problemType)}</p>
+                          <p className="text-sm font-medium">{formatProblemTypeLabel(service.problemType)}</p>
                           <Badge variant="outline">
                             {service.priceMin}–{service.priceMax} kr
                           </Badge>
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          Varetyper: {service.itemTypes.map(formatEnumLabel).join(", ")}
+                          Varetyper: {service.itemTypes.map(formatItemTypeLabel).join(", ")}
                         </div>
                         {service.etaDays !== null && (
                           <div className="text-xs text-muted-foreground">Estimert tid: {service.etaDays} dager</div>

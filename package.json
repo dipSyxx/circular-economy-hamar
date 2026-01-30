@@ -6,6 +6,7 @@
     "postinstall": "prisma generate",
     "build": "next build",
     "dev": "next dev",
+    "generate:prisma-enums": "node scripts/generate-prisma-enums.js",
     "lint": "eslint .",
     "start": "next start",
     "seed": "prisma db seed"

@@ -16,6 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { AddressSearchInput } from "@/components/address-search-input"
 import { ImageUploadField } from "@/components/image-upload"
+import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
+import { SearchableSelect } from "@/components/ui/searchable-select"
+import { formatEnumLabel, formatItemTypeLabel, formatProblemTypeLabel } from "@/lib/enum-labels"
 
 export type ActorDraft = {
   name: string
@@ -91,8 +94,8 @@ const categoryLabels: Record<string, string> = {
   baerekraftig_mat: "Bærekraftig mat",
 }
 
-const problemTypes = ["screen", "battery", "slow", "no_power", "water", "zipper", "seam", "other"]
-const itemTypes = ["phone", "laptop", "clothing", "other"]
+const problemTypes = PROBLEM_TYPES
+const itemTypes = ITEM_TYPES
 const sourceTypes = ["website", "social", "google_reviews", "article", "map"]
 
 const sourceTypeLabels: Record<string, string> = {
@@ -102,8 +105,6 @@ const sourceTypeLabels: Record<string, string> = {
   article: "Artikkel",
   map: "Kart",
 }
-
-const formatEnumLabel = (value: string) => value.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase())
 
 const slugify = (value: string) =>
   value
@@ -219,11 +220,12 @@ function TagInput({ value, onChange, placeholder }: TagInputProps) {
 
 type MultiSelectProps = {
   value: string[]
-  options: string[]
+  options: ReadonlyArray<string>
+  getLabel?: (value: string) => string
   onChange: (value: string[]) => void
 }
 
-function MultiSelect({ value, options, onChange }: MultiSelectProps) {
+function MultiSelect({ value, options, getLabel, onChange }: MultiSelectProps) {
   const current = Array.isArray(value) ? value : []
 
   const toggle = (option: string, checked: boolean) => {
@@ -238,6 +240,7 @@ function MultiSelect({ value, options, onChange }: MultiSelectProps) {
     <div className="grid gap-2 sm:grid-cols-2">
       {options.map((option) => {
         const checked = current.includes(option)
+        const label = getLabel ? getLabel(option) : formatEnumLabel(option)
         return (
           <label
             key={option}
@@ -247,7 +250,7 @@ function MultiSelect({ value, options, onChange }: MultiSelectProps) {
             )}
           >
             <Checkbox checked={checked} onCheckedChange={(next) => toggle(option, Boolean(next))} />
-            <span>{formatEnumLabel(option)}</span>
+            <span>{label}</span>
           </label>
         )
       })}
@@ -694,25 +697,22 @@ export function ActorSubmissionForm({
                     </div>
                     <div>
                       <Label>Problemtype</Label>
-                      <Select
-                        value={service.problemType}
-                        onValueChange={(value) =>
-                          setRepairServices((prev) =>
-                            prev.map((item, idx) => (idx === index ? { ...item, problemType: value } : item)),
-                          )
-                        }
-                      >
-                        <SelectTrigger className="mt-1 w-full">
-                          <SelectValue placeholder="Velg problemtype" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {problemTypes.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {formatEnumLabel(option)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="mt-1">
+                        <SearchableSelect
+                          value={service.problemType}
+                          onChange={(value) =>
+                            setRepairServices((prev) =>
+                              prev.map((item, idx) => (idx === index ? { ...item, problemType: value } : item)),
+                            )
+                          }
+                          placeholder="Velg problemtype"
+                          options={problemTypes.map((option) => ({
+                            value: option,
+                            label: formatProblemTypeLabel(option),
+                            keywords: option,
+                          }))}
+                        />
+                      </div>
                     </div>
                     <div>
                       <Label>Produktkategorier</Label>
@@ -720,6 +720,7 @@ export function ActorSubmissionForm({
                         <MultiSelect
                           value={service.itemTypes}
                           options={itemTypes}
+                          getLabel={formatItemTypeLabel}
                           onChange={(value) =>
                             setRepairServices((prev) =>
                               prev.map((item, idx) => (idx === index ? { ...item, itemTypes: value } : item)),

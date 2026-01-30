@@ -1,5 +1,6 @@
-export type ItemType = "phone" | "laptop" | "clothing" | "other"
-export type ProblemType = "screen" | "battery" | "slow" | "no_power" | "water" | "zipper" | "seam" | "other"
+import type { ItemType, ProblemType } from "@/lib/prisma-enums"
+
+export type { ItemType, ProblemType } from "@/lib/prisma-enums"
 export type Priority = "save_money" | "save_time" | "save_impact" | "balanced"
 export type Recommendation = "repair" | "buy_used" | "donate" | "recycle"
 export type ReasonKey =
@@ -79,7 +80,21 @@ type Co2Range = { min: number; max: number }
 const embodiedCo2eKg: Record<ItemType, Co2Range> = {
   phone: { min: 48, max: 60 },
   laptop: { min: 250, max: 350 },
+  tablet: { min: 70, max: 120 },
+  desktop: { min: 300, max: 600 },
+  smartwatch: { min: 15, max: 30 },
+  tv: { min: 200, max: 500 },
+  monitor: { min: 150, max: 300 },
+  printer: { min: 80, max: 200 },
+  camera: { min: 50, max: 150 },
+  gaming_console: { min: 80, max: 200 },
+  audio: { min: 20, max: 80 },
+  small_appliance: { min: 30, max: 120 },
+  large_appliance: { min: 200, max: 800 },
+  bicycle: { min: 80, max: 200 },
+  furniture: { min: 40, max: 200 },
   clothing: { min: 2, max: 33 },
+  footwear: { min: 5, max: 25 },
   other: { min: 40, max: 120 },
 }
 
@@ -133,6 +148,18 @@ const policyBias: Record<Recommendation, number> = {
   recycle: -0.04,
 }
 
+const genericDecisionData: Partial<Record<ProblemType, DecisionDataEntry>> = {
+  other: {
+    repairCostMin: 500,
+    repairCostMax: 1500,
+    repairDays: 3,
+    usedPriceMin: 1500,
+    usedPriceMax: 4000,
+    newPrice: 7000,
+    risk: 0.2,
+  },
+}
+
 const decisionData: DecisionData = {
   phone: {
     screen: { repairCostMin: 800, repairCostMax: 2000, repairDays: 1, usedPriceMin: 2000, usedPriceMax: 5000, newPrice: 8000, risk: 0.1 },
@@ -150,14 +177,26 @@ const decisionData: DecisionData = {
     water: { repairCostMin: 2500, repairCostMax: 6000, repairDays: 5, usedPriceMin: 3000, usedPriceMax: 8000, newPrice: 12000, risk: 0.4 },
     other: { repairCostMin: 1200, repairCostMax: 3000, repairDays: 3, usedPriceMin: 3000, usedPriceMax: 8000, newPrice: 12000, risk: 0.2 },
   },
+  tablet: genericDecisionData,
+  desktop: genericDecisionData,
+  smartwatch: genericDecisionData,
+  tv: genericDecisionData,
+  monitor: genericDecisionData,
+  printer: genericDecisionData,
+  camera: genericDecisionData,
+  gaming_console: genericDecisionData,
+  audio: genericDecisionData,
+  small_appliance: genericDecisionData,
+  large_appliance: genericDecisionData,
+  bicycle: genericDecisionData,
+  furniture: genericDecisionData,
   clothing: {
     zipper: { repairCostMin: 100, repairCostMax: 300, repairDays: 3, usedPriceMin: 100, usedPriceMax: 500, newPrice: 800, risk: 0.05 },
     seam: { repairCostMin: 50, repairCostMax: 200, repairDays: 2, usedPriceMin: 100, usedPriceMax: 500, newPrice: 800, risk: 0.05 },
     other: { repairCostMin: 150, repairCostMax: 400, repairDays: 3, usedPriceMin: 150, usedPriceMax: 600, newPrice: 900, risk: 0.1 },
   },
-  other: {
-    other: { repairCostMin: 500, repairCostMax: 1500, repairDays: 3, usedPriceMin: 1500, usedPriceMax: 4000, newPrice: 7000, risk: 0.2 },
-  },
+  footwear: genericDecisionData,
+  other: genericDecisionData,
 }
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
