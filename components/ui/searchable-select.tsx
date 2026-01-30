@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type WheelEvent } from "react"
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -33,6 +33,13 @@ export function SearchableSelect({
   const [open, setOpen] = useState(false)
   const selected = options.find((option) => option.value === value)
   const displayLabel = selected?.label ?? ""
+  const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
+    const target = event.currentTarget
+    if (target.scrollHeight <= target.clientHeight) return
+    target.scrollTop += event.deltaY
+    event.preventDefault()
+    event.stopPropagation()
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -53,7 +60,7 @@ export function SearchableSelect({
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command>
           <CommandInput placeholder="Søk..." />
-          <CommandList>
+          <CommandList className="max-h-64 overflow-y-auto overscroll-contain" onWheel={handleWheel}>
             <CommandEmpty>{emptyLabel}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => {
