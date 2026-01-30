@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { decideCopy, pageCopy } from "@/content/no"
-import { evaluateDecision, type DecisionInput, type ItemType, type ProblemType, type Priority } from "@/lib/decision-engine"
+import {
+  evaluateDecision,
+  type DecisionInput,
+  type ItemType,
+  type ProblemType,
+  type Priority,
+  type Recommendation,
+} from "@/lib/decision-engine"
 import type { Actor, Co2eSource, Co2eSourceItem } from "@/lib/data"
 import { formatTime, getOpeningStatus } from "@/lib/opening-hours"
 import { recordAction, recordDecision } from "@/lib/profile-store"
@@ -43,6 +50,198 @@ const matchReasonLabels: Record<MatchReason, string> = {
 }
 
 const formatScore = (value: number) => (Number.isFinite(value) ? value.toFixed(1) : "-")
+
+const donateTagHints = ["ombruk", "gjenbruk", "donasjon", "doner", "innlevering", "brukt", "second hand", "secondhand"]
+const buyUsedTagHints = ["ombruk", "gjenbruk", "brukt", "second hand", "secondhand"]
+const recycleTagHints = ["gjenvinning", "e-avfall", "avfall", "resirk", "sortering"]
+
+const repairCategories = new Set(["reparasjon", "reparasjon_sko_klar", "mobelreparasjon", "sykkelverksted", "ombruksverksted"])
+const buyUsedCategories = new Set(["brukt", "utleie"])
+const donateCategories = new Set(["mottak_ombruk", "ombruksverksted", "brukt"])
+const recycleCategories = new Set(["gjenvinning"])
+
+const categoryWeightsByRecommendation: Record<Recommendation, Record<string, number>> = {
+  repair: {
+    reparasjon: 1.6,
+    reparasjon_sko_klar: 1.4,
+    mobelreparasjon: 1.2,
+    sykkelverksted: 1.2,
+    ombruksverksted: 1.0,
+  },
+  buy_used: {
+    brukt: 1.4,
+    utleie: 0.8,
+    ombruksverksted: 0.5,
+  },
+  donate: {
+    mottak_ombruk: 1.8,
+    ombruksverksted: 1.2,
+    brukt: 0.6,
+  },
+  recycle: {
+    gjenvinning: 1.8,
+  },
+}
+
+const hasTagMatch = (tags: string[], hints: string[]) => {
+  if (!tags.length) return false
+  const normalized = tags.map((tag) => tag.trim().toLowerCase()).filter(Boolean)
+  return normalized.some((tag) => hints.some((hint) => tag.includes(hint)))
+}
+
+const getDistanceScore = (distanceKm: number | null) => {
+  if (distanceKm === null) return 0
+  const normalized = distanceKm / 5
+  return 1 / (1 + normalized)
+}
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
+
+const getRangeOverlapScore = (minA: number, maxA: number, minB: number, maxB: number) => {
+  const overlap = Math.max(0, Math.min(maxA, maxB) - Math.max(minA, minB))
+  const span = Math.max(maxA, maxB) - Math.min(minA, minB)
+  if (span <= 0) return 0
+  return overlap / span
+}
+
+const getPriceAlignmentScore = (
+  priceMin: number,
+  priceMax: number,
+  targetMin: number,
+  targetMax: number,
+) => {
+  const overlap = getRangeOverlapScore(priceMin, priceMax, targetMin, targetMax)
+  const median = (priceMin + priceMax) / 2
+  const targetMedian = (targetMin + targetMax) / 2
+  const tolerance = Math.max(300, targetMedian * 0.6)
+  const medianScore = clamp(1 - Math.abs(median - targetMedian) / tolerance, 0, 1)
+  return overlap * 0.6 + medianScore * 0.4
+}
+
+const getTimeAlignmentScore = (etaDays: number | null | undefined, targetDays: number | null | undefined) => {
+  if (!etaDays || !targetDays) return 0
+  const tolerance = Math.max(1, targetDays)
+  return clamp(1 - Math.abs(etaDays - targetDays) / tolerance, 0, 1)
+}
+
+const getServiceMatchQuality = (
+  service: { problemType: ProblemType; itemTypes?: ItemType[] | null },
+  problemType: ProblemType,
+  itemType: ItemType | null,
+) => {
+  if (service.problemType !== problemType) return 0
+  const items = service.itemTypes ?? []
+  if (!items.length) return 0.7
+  if (!itemType) return 0.6
+  return items.includes(itemType) ? 1 : 0.3
+}
+
+const getBudgetFitScore = (priceMin: number, priceMax: number, budget: number) => {
+  if (budget >= priceMax) return 1
+  if (budget >= priceMin) return 0.4
+  return -0.8
+}
+
+const getEtaFitScore = (etaDays: number | null | undefined, timeDays: number) => {
+  if (!etaDays) return 0
+  if (timeDays >= etaDays) return 0.6
+  if (timeDays >= etaDays / 2) return -0.2
+  return -0.6
+}
+
+type ScoreWeights = {
+  open: number
+  closed: number
+  distance: number
+  serviceMatch: number
+  timeFit: number
+  budgetFit: number
+  budgetShort: number
+  tagBoost: number
+  categoryBoost: number
+}
+
+const getScoreWeights = (recommendation: Recommendation): ScoreWeights => {
+  const base: ScoreWeights = {
+    open: 0,
+    closed: 0,
+    distance: 0,
+    serviceMatch: 0,
+    timeFit: 0,
+    budgetFit: 0,
+    budgetShort: 0,
+    tagBoost: 0,
+    categoryBoost: 0,
+  }
+
+  switch (recommendation) {
+    case "repair":
+      return {
+        ...base,
+        open: 2.2,
+        closed: -1,
+        distance: 1.6,
+        serviceMatch: 3.6,
+        timeFit: 0.9,
+        budgetFit: 1.2,
+        budgetShort: -1,
+      }
+    case "buy_used":
+      return {
+        ...base,
+        open: 1.6,
+        closed: -0.7,
+        distance: 1.5,
+        tagBoost: 1.0,
+        categoryBoost: 1.0,
+      }
+    case "donate":
+      return {
+        ...base,
+        open: 1.5,
+        closed: -0.7,
+        distance: 1.4,
+        tagBoost: 1.2,
+        categoryBoost: 1.2,
+      }
+    case "recycle":
+      return {
+        ...base,
+        open: 1.3,
+        closed: -0.7,
+        distance: 1.7,
+        tagBoost: 1.1,
+        categoryBoost: 1.4,
+      }
+  }
+}
+
+const adjustWeightsForPriority = (weights: ScoreWeights, priority?: Priority) => {
+  if (!priority) return weights
+  switch (priority) {
+    case "save_time":
+      return {
+        ...weights,
+        distance: weights.distance * 1.3,
+        timeFit: weights.timeFit * 1.5,
+      }
+    case "save_money":
+      return {
+        ...weights,
+        budgetFit: weights.budgetFit * 1.5,
+        budgetShort: weights.budgetShort * 1.2,
+      }
+    case "save_impact":
+      return {
+        ...weights,
+        open: weights.open * 0.9,
+        distance: weights.distance * 0.9,
+      }
+    case "balanced":
+    default:
+      return weights
+  }
+}
 
 interface DecisionWizardProps {
   actors: Actor[]
@@ -85,49 +284,93 @@ export function DecisionWizard({ actors, co2eSources, co2eSourceItems }: Decisio
 
   const matchedActors = useMemo(() => {
     if (!decision) return []
+    const recommendationOption =
+      decision.options.find((option) => option.type === decision.recommendation) ?? decision.options[0]
     let baseList = actors
     if (decision.recommendation === "repair") {
-      baseList = actors.filter((actor) => actor.category === "reparasjon")
-      if (problemType) {
-        const covered = baseList.filter((actor) =>
-          actor.repairServices?.some(
-            (service) =>
-              service.problemType === problemType && (!service.itemTypes || (itemType && service.itemTypes.includes(itemType))),
-          ),
-        )
-        if (covered.length > 0) {
-          baseList = covered
-        }
-      }
+      baseList = actors.filter((actor) => repairCategories.has(actor.category))
     } else if (decision.recommendation === "buy_used") {
-      baseList = actors.filter((actor) => actor.category === "brukt")
+      baseList = actors.filter(
+        (actor) => buyUsedCategories.has(actor.category) || hasTagMatch(actor.tags, buyUsedTagHints),
+      )
     } else if (decision.recommendation === "donate") {
-      const ombrukActors = actors.filter((actor) => actor.tags.includes("ombruk"))
-      baseList = ombrukActors.length ? ombrukActors : actors.filter((actor) => actor.category === "brukt")
+      baseList = actors.filter(
+        (actor) => donateCategories.has(actor.category) || hasTagMatch(actor.tags, donateTagHints),
+      )
     } else {
-      baseList = actors.filter((actor) => actor.category === "gjenvinning")
+      baseList = actors.filter(
+        (actor) => recycleCategories.has(actor.category) || hasTagMatch(actor.tags, recycleTagHints),
+      )
     }
 
     const scored = baseList.map((actor) => {
       const hasCoords = !(actor.lat === 0 && actor.lng === 0)
       const distanceKm = userLocation && hasCoords ? getDistanceKm(userLocation, [actor.lat, actor.lng]) : null
-      const openStatus = getOpeningStatus(actor.openingHoursOsm)
-      const serviceMatch =
-        decision.recommendation === "repair" && problemType
-          ? actor.repairServices?.find(
-              (service) =>
-                service.problemType === problemType &&
-                (!service.itemTypes || (itemType && service.itemTypes.includes(itemType))),
-            ) ?? null
-          : null
+      const openStatus = getOpeningStatus(actor.openingHoursOsm ?? undefined)
+      const weights = adjustWeightsForPriority(getScoreWeights(decision.recommendation), priority)
+      const distanceScore = getDistanceScore(distanceKm)
+      const donateTagMatch = hasTagMatch(actor.tags, donateTagHints)
+      const buyUsedTagMatch = hasTagMatch(actor.tags, buyUsedTagHints)
+      const recycleTagMatch = hasTagMatch(actor.tags, recycleTagHints)
+      const categoryWeight = categoryWeightsByRecommendation[decision.recommendation][actor.category] ?? 0
+      let serviceMatch: NonNullable<Actor["repairServices"]>[number] | null = null
+      let serviceMatchQuality = 0
+      if (decision.recommendation === "repair" && problemType) {
+        for (const service of actor.repairServices ?? []) {
+          const quality = getServiceMatchQuality(service, problemType, itemType)
+          if (quality > serviceMatchQuality) {
+            serviceMatchQuality = quality
+            serviceMatch = service
+          }
+        }
+      }
       let score = 0
-      if (openStatus.state === "open") score += 3
-      if (openStatus.state === "closed") score -= 1
-      if (distanceKm !== null) score += Math.max(0, 10 - distanceKm) / 10
-      if (serviceMatch) score += 1.5
-      if (serviceMatch?.etaDays && timeDays >= serviceMatch.etaDays) score += 0.3
-      if (serviceMatch && budget >= serviceMatch.priceMax) score += 0.5
-      if (serviceMatch && budget < serviceMatch.priceMin) score -= 0.5
+      if (openStatus.state === "open") score += weights.open
+      if (openStatus.state === "closed") score += weights.closed
+      if (distanceKm !== null) score += distanceScore * weights.distance
+      if (distanceKm === null) score -= 0.2
+
+      if (decision.recommendation === "repair") {
+        if (serviceMatchQuality > 0) {
+          score += weights.serviceMatch * serviceMatchQuality
+        } else {
+          score -= weights.serviceMatch * 0.6
+        }
+        if (serviceMatch) {
+          score += getEtaFitScore(serviceMatch.etaDays, timeDays) * weights.timeFit
+          score += getBudgetFitScore(serviceMatch.priceMin, serviceMatch.priceMax, budget) * weights.budgetFit
+          if (recommendationOption && recommendationOption.type === "repair") {
+            const priceAlignment = getPriceAlignmentScore(
+              serviceMatch.priceMin,
+              serviceMatch.priceMax,
+              recommendationOption.expectedCostMin,
+              recommendationOption.expectedCostMax,
+            )
+            const timeAlignment = getTimeAlignmentScore(serviceMatch.etaDays, recommendationOption.expectedTimeDays)
+            score += priceAlignment * 1.4
+            score += timeAlignment * 0.8
+          }
+        }
+      }
+
+      if (decision.recommendation === "buy_used") {
+        if (buyUsedTagMatch) score += weights.tagBoost
+        if (categoryWeight > 0) score += categoryWeight * weights.categoryBoost
+        if (!buyUsedTagMatch && categoryWeight === 0) score -= 0.4
+      }
+
+      if (decision.recommendation === "donate") {
+        if (donateTagMatch) score += weights.tagBoost
+        if (categoryWeight > 0) score += categoryWeight * weights.categoryBoost
+        if (!donateTagMatch && categoryWeight === 0) score -= 0.4
+      }
+
+      if (decision.recommendation === "recycle") {
+        if (recycleTagMatch) score += weights.tagBoost
+        if (categoryWeight > 0) score += categoryWeight * weights.categoryBoost
+        if (!recycleTagMatch && categoryWeight === 0) score -= 0.4
+      }
+
       return { actor, distanceKm, openStatus, serviceMatch, score }
     })
 
