@@ -1,3 +1,4 @@
+import type { ActorCategory } from "@/lib/data"
 import type { ItemType, ProblemType } from "@/lib/prisma-enums"
 
 export const itemTypeLabels: Record<ItemType, string> = {
@@ -54,6 +55,19 @@ export const problemTypeLabels: Record<ProblemType, string> = {
   other: "Annet",
 }
 
+export const categoryLabels: Record<ActorCategory, string> = {
+  brukt: "Ombruk / second hand",
+  reparasjon: "Reparasjon mobil/PC",
+  gjenvinning: "Gjenvinning",
+  utleie: "Utleie / utlån",
+  reparasjon_sko_klar: "Reparasjon sko og klær",
+  mottak_ombruk: "Mottak for ombruk",
+  mobelreparasjon: "Møbelreparasjon",
+  sykkelverksted: "Sykkelverksted",
+  ombruksverksted: "Ombruksverksted",
+  baerekraftig_mat: "Bærekraftig mat",
+}
+
 export const formatEnumLabel = (value: string) =>
   value.replace(/_/g, " ").replace(/\b\w/g, (match) => match.toUpperCase())
 
@@ -61,3 +75,6 @@ export const formatItemTypeLabel = (value: string) => itemTypeLabels[value as It
 
 export const formatProblemTypeLabel = (value: string) =>
   problemTypeLabels[value as ProblemType] ?? formatEnumLabel(value)
+
+export const formatCategoryLabel = (value: string) =>
+  categoryLabels[value as ActorCategory] ?? formatEnumLabel(value)

@@ -20,7 +20,13 @@ import { AddressSearchInput } from "@/components/address-search-input"
 import { ImageUploadField } from "@/components/image-upload"
 import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { SearchableSelect } from "@/components/ui/searchable-select"
-import { formatEnumLabel, formatItemTypeLabel, formatProblemTypeLabel } from "@/lib/enum-labels"
+import {
+  formatCategoryLabel,
+  formatEnumLabel,
+  formatItemTypeLabel,
+  formatProblemTypeLabel,
+} from "@/lib/enum-labels"
+import { categoryOrder } from "@/lib/categories"
 
 type ResourceManagerProps = {
   resourceKey: string
@@ -48,18 +54,7 @@ type LookupConfig = {
 const READ_ONLY_FIELDS = new Set(["id", "createdAt", "updatedAt"])
 const NONE_VALUE = "__none__"
 
-const actorCategory = [
-  "brukt",
-  "reparasjon",
-  "gjenvinning",
-  "utleie",
-  "reparasjon_sko_klar",
-  "mottak_ombruk",
-  "mobelreparasjon",
-  "sykkelverksted",
-  "ombruksverksted",
-  "baerekraftig_mat",
-]
+const actorCategory = categoryOrder
 
 const actorStatus = ["pending", "approved", "rejected", "archived"]
 const sourceType = ["website", "social", "google_reviews", "article", "map"]
@@ -164,6 +159,9 @@ const getEnumOptions = (resourceKey: string, field: string) => {
 }
 
 const formatEnumValue = (field: string, value: string) => {
+  if (field === "category") {
+    return formatCategoryLabel(value)
+  }
   if (field === "itemType" || field === "itemTypes") {
     return formatItemTypeLabel(value)
   }
@@ -172,6 +170,14 @@ const formatEnumValue = (field: string, value: string) => {
   }
   return formatEnumLabel(value)
 }
+
+const slugify = (value: string) =>
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
 
 const stripReadOnlyFields = (value: AdminRow, options?: { keepId?: boolean }) => {
   const data = { ...value }
@@ -611,6 +617,7 @@ export function ResourceManager({
   const [draft, setDraft] = useState<AdminRow>({})
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [slugTouched, setSlugTouched] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [filters, setFilters] = useState<Record<string, string | boolean | null>>({})
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -912,6 +919,7 @@ export function ResourceManager({
     setMode("create")
     setSelectedId(null)
     setDraft(buildDraft({}, defaultPayload))
+    setSlugTouched(false)
     setDialogOpen(true)
   }
 
@@ -919,6 +927,7 @@ export function ResourceManager({
     setMode("edit")
     setSelectedId(item.id ?? null)
     setDraft(buildDraft(item, defaultPayload))
+    setSlugTouched(true)
     setDialogOpen(true)
   }
 
@@ -1015,10 +1024,12 @@ export function ResourceManager({
         }))
       : []
     const useSearchableSelect = Boolean(enumOptions && enumOptions.length > 8)
-    const lookupConfig = lookupConfigByField[key]
-    const isEditableId = allowIdOnCreate && mode === "create" && key === "id"
-    const isReadOnly = READ_ONLY_FIELDS.has(key) && !isEditableId
-    const isMultiline = meta.kind === "array" || meta.kind === "object" || isLongTextField(key, value)
+      const lookupConfig = lookupConfigByField[key]
+      const isEditableId = allowIdOnCreate && mode === "create" && key === "id"
+      const isReadOnly = READ_ONLY_FIELDS.has(key) && !isEditableId
+      const isMultiline = meta.kind === "array" || meta.kind === "object" || isLongTextField(key, value)
+      const isActorNameField = isActorResource && key === "name" && meta.kind === "string"
+      const isActorSlugField = isActorResource && key === "slug" && meta.kind === "string"
 
     const commonProps = {
       id: key,
@@ -1147,24 +1158,36 @@ export function ResourceManager({
               onChange={(event) => setDraft((prev) => ({ ...prev, [key]: event.target.value }))}
               className="min-h-[140px] font-mono text-xs"
             />
-          ) : (
-            <Input
-              {...commonProps}
-              type={meta.kind === "number" ? "number" : "text"}
-              value={formatInputValue(value, meta) as string}
-              onChange={(event) =>
-                setDraft((prev) => ({
-                  ...prev,
-                  [key]:
-                    meta.kind === "number"
-                      ? event.target.value === ""
-                        ? null
-                        : Number(event.target.value)
-                      : event.target.value,
-                }))
-              }
-            />
-          )}
+            ) : (
+              <Input
+                {...commonProps}
+                type={meta.kind === "number" ? "number" : "text"}
+                value={formatInputValue(value, meta) as string}
+                onChange={(event) => {
+                  const nextValue = event.target.value
+                  if (meta.kind === "number") {
+                    setDraft((prev) => ({
+                      ...prev,
+                      [key]: nextValue === "" ? null : Number(nextValue),
+                    }))
+                    return
+                  }
+                  if (isActorSlugField) {
+                    setSlugTouched(true)
+                  }
+                  setDraft((prev) => {
+                    const nextDraft = {
+                      ...prev,
+                      [key]: nextValue,
+                    }
+                    if (isActorNameField && !slugTouched) {
+                      nextDraft.slug = slugify(nextValue)
+                    }
+                    return nextDraft
+                  })
+                }}
+              />
+            )}
         </div>
       </div>
     )

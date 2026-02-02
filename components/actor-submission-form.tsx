@@ -17,8 +17,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { AddressSearchInput } from "@/components/address-search-input"
 import { ImageUploadField } from "@/components/image-upload"
 import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
+import { categoryOrder } from "@/lib/categories"
 import { SearchableSelect } from "@/components/ui/searchable-select"
-import { formatEnumLabel, formatItemTypeLabel, formatProblemTypeLabel } from "@/lib/enum-labels"
+import {
+  formatCategoryLabel,
+  formatEnumLabel,
+  formatItemTypeLabel,
+  formatProblemTypeLabel,
+} from "@/lib/enum-labels"
 
 export type ActorDraft = {
   name: string
@@ -68,31 +74,7 @@ type ActorSubmissionFormProps = {
   onSuccess?: (actorId: string) => void | Promise<void>
 }
 
-const categoryOptions = [
-  "brukt",
-  "reparasjon",
-  "gjenvinning",
-  "utleie",
-  "reparasjon_sko_klar",
-  "mottak_ombruk",
-  "mobelreparasjon",
-  "sykkelverksted",
-  "ombruksverksted",
-  "baerekraftig_mat",
-]
-
-const categoryLabels: Record<string, string> = {
-  brukt: "Ombruk / second hand",
-  reparasjon: "Reparasjon mobil/PC",
-  gjenvinning: "Gjenvinning",
-  utleie: "Utleie / utlån",
-  reparasjon_sko_klar: "Reparasjon sko og klær",
-  mottak_ombruk: "Mottak for ombruk",
-  mobelreparasjon: "Møbelreparasjon",
-  sykkelverksted: "Sykkelverksted",
-  ombruksverksted: "Ombruksverksted",
-  baerekraftig_mat: "Bærekraftig mat",
-}
+const categoryOptions = categoryOrder
 
 const problemTypes = PROBLEM_TYPES
 const itemTypes = ITEM_TYPES
@@ -506,7 +488,7 @@ export function ActorSubmissionForm({
                   <SelectContent>
                     {categoryOptions.map((option) => (
                       <SelectItem key={option} value={option}>
-                        {categoryLabels[option] ?? formatEnumLabel(option)}
+                        {formatCategoryLabel(option)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -952,3 +934,4 @@ export function ActorSubmissionForm({
     </Card>
   )
 }
+
