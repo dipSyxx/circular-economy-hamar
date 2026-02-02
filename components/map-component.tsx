@@ -172,6 +172,7 @@ export function MapComponent({ actors }: MapComponentProps) {
   const [sortKey, setSortKey] = useState<SortKey>("default");
   const [favoriteOnly, setFavoriteOnly] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const [filtersOpen, setFiltersOpen] = useState(true);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(
     null
   );
@@ -557,34 +558,57 @@ export function MapComponent({ actors }: MapComponentProps) {
     <div className="grid gap-6 lg:grid-cols-[1fr_350px]">
       <div className="relative z-49">
         <div className="absolute top-2.5 left-[52px] mr-10 z-[1000] flex gap-2 flex-wrap">
-          <div className="flex flex-wrap gap-2 rounded-lg border bg-background/60 p-2 shadow-sm">
+          <div className="flex flex-col gap-2">
             <Button
               size="sm"
-              variant={filter === "all" ? "default" : "secondary"}
-              onClick={() => setFilter("all")}
-              className="gap-2 cursor-pointer"
+              variant="secondary"
+              onClick={() => setFiltersOpen((prev) => !prev)}
+              className="w-fit gap-2"
             >
-              <Layers className="h-4 w-4" />
-              {mapCopy.filterAll}
+              <SlidersHorizontal className="h-4 w-4" />
+              {filtersOpen ? "Skjul filtre" : "Vis filtre"}
             </Button>
-            {categoryOrder.map((category) => {
-              const meta = categoryConfig[category];
-              const Icon = meta.icon;
-              const active = filter === category;
-              return (
-                <Button
-                  key={category}
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setFilter(category)}
-                  className="gap-2 cursor-pointer"
-                  style={getFilterButtonStyle(active, meta.color)}
+            <AnimatePresence initial={false}>
+              {filtersOpen && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
                 >
-                  <Icon className="h-4 w-4" />
-                  {categoryFilterLabels[category]}
-                </Button>
-              );
-            })}
+                  <div className="flex flex-wrap gap-2 rounded-lg border bg-background/60 p-2 shadow-sm">
+                    <Button
+                      size="sm"
+                      variant={filter === "all" ? "default" : "secondary"}
+                      onClick={() => setFilter("all")}
+                      className="gap-2 cursor-pointer"
+                    >
+                      <Layers className="h-4 w-4" />
+                      {mapCopy.filterAll}
+                    </Button>
+                    {categoryOrder.map((category) => {
+                      const meta = categoryConfig[category];
+                      const Icon = meta.icon;
+                      const active = filter === category;
+                      return (
+                        <Button
+                          key={category}
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setFilter(category)}
+                          className="gap-2 cursor-pointer"
+                          style={getFilterButtonStyle(active, meta.color)}
+                        >
+                          <Icon className="h-4 w-4" />
+                          {categoryFilterLabels[category]}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
         <div className="relative">
