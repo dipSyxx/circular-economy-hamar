@@ -94,10 +94,10 @@ const buildMarkerIcon = (
     color?: string;
     size?: number;
     strokeWidth?: number;
-  }>,
+  }>
 ) => {
   const svg = renderToStaticMarkup(
-    <Icon color="white" size={16} strokeWidth={2} />,
+    <Icon color="white" size={16} strokeWidth={2} />
   );
   return L.divIcon({
     className: "",
@@ -173,18 +173,18 @@ export function MapComponent({ actors }: MapComponentProps) {
   const [favoriteOnly, setFavoriteOnly] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [userLocation, setUserLocation] = useState<[number, number] | null>(
-    null,
+    null
   );
   const [locationError, setLocationError] = useState<string | null>(null);
   const [locationUpdatedAt, setLocationUpdatedAt] = useState<number | null>(
-    null,
+    null
   );
   const [hasRestoredState, setHasRestoredState] = useState(false);
   const [routeStops, setRouteStops] = useState<string[]>([]);
 
   const categoryIndex = useMemo(
     () => new Map(categoryOrder.map((category, index) => [category, index])),
-    [],
+    []
   );
 
   const isActor = (actor: Actor | undefined): actor is Actor => Boolean(actor);
@@ -224,7 +224,7 @@ export function MapComponent({ actors }: MapComponentProps) {
       filter === "all"
         ? baseActors
         : baseActors.filter((actor) => actor.category === filter),
-    [baseActors, filter],
+    [baseActors, filter]
   );
 
   const tagOptions = useMemo<TagOption[]>(() => {
@@ -240,7 +240,7 @@ export function MapComponent({ actors }: MapComponentProps) {
         a.tag.localeCompare(b.tag, "no", {
           sensitivity: "base",
           numeric: true,
-        }),
+        })
       );
   }, [categoryFiltered]);
 
@@ -248,7 +248,7 @@ export function MapComponent({ actors }: MapComponentProps) {
     const normalized = normalizeText(tagQuery.trim());
     if (!normalized) return tagOptions;
     return tagOptions.filter((option) =>
-      normalizeText(option.tag).includes(normalized),
+      normalizeText(option.tag).includes(normalized)
     );
   }, [tagOptions, tagQuery]);
 
@@ -273,7 +273,7 @@ export function MapComponent({ actors }: MapComponentProps) {
           actor.address,
           actor.tags.join(" "),
           mapCopy.categoryLabels[actor.category] ?? "",
-        ].join(" "),
+        ].join(" ")
       );
       return searchText.includes(normalizedQuery);
     });
@@ -306,7 +306,7 @@ export function MapComponent({ actors }: MapComponentProps) {
         a.name.localeCompare(b.name, "no", {
           sensitivity: "base",
           numeric: true,
-        }),
+        })
       );
     }
 
@@ -315,7 +315,7 @@ export function MapComponent({ actors }: MapComponentProps) {
         b.name.localeCompare(a.name, "no", {
           sensitivity: "base",
           numeric: true,
-        }),
+        })
       );
     }
 
@@ -358,12 +358,12 @@ export function MapComponent({ actors }: MapComponentProps) {
       routeStops
         .map((id) => actors.find((actor) => actor.id === id))
         .filter(isActor),
-    [actors, routeStops],
+    [actors, routeStops]
   );
   const routePoints = useMemo(
     () =>
       routeActors.map((actor) => [actor.lat, actor.lng] as [number, number]),
-    [routeActors],
+    [routeActors]
   );
 
   const routeDistance = useMemo(() => {
@@ -384,7 +384,7 @@ export function MapComponent({ actors }: MapComponentProps) {
       : formatCoords(routeActors[0].lat, routeActors[0].lng);
     const destination = formatCoords(
       routeActors[routeActors.length - 1].lat,
-      routeActors[routeActors.length - 1].lng,
+      routeActors[routeActors.length - 1].lng
     );
     const waypoints = userLocation
       ? routeActors.slice(0, -1)
@@ -394,11 +394,11 @@ export function MapComponent({ actors }: MapComponentProps) {
         ? `&waypoints=${encodeURIComponent(
             waypoints
               .map((actor) => formatCoords(actor.lat, actor.lng))
-              .join("|"),
+              .join("|")
           )}`
         : "";
     return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
-      origin,
+      origin
     )}&destination=${encodeURIComponent(destination)}${waypointParam}`;
   }, [routeActors, userLocation]);
 
@@ -413,7 +413,7 @@ export function MapComponent({ actors }: MapComponentProps) {
 
   const toggleTag = (tag: string) => {
     setTagFilters((prev) =>
-      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
+      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]
     );
   };
 
@@ -441,14 +441,11 @@ export function MapComponent({ actors }: MapComponentProps) {
   };
 
   const icons = useMemo(() => {
-    const categoryIcons = categoryOrder.reduce(
-      (acc, category) => {
-        const meta = categoryConfig[category];
-        acc[category] = buildMarkerIcon(meta.color, meta.icon);
-        return acc;
-      },
-      {} as Record<ActorCategory, L.DivIcon>,
-    );
+    const categoryIcons = categoryOrder.reduce((acc, category) => {
+      const meta = categoryConfig[category];
+      acc[category] = buildMarkerIcon(meta.color, meta.icon);
+      return acc;
+    }, {} as Record<ActorCategory, L.DivIcon>);
 
     return {
       ...categoryIcons,
@@ -471,7 +468,7 @@ export function MapComponent({ actors }: MapComponentProps) {
       () => {
         setLocationError(mapCopy.locationError);
       },
-      { enableHighAccuracy: true, timeout: 10000 },
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
@@ -502,7 +499,7 @@ export function MapComponent({ actors }: MapComponentProps) {
         if (typeof stored.query === "string") setQuery(stored.query);
         if (Array.isArray(stored.tagFilters)) {
           setTagFilters(
-            stored.tagFilters.filter((tag) => typeof tag === "string"),
+            stored.tagFilters.filter((tag) => typeof tag === "string")
           );
         }
         if (typeof stored.tagQuery === "string") setTagQuery(stored.tagQuery);
@@ -610,9 +607,55 @@ export function MapComponent({ actors }: MapComponentProps) {
                 }}
               >
                 <Popup>
-                  <strong>{actor.name}</strong>
-                  <br />
-                  {actor.address}
+                  <div className="w-56 space-y-2">
+                    <Link
+                      href={`/aktorer/${actor.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group block overflow-hidden rounded-md border"
+                      onClick={() =>
+                        recordAction("open_actor", { actorId: actor.id })
+                      }
+                    >
+                      <div className="relative">
+                        <img
+                          src={actor.image || "/placeholder.svg"}
+                          alt={actor.name}
+                          className="h-28 w-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                          <span className="text-xs font-semibold uppercase tracking-wide text-white">
+                            Vis aktør
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-sm font-semibold !my-0">
+                        {actor.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground !my-0">
+                        {actor.address}
+                      </p>
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2 text-xs"
+                      >
+                        <Link
+                          href={`/aktorer/${actor.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() =>
+                            recordAction("open_actor", { actorId: actor.id })
+                          }
+                        >
+                          Åpne aktørside
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
                 </Popup>
               </Marker>
             ))}
@@ -748,7 +791,7 @@ export function MapComponent({ actors }: MapComponentProps) {
                       className={cn(
                         "mt-2 flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition",
                         favoriteOnly && "border-primary/40 bg-primary/5",
-                        !isSignedIn && "opacity-60",
+                        !isSignedIn && "opacity-60"
                       )}
                     >
                       <Checkbox
@@ -793,7 +836,7 @@ export function MapComponent({ actors }: MapComponentProps) {
                                 key={option.tag}
                                 className={cn(
                                   "flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition",
-                                  isChecked && "border-primary/40 bg-primary/5",
+                                  isChecked && "border-primary/40 bg-primary/5"
                                 )}
                               >
                                 <Checkbox
@@ -957,14 +1000,14 @@ export function MapComponent({ actors }: MapComponentProps) {
                     actor.lng,
                   ]).toFixed(1)} ${mapCopy.distanceUnit}`;
                 const openStatus = getOpeningStatus(
-                  actor.openingHoursOsm ?? undefined,
+                  actor.openingHoursOsm ?? undefined
                 );
                 const statusLabel =
                   openStatus.state === "open"
                     ? mapCopy.openNowLabel
                     : openStatus.state === "closed"
-                      ? mapCopy.closedNowLabel
-                      : mapCopy.hoursFallbackLabel;
+                    ? mapCopy.closedNowLabel
+                    : mapCopy.hoursFallbackLabel;
                 const statusDetail =
                   openStatus.state === "unknown" || !openStatus.nextChange
                     ? null
