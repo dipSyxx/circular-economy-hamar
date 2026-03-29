@@ -68,3 +68,23 @@ export const categoryConfig: Record<ActorCategory, { color: string; icon: Lucide
     icon: Recycle,
   },
 }
+
+export type CategoryRule = {
+  allowsRepairServices: boolean
+}
+
+export const categoryRules: Record<ActorCategory, CategoryRule> = {
+  brukt: { allowsRepairServices: false },
+  utleie: { allowsRepairServices: false },
+  reparasjon: { allowsRepairServices: true },
+  reparasjon_sko_klar: { allowsRepairServices: true },
+  mobelreparasjon: { allowsRepairServices: true },
+  sykkelverksted: { allowsRepairServices: true },
+  ombruksverksted: { allowsRepairServices: true },
+  mottak_ombruk: { allowsRepairServices: false },
+  baerekraftig_mat: { allowsRepairServices: false },
+  gjenvinning: { allowsRepairServices: false },
+}
+
+export const supportsRepairServices = (category: string) =>
+  Boolean(categoryRules[category as ActorCategory]?.allowsRepairServices)

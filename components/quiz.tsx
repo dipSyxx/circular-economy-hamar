@@ -10,6 +10,7 @@ import { CheckCircle2, ArrowRight, Share2, RotateCcw, Trophy, Target } from "luc
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { quizCopy, site } from "@/content/no"
+import { recordQuizAttempt } from "@/lib/profile-store"
 
 type QuizState = "intro" | "playing" | "result"
 
@@ -80,6 +81,12 @@ export function Quiz({ challenges, quizQuestions, quizResults }: QuizProps) {
       badge: config.badge,
     })
     setState("result")
+    void recordQuizAttempt({
+      score,
+      maxScore,
+      level,
+      answers: finalAnswers,
+    })
   }
 
   const resetQuiz = () => {

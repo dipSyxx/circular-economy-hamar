@@ -1,16 +1,16 @@
-import { deletePublicResource, getPublicResource, updatePublicResource } from "@/app/api/public/_resource"
+﻿import { deletePublicResource, getPublicResource, updatePublicResource } from "@/app/api/public/_resource"
 
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
-  const { id } = await Promise.resolve(params)
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   return getPublicResource("challenge-completions", id)
 }
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-  const { id } = await Promise.resolve(params)
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   return updatePublicResource("challenge-completions", id, request)
 }
 
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
-  const { id } = await Promise.resolve(params)
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   return deletePublicResource("challenge-completions", id)
 }

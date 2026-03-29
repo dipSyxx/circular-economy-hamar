@@ -41,6 +41,15 @@ type MyActor = {
   description: string
   longDescription: string
   address: string
+  postalCode: string | null
+  country: string
+  county: string
+  countySlug: string
+  municipality: string
+  municipalitySlug: string
+  city: string
+  area: string | null
+  nationwide: boolean
   lat: number
   lng: number
   phone: string | null
@@ -82,6 +91,11 @@ const toDrafts = (actor: MyActor) => {
     description: actor.description ?? "",
     longDescription: actor.longDescription ?? "",
     address: actor.address ?? "",
+    postalCode: actor.postalCode ?? "",
+    county: actor.county ?? "",
+    municipality: actor.municipality ?? "",
+    city: actor.city ?? "",
+    area: actor.area ?? "",
     lat: Number.isFinite(actor.lat) ? String(actor.lat) : "",
     lng: Number.isFinite(actor.lng) ? String(actor.lng) : "",
     phone: actor.phone ?? "",
@@ -94,6 +108,7 @@ const toDrafts = (actor: MyActor) => {
     benefits: actor.benefits ?? [],
     howToUse: actor.howToUse ?? [],
     image: actor.image ?? "",
+    nationwide: actor.nationwide ?? false,
   }
 
   const repairServices: RepairServiceDraft[] = actor.repairServices?.length
@@ -104,15 +119,7 @@ const toDrafts = (actor: MyActor) => {
         priceMax: String(service.priceMax ?? ""),
         etaDays: service.etaDays === null || service.etaDays === undefined ? "" : String(service.etaDays),
       }))
-    : [
-        {
-          problemType: "screen",
-          itemTypes: ["phone"],
-          priceMin: "",
-          priceMax: "",
-          etaDays: "",
-        },
-      ]
+    : [{ problemType: "", itemTypes: [], priceMin: "", priceMax: "", etaDays: "" }]
 
   const sources: SourceDraft[] = actor.sources?.length
     ? actor.sources.map((source) => ({

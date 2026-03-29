@@ -42,6 +42,12 @@ const parseDate = (value: unknown) => {
   return Number.isNaN(parsed.getTime()) ? undefined : parsed
 }
 
+const parseBooleanParam = (value: string | null) => {
+  if (value === "true") return true
+  if (value === "false") return false
+  return undefined
+}
+
 const actorFields = [
   "name",
   "slug",
@@ -49,6 +55,14 @@ const actorFields = [
   "description",
   "longDescription",
   "address",
+  "postalCode",
+  "country",
+  "county",
+  "countySlug",
+  "municipality",
+  "municipalitySlug",
+  "city",
+  "area",
   "lat",
   "lng",
   "phone",
@@ -61,6 +75,9 @@ const actorFields = [
   "benefits",
   "howToUse",
   "image",
+  "nationwide",
+  "verificationStatus",
+  "verifiedAt",
 ]
 
 export const publicResourceConfig: Record<string, PublicResourceConfig> = {
@@ -71,8 +88,12 @@ export const publicResourceConfig: Record<string, PublicResourceConfig> = {
     readUsesUser: true,
     listWhere: ({ searchParams }) => {
       const category = searchParams.get("category")
+      const countySlug = searchParams.get("countySlug")
+      const municipalitySlug = searchParams.get("municipalitySlug")
+      const city = searchParams.get("city")
       const slug = searchParams.get("slug")
       const id = searchParams.get("id")
+      const nationwide = parseBooleanParam(searchParams.get("nationwide"))
       const idsParam = searchParams.get("ids")
       const ids = idsParam
         ? idsParam
@@ -83,8 +104,12 @@ export const publicResourceConfig: Record<string, PublicResourceConfig> = {
       const base = { status: "approved" }
       const filters = []
       if (category) filters.push({ category })
+      if (countySlug) filters.push({ countySlug })
+      if (municipalitySlug) filters.push({ municipalitySlug })
+      if (city) filters.push({ city })
       if (slug) filters.push({ slug })
       if (id) filters.push({ id })
+      if (nationwide !== undefined) filters.push({ nationwide })
       if (ids.length) filters.push({ id: { in: ids } })
       return filters.length ? { AND: [base, ...filters] } : base
     },
@@ -100,6 +125,8 @@ export const publicResourceConfig: Record<string, PublicResourceConfig> = {
       transform: (data, context) => ({
         ...data,
         status: "pending",
+        verificationStatus: "unverified",
+        verifiedAt: null,
         createdById: context.userId,
         reviewedById: null,
         reviewedAt: null,
@@ -108,7 +135,14 @@ export const publicResourceConfig: Record<string, PublicResourceConfig> = {
     update: {
       fields: actorFields,
       ownerCheck: { type: "user", field: "createdById", statusField: "status", allowedStatuses: ["pending", "rejected"] },
-      transform: (data) => ({ ...data, status: "pending", reviewedById: null, reviewedAt: null }),
+      transform: (data) => ({
+        ...data,
+        status: "pending",
+        verificationStatus: "unverified",
+        verifiedAt: null,
+        reviewedById: null,
+        reviewedAt: null,
+      }),
     },
     remove: {
       ownerCheck: { type: "user", field: "createdById", statusField: "status", allowedStatuses: ["pending", "rejected"] },

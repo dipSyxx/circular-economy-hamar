@@ -13,6 +13,8 @@ import { ExternalLink, Heart, MapPin } from "lucide-react";
 import Link from "next/link";
 import type { Actor } from "@/lib/data";
 import { actorCopy } from "@/content/no";
+import { ActorTrustBadges } from "@/components/actor-trust-badges";
+import { formatActorGeoLabel } from "@/lib/geo";
 import { recordAction } from "@/lib/profile-store";
 import { categoryConfig } from "@/lib/categories";
 import { cn } from "@/lib/utils";
@@ -33,6 +35,7 @@ export function ActorCard({
   distanceLabel,
 }: ActorCardProps) {
   const categoryColor = categoryConfig[actor.category]?.color ?? "#64748b";
+  const locationLabel = formatActorGeoLabel(actor);
   const badgeStyle = {
     backgroundColor: `${categoryColor}1A`,
     borderColor: categoryColor,
@@ -81,12 +84,17 @@ export function ActorCard({
           <MapPin className="h-3 w-3" />
           {actor.address}
         </CardDescription>
+        {locationLabel && (
+          <p className="text-xs text-muted-foreground mt-1">{locationLabel}</p>
+        )}
         {distanceLabel && (
           <p className="text-xs text-muted-foreground mt-1">{distanceLabel}</p>
         )}
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">{actor.description}</p>
+
+        <ActorTrustBadges actor={actor} />
 
         <div className="flex flex-wrap gap-2">
           {actor.tags.slice(0, 3).map((tag) => (

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { authClient } from "@/lib/auth/client"
 import { loadProfile, type ProfileData } from "@/lib/profile-store"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -9,11 +10,34 @@ import { MyFavoritesPanel } from "@/components/my-favorites-panel"
 import { profileCopy } from "@/content/no"
 
 export function ProfileDashboard() {
+  const { data } = authClient.useSession()
+  const isSignedIn = Boolean(data?.session)
   const [profile, setProfile] = useState<ProfileData | null>(null)
 
   useEffect(() => {
-    setProfile(loadProfile())
-  }, [])
+    let active = true
+
+    const load = async () => {
+      if (!isSignedIn) {
+        if (active) setProfile(loadProfile())
+        return
+      }
+
+      try {
+        const response = await fetch("/api/user/profile-summary", { cache: "no-store" })
+        if (!response.ok) throw new Error("Kunne ikke hente profil.")
+        const nextProfile = (await response.json()) as ProfileData
+        if (active) setProfile(nextProfile)
+      } catch {
+        if (active) setProfile(loadProfile())
+      }
+    }
+
+    void load()
+    return () => {
+      active = false
+    }
+  }, [isSignedIn])
 
   const decisions = profile?.decisionHistory ?? []
   const actions = profile?.actions ?? []

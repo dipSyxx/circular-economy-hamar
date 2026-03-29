@@ -13,6 +13,9 @@ export default async function AdminPage() {
     userCount,
     actorCount,
     pendingActorCount,
+    pendingCorrectionCount,
+    previewImportCount,
+    verificationTaskCount,
     challengeCount,
     quizQuestionCount,
     factCount,
@@ -20,6 +23,9 @@ export default async function AdminPage() {
     prisma.user.count(),
     prisma.actor.count(),
     prisma.actor.count({ where: { status: "pending" } }),
+    prisma.actorCorrectionSuggestion.count({ where: { status: "pending" } }),
+    prisma.actorImportBatch.count({ where: { status: "preview" } }),
+    prisma.actorVerificationTask.count({ where: { status: { in: ["open", "snoozed"] } } }),
     prisma.challenge.count(),
     prisma.quizQuestion.count(),
     prisma.fact.count(),
@@ -44,6 +50,17 @@ export default async function AdminPage() {
     description: actor.description,
     longDescription: actor.longDescription,
     address: actor.address,
+    postalCode: actor.postalCode,
+    country: actor.country ?? "Norway",
+    county: actor.county ?? "",
+    countySlug: actor.countySlug ?? "",
+    municipality: actor.municipality ?? "",
+    municipalitySlug: actor.municipalitySlug ?? "",
+    city: actor.city ?? "",
+    area: actor.area,
+    nationwide: actor.nationwide,
+    verificationStatus: actor.verificationStatus,
+    verifiedAt: actor.verifiedAt ? actor.verifiedAt.toISOString() : null,
     lat: actor.lat,
     lng: actor.lng,
     phone: actor.phone,
@@ -83,6 +100,9 @@ export default async function AdminPage() {
     { label: "Brukere", value: userCount },
     { label: "Aktører", value: actorCount },
     { label: "Ventende aktører", value: pendingActorCount },
+    { label: "Ventende korreksjoner", value: pendingCorrectionCount },
+    { label: "Preview importer", value: previewImportCount },
+    { label: "Verification tasks", value: verificationTaskCount },
     { label: "Oppdrag", value: challengeCount },
     { label: "Quizspørsmål", value: quizQuestionCount },
     { label: "Fakta", value: factCount },
@@ -118,6 +138,49 @@ export default async function AdminPage() {
       <PendingActorsPanel initialActors={pendingActorPayload} reviewerId={dbUser.id} />
 
       <div>
+        <h2 className="text-xl font-semibold">Data ops</h2>
+        <p className="text-muted-foreground">Direkte arbeidsflater for imports, korrekturer og trust/freshness-review.</p>
+      </div>
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">CSV imports</CardTitle>
+            <CardDescription>Forhandsvis, valider og bruk batch-importer med dedupe og audit trail.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ButtonLink href="/admin/imports" label="Apen importsentral" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Korrekturforslag</CardTitle>
+            <CardDescription>Review brukerforslag, sammenlign diff og oppdater katalogen redaksjonelt.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ButtonLink href="/admin/corrections" label="Apen korrekturko" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Aktor review board</CardTitle>
+            <CardDescription>Filtrer pilotfylker, stale poster, manglende kilder og pending public submissions.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ButtonLink href="/admin/actors-review" label="Apen review board" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Nationwide rollout</CardTitle>
+            <CardDescription>Operasjonell fylkesoversikt for stage, prioritet, klynger og importpåvirkning.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ButtonLink href="/admin/rollout" label="Apen rollout board" />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div>
         <h2 className="text-xl font-semibold">Ressurser</h2>
         <p className="text-muted-foreground">Detaljert redigering per ressurs.</p>
       </div>
@@ -141,6 +204,17 @@ export default async function AdminPage() {
         ))}
       </div>
     </div>
+  )
+}
+
+function ButtonLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+    >
+      {label}
+    </Link>
   )
 }
 

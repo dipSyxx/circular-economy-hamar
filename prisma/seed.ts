@@ -1,8 +1,10 @@
 import "dotenv/config"
 import { PrismaClient, QuizLevel } from "@prisma/client"
 import { PrismaNeon } from "@prisma/adapter-neon"
+import { prepareActorPersistData } from "../lib/actor-write"
+import { loadBootstrapActorFixtures } from "../lib/bootstrap-actors"
+import { seedCanonicalGeoTaxonomy } from "../lib/geo-taxonomy"
 import {
-  actors,
   challenges,
   co2eSources,
   detailedFacts,
@@ -32,52 +34,40 @@ const co2eSourcesByItem = {
 const parseDate = (value?: string) => (value ? new Date(value) : null)
 
 async function seedActors() {
-  for (const actor of actors) {
+  const fixtures = await loadBootstrapActorFixtures(process.cwd())
+
+  await seedCanonicalGeoTaxonomy(
+    prisma,
+    fixtures.map((fixture) => ({
+      county: fixture.actor.county,
+      countySlug: fixture.actor.countySlug,
+      municipality: fixture.actor.municipality,
+      municipalitySlug: fixture.actor.municipalitySlug,
+    })),
+  )
+
+  for (const fixture of fixtures) {
+    const prepared = await prepareActorPersistData(
+      prisma,
+      fixture.actor,
+      { createMissingMunicipality: true },
+    )
+
     const actorRecord = await prisma.actor.upsert({
-      where: { slug: actor.slug },
+      where: { slug: fixture.actor.slug },
       update: {
-        name: actor.name,
-        slug: actor.slug,
-        category: actor.category,
-        description: actor.description,
-        longDescription: actor.longDescription,
-        address: actor.address,
-        lat: actor.lat,
-        lng: actor.lng,
-        phone: actor.phone ?? null,
-        email: actor.email ?? null,
-        website: actor.website ?? null,
-        instagram: actor.instagram ?? null,
-        openingHours: actor.openingHours,
-        openingHoursOsm: actor.openingHoursOsm ?? null,
-        tags: actor.tags,
-        benefits: actor.benefits,
-        howToUse: actor.howToUse,
-        image: actor.image ?? null,
+        ...prepared.actorData,
+        verificationStatus: fixture.verificationStatus,
+        verifiedAt: fixture.verifiedAt ?? new Date(),
         status: "approved",
         createdById: seedAdminId,
         reviewedById: seedAdminId,
         reviewedAt: new Date(),
       },
       create: {
-        name: actor.name,
-        slug: actor.slug,
-        category: actor.category,
-        description: actor.description,
-        longDescription: actor.longDescription,
-        address: actor.address,
-        lat: actor.lat,
-        lng: actor.lng,
-        phone: actor.phone ?? null,
-        email: actor.email ?? null,
-        website: actor.website ?? null,
-        instagram: actor.instagram ?? null,
-        openingHours: actor.openingHours,
-        openingHoursOsm: actor.openingHoursOsm ?? null,
-        tags: actor.tags,
-        benefits: actor.benefits,
-        howToUse: actor.howToUse,
-        image: actor.image ?? null,
+        ...prepared.actorData,
+        verificationStatus: fixture.verificationStatus,
+        verifiedAt: fixture.verifiedAt ?? new Date(),
         status: "approved",
         createdById: seedAdminId,
         reviewedById: seedAdminId,
@@ -85,14 +75,25 @@ async function seedActors() {
       },
     })
 
+    await prisma.actorServiceArea.deleteMany({ where: { actorId: actorRecord.id } })
+    if (prepared.serviceAreaLinks.length > 0) {
+      await prisma.actorServiceArea.createMany({
+        data: prepared.serviceAreaLinks.map((serviceArea) => ({
+          actorId: actorRecord.id,
+          countyId: serviceArea.countyId,
+          municipalityId: serviceArea.municipalityId,
+        })),
+      })
+    }
+
     await prisma.actorRepairService.deleteMany({ where: { actorId: actorRecord.id } })
-    if (actor.repairServices?.length) {
-      for (const service of actor.repairServices) {
+    if (fixture.repairServices.length) {
+      for (const service of fixture.repairServices) {
         await prisma.actorRepairService.create({
           data: {
             actorId: actorRecord.id,
             problemType: service.problemType,
-            itemTypes: service.itemTypes ?? [],
+            itemTypes: service.itemTypes,
             priceMin: service.priceMin,
             priceMax: service.priceMax,
             etaDays: service.etaDays ?? null,
@@ -102,8 +103,8 @@ async function seedActors() {
     }
 
     await prisma.actorSource.deleteMany({ where: { actorId: actorRecord.id } })
-    if (actor.sources?.length) {
-      for (const source of actor.sources) {
+    if (fixture.sources.length) {
+      for (const source of fixture.sources) {
         await prisma.actorSource.create({
           data: {
             actorId: actorRecord.id,
@@ -111,7 +112,7 @@ async function seedActors() {
             title: source.title,
             url: source.url,
             note: source.note ?? null,
-            ...(source.capturedAt ? { capturedAt: new Date(source.capturedAt) } : {}),
+            ...(source.capturedAt ? { capturedAt: source.capturedAt } : {}),
           },
         })
       }
@@ -335,6 +336,7 @@ async function seedCo2eSources() {
 }
 
 async function clearSeedData() {
+  await prisma.actorServiceArea.deleteMany()
   await prisma.actorRepairService.deleteMany()
   await prisma.actorSource.deleteMany()
   await prisma.challengeCompletion.deleteMany()
@@ -349,6 +351,8 @@ async function clearSeedData() {
   await prisma.co2eSourceItem.deleteMany()
   await prisma.co2eSource.deleteMany()
   await prisma.actor.deleteMany()
+  await prisma.municipality.deleteMany()
+  await prisma.county.deleteMany()
 }
 
 async function main() {

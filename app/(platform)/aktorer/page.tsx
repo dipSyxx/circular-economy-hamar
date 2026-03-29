@@ -2,10 +2,45 @@ import { ActorSubmissionDialog } from "@/components/actor-submission-dialog"
 import { ActorsExplorer } from "@/components/actors-explorer"
 import { Badge } from "@/components/ui/badge"
 import { pageCopy } from "@/content/no"
+import { getAvailableCountyOptions, getAvailableMunicipalityOptions } from "@/lib/actor-scope"
+import { categoryOrder } from "@/lib/categories"
 import { getActors } from "@/lib/public-data"
 
-export default async function ActorsPage() {
+type ActorsPageProps = {
+  searchParams: Promise<{
+    q?: string | string[]
+    category?: string | string[]
+    county?: string | string[]
+    municipality?: string | string[]
+  }>
+}
+
+const pickParam = (value?: string | string[]) => {
+  if (Array.isArray(value)) return value[0] ?? ""
+  return value ?? ""
+}
+
+export default async function ActorsPage({ searchParams }: ActorsPageProps) {
+  const resolvedSearchParams = await searchParams
   const actors = await getActors()
+  const initialQuery = pickParam(resolvedSearchParams.q).trim()
+  const requestedCategory = pickParam(resolvedSearchParams.category).trim()
+  const requestedCounty = pickParam(resolvedSearchParams.county).trim()
+  const requestedMunicipality = pickParam(resolvedSearchParams.municipality).trim()
+
+  const initialCategory = categoryOrder.includes(requestedCategory as (typeof categoryOrder)[number])
+    ? (requestedCategory as (typeof categoryOrder)[number])
+    : null
+  const initialCounty = getAvailableCountyOptions(actors).some((county) => county.slug === requestedCounty)
+    ? requestedCounty
+    : null
+  const initialMunicipality =
+    initialCounty &&
+    getAvailableMunicipalityOptions(actors, initialCounty).some(
+      (municipality) => municipality.slug === requestedMunicipality,
+    )
+      ? requestedMunicipality
+      : null
 
   return (
     <div>
@@ -33,7 +68,15 @@ export default async function ActorsPage() {
 
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <ActorsExplorer actors={actors} />
+          <ActorsExplorer
+            actors={actors}
+            enableGeographyFilters
+            syncToUrl
+            initialQuery={initialQuery}
+            initialCategory={initialCategory}
+            initialCounty={initialCounty}
+            initialMunicipality={initialMunicipality}
+          />
         </div>
       </section>
     </div>

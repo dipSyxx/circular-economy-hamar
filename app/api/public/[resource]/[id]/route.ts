@@ -1,27 +1,28 @@
-import {
+﻿import {
   deletePublicResource,
   getPublicResource,
   updatePublicResource,
 } from "@/app/api/public/_resource"
 
 type RouteParams = {
-  params: {
+  params: Promise<{
     resource: string
     id: string
-  }
+  }>
 }
 
 export async function GET(_request: Request, { params }: RouteParams) {
-  const { id, resource } = await Promise.resolve(params)
+  const { id, resource } = await params
   return getPublicResource(resource, id)
 }
 
 export async function PATCH(request: Request, { params }: RouteParams) {
-  const { id, resource } = await Promise.resolve(params)
+  const { id, resource } = await params
   return updatePublicResource(resource, id, request)
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
-  const { id, resource } = await Promise.resolve(params)
+  const { id, resource } = await params
   return deletePublicResource(resource, id)
 }
+

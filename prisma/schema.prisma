@@ -133,6 +133,65 @@ enum QuizLevel {
   gjenbrukshelt
 }
 
+enum VerificationStatus {
+  unverified
+  community_verified
+  editorial_verified
+}
+
+enum VerificationDueState {
+  healthy
+  due_soon
+  due
+  overdue
+  blocked
+}
+
+enum ActorImportBatchStatus {
+  preview
+  applied
+  failed
+}
+
+enum ActorImportMatchStrategy {
+  slug
+  website_host
+  name_postal
+  none
+}
+
+enum ActorImportAction {
+  create
+  update
+  skip
+  error
+}
+
+enum ActorImportRowType {
+  actor
+  actor_source
+  actor_repair_service
+}
+
+enum ActorCorrectionStatus {
+  pending
+  accepted
+  rejected
+}
+
+enum ActorVerificationTaskStatus {
+  open
+  snoozed
+  resolved
+}
+
+enum CountyRolloutStage {
+  pilot
+  queued
+  in_progress
+  ready
+}
+
 model User {
   id        String   @id
   email     String?  @unique
@@ -150,6 +209,10 @@ model User {
   actorsCreated        Actor[] @relation("ActorCreatedBy")
   actorsReviewed       Actor[] @relation("ActorReviewedBy")
   favoriteActors       ActorFavorite[]
+  importBatchesCreated ActorImportBatch[] @relation("ActorImportBatchCreatedBy")
+  correctionsSubmitted ActorCorrectionSuggestion[] @relation("ActorCorrectionSuggestionSubmittedBy")
+  correctionsReviewed  ActorCorrectionSuggestion[] @relation("ActorCorrectionSuggestionReviewedBy")
+  resolvedVerificationTasks ActorVerificationTask[] @relation("ActorVerificationTaskResolvedBy")
 
   @@map("users")
 }
@@ -242,6 +305,43 @@ model QuizAttempt {
   @@map("quiz_attempts")
 }
 
+model County {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String   @unique
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  municipalities   Municipality[]
+  baseActors       Actor[]           @relation("ActorBaseCounty")
+  actorServiceAreas ActorServiceArea[]
+  rolloutStatus    CountyRolloutStatus?
+
+  @@index([sortOrder, name])
+  @@map("counties")
+}
+
+model Municipality {
+  id        String   @id @default(cuid())
+  countyId  String   @map("county_id")
+  slug      String
+  name      String
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  county             County           @relation(fields: [countyId], references: [id], onDelete: Cascade)
+  baseActors         Actor[]          @relation("ActorBaseMunicipality")
+  actorServiceAreas  ActorServiceArea[]
+
+  @@unique([countyId, slug])
+  @@unique([countyId, name])
+  @@index([slug])
+  @@index([countyId, sortOrder, name])
+  @@map("municipalities")
+}
+
 model Actor {
   id              String       @id @default(cuid())
   name            String
@@ -250,6 +350,14 @@ model Actor {
   description     String
   longDescription String       @map("long_description")
   address         String
+  postalCode      String?      @map("postal_code")
+  country         String       @default("Norway")
+  county          String?
+  countySlug      String?      @map("county_slug")
+  municipality    String?
+  municipalitySlug String?     @map("municipality_slug")
+  city            String?
+  area            String?
   lat             Float
   lng             Float
   phone           String?
@@ -262,6 +370,11 @@ model Actor {
   benefits        String[]
   howToUse        String[]     @map("how_to_use")
   image           String?      @map("image_url")
+  nationwide      Boolean      @default(false)
+  baseCountyId    String?      @map("base_county_id")
+  baseMunicipalityId String?   @map("base_municipality_id")
+  verificationStatus VerificationStatus @default(unverified) @map("verification_status")
+  verifiedAt      DateTime?    @map("verified_at")
   status          ActorStatus  @default(pending)
   reviewNote      String?      @map("review_note")
   createdById     String?      @map("created_by_id")
@@ -272,12 +385,22 @@ model Actor {
 
   createdBy  User? @relation("ActorCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   reviewedBy User? @relation("ActorReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  baseCounty County? @relation("ActorBaseCounty", fields: [baseCountyId], references: [id], onDelete: SetNull)
+  baseMunicipality Municipality? @relation("ActorBaseMunicipality", fields: [baseMunicipalityId], references: [id], onDelete: SetNull)
 
   repairServices ActorRepairService[]
   sources        ActorSource[]
   favorites      ActorFavorite[]
+  serviceAreas   ActorServiceArea[]
+  correctionSuggestions ActorCorrectionSuggestion[]
+  matchedImportRows     ActorImportRow[]
+  verificationTasks     ActorVerificationTask[]
 
   @@index([status, category])
+  @@index([status, countySlug, municipalitySlug, category])
+  @@index([status, baseCountyId, baseMunicipalityId, category])
+  @@index([status, city, category])
+  @@index([status, nationwide])
   @@index([createdById, createdAt])
   @@map("actors")
 }
@@ -325,6 +448,135 @@ model ActorSource {
 
   @@index([actorId])
   @@map("actor_sources")
+}
+
+model ActorServiceArea {
+  id             String   @id @default(cuid())
+  actorId        String   @map("actor_id")
+  countyId       String?  @map("county_id")
+  municipalityId String?  @map("municipality_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  actor        Actor        @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  county       County?      @relation(fields: [countyId], references: [id], onDelete: Cascade)
+  municipality Municipality? @relation(fields: [municipalityId], references: [id], onDelete: Cascade)
+
+  @@unique([actorId, countyId])
+  @@unique([actorId, municipalityId])
+  @@index([actorId])
+  @@index([countyId])
+  @@index([municipalityId])
+  @@map("actor_service_areas")
+}
+
+model ActorImportBatch {
+  id            String                 @id @default(cuid())
+  filename      String
+  status        ActorImportBatchStatus @default(preview)
+  targetCounties String[]              @map("target_counties")
+  totalRows     Int                    @default(0) @map("total_rows")
+  createCount   Int                    @default(0) @map("create_count")
+  updateCount   Int                    @default(0) @map("update_count")
+  skipCount     Int                    @default(0) @map("skip_count")
+  errorCount    Int                    @default(0) @map("error_count")
+  warningCount  Int                    @default(0) @map("warning_count")
+  errorSummary  Json?                  @map("error_summary")
+  createdById   String?                @map("created_by_id")
+  createdAt     DateTime               @default(now()) @map("created_at")
+  appliedAt     DateTime?              @map("applied_at")
+
+  createdBy User?            @relation("ActorImportBatchCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  rows      ActorImportRow[]
+
+  @@index([status, createdAt])
+  @@index([createdById, createdAt])
+  @@map("actor_import_batches")
+}
+
+model ActorImportRow {
+  id               String                   @id @default(cuid())
+  batchId          String                   @map("batch_id")
+  rowType          ActorImportRowType       @map("row_type")
+  rowNumber        Int                      @map("row_number")
+  rawData          Json                     @map("raw_data")
+  normalizedData   Json?                    @map("normalized_data")
+  matchStrategy    ActorImportMatchStrategy? @map("match_strategy")
+  matchedActorId   String?                  @map("matched_actor_id")
+  action           ActorImportAction
+  validationErrors String[]                @map("validation_errors")
+  warnings         String[]
+  appliedAt        DateTime?                @map("applied_at")
+  createdAt        DateTime                 @default(now()) @map("created_at")
+
+  batch        ActorImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  matchedActor Actor?           @relation(fields: [matchedActorId], references: [id], onDelete: SetNull)
+
+  @@index([batchId, rowType, rowNumber])
+  @@index([action])
+  @@index([matchedActorId])
+  @@map("actor_import_rows")
+}
+
+model ActorCorrectionSuggestion {
+  id            String                @id @default(cuid())
+  actorId        String                @map("actor_id")
+  submittedById  String                @map("submitted_by_id")
+  payload        Json
+  note           String
+  sourceUrl      String?               @map("source_url")
+  status         ActorCorrectionStatus @default(pending)
+  reviewNote     String?               @map("review_note")
+  reviewedById   String?               @map("reviewed_by_id")
+  reviewedAt     DateTime?             @map("reviewed_at")
+  createdAt      DateTime              @default(now()) @map("created_at")
+  updatedAt      DateTime              @updatedAt @map("updated_at")
+
+  actor       Actor @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  submittedBy User  @relation("ActorCorrectionSuggestionSubmittedBy", fields: [submittedById], references: [id], onDelete: Cascade)
+  reviewedBy  User? @relation("ActorCorrectionSuggestionReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([actorId, status, createdAt])
+  @@index([submittedById, createdAt])
+  @@index([reviewedById, reviewedAt])
+  @@map("actor_correction_suggestions")
+}
+
+model ActorVerificationTask {
+  id             String                      @id @default(cuid())
+  actorId        String                      @map("actor_id")
+  dueState       VerificationDueState        @map("due_state")
+  status         ActorVerificationTaskStatus @default(open)
+  reasonSummary  String                      @map("reason_summary")
+  generatedAt    DateTime                    @map("generated_at")
+  snoozeUntil    DateTime?                   @map("snooze_until")
+  resolvedAt     DateTime?                   @map("resolved_at")
+  resolvedById   String?                     @map("resolved_by_id")
+  resolutionNote String?                     @map("resolution_note")
+  createdAt      DateTime                    @default(now()) @map("created_at")
+  updatedAt      DateTime                    @updatedAt @map("updated_at")
+
+  actor      Actor @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  resolvedBy User? @relation("ActorVerificationTaskResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([actorId, status, generatedAt])
+  @@index([status, dueState, snoozeUntil])
+  @@index([resolvedById, resolvedAt])
+  @@map("actor_verification_tasks")
+}
+
+model CountyRolloutStatus {
+  countyId   String             @id @map("county_id")
+  stage      CountyRolloutStage @default(queued)
+  priority   Int                @default(100)
+  notes      String?
+  createdAt  DateTime           @default(now()) @map("created_at")
+  updatedAt  DateTime           @updatedAt @map("updated_at")
+
+  county County @relation(fields: [countyId], references: [id], onDelete: Cascade)
+
+  @@index([stage, priority])
+  @@map("county_rollout_statuses")
 }
 
 model Challenge {

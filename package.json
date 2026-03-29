@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "db:guardrails": "prisma db execute --file prisma/migrations/20260329_actor_repair_guardrails.sql",
     "postinstall": "prisma generate",
     "build": "next build",
+    "backfill:geo": "tsx scripts/backfill-geo-taxonomy.ts",
     "dev": "next dev",
     "generate:prisma-enums": "node scripts/generate-prisma-enums.js",
+    "import:pilot": "tsx scripts/import-pilot-catalog.ts",
     "lint": "eslint .",
     "start": "next start",
     "seed": "prisma db seed"

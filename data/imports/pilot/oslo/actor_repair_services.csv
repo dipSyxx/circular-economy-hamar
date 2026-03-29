@@ -1,0 +1,4 @@
+actor_slug,problem_type,item_types,price_min,price_max,eta_days
+oslo-sykkelverksted,brake,bicycle,400,1200,2
+oslo-sykkelverksted,chain,bicycle,300,900,1
+oslo-sykkelverksted,tire,bicycle,200,500,1

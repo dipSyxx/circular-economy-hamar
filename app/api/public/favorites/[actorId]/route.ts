@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getPublicUser, jsonError } from "@/app/api/public/_helpers"
 
-export async function GET(_request: Request, { params }: { params: { actorId: string } }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ actorId: string }> }) {
   const { user, error } = await getPublicUser(true)
   if (error) return error
   if (!user) return jsonError("Unauthorized", 401)
 
-  const { actorId } = await Promise.resolve(params)
+  const { actorId } = await params
   const favorite = await prisma.actorFavorite.findUnique({
     where: { userId_actorId: { userId: user.id, actorId } },
     select: { actorId: true },
@@ -16,12 +16,12 @@ export async function GET(_request: Request, { params }: { params: { actorId: st
   return NextResponse.json({ favorite: Boolean(favorite) })
 }
 
-export async function DELETE(_request: Request, { params }: { params: { actorId: string } }) {
+export async function DELETE(_request: Request, { params }: { params: Promise<{ actorId: string }> }) {
   const { user, error } = await getPublicUser(true)
   if (error) return error
   if (!user) return jsonError("Unauthorized", 401)
 
-  const { actorId } = await Promise.resolve(params)
+  const { actorId } = await params
 
   await prisma.actorFavorite.deleteMany({
     where: { userId: user.id, actorId },
@@ -29,3 +29,4 @@ export async function DELETE(_request: Request, { params }: { params: { actorId:
 
   return NextResponse.json({ ok: true })
 }
+

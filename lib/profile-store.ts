@@ -1,4 +1,16 @@
-﻿import type { DecisionInput, Recommendation, ItemType, ProblemType, Priority } from "@/lib/decision-engine"
+import type {
+  ConfidenceLevel,
+  DecisionInput,
+  DecisionOption,
+  DecisionOutput,
+  DecisionStatus,
+  ItemType,
+  PlanB,
+  ProblemType,
+  Priority,
+  Recommendation,
+  ReasonKey,
+} from "@/lib/decision-engine"
 
 export type ActionType =
   | "decision_complete"
@@ -28,6 +40,16 @@ export interface DecisionEntry {
   impactScore: number
   savingsMin: number
   savingsMax: number
+  status?: DecisionStatus
+  confidence?: ConfidenceLevel
+  recommendedFeasible?: boolean
+  bestFeasibleOption?: Recommendation | null
+  modelRepairabilityScore?: number
+  co2eSavedMin?: number
+  co2eSavedMax?: number
+  explainability?: ReasonKey[]
+  options?: DecisionOption[]
+  planB?: PlanB | null
 }
 
 export interface ProfileData {
@@ -60,6 +82,7 @@ const actionPoints: Record<ActionType, number> = {
 
 const maxActions = 20
 const maxDecisions = 10
+let remoteProfileId: string | null | undefined
 
 const getDateKey = (date = new Date()) => {
   const formatter = new Intl.DateTimeFormat("en-CA", {
@@ -100,6 +123,132 @@ const updateStreak = (profile: ProfileData, dateKey: string) => {
   profile.lastActionDate = dateKey
 }
 
+const resolveRemoteProfileId = async () => {
+  if (remoteProfileId !== undefined) return remoteProfileId
+
+  try {
+    const response = await fetch("/api/public/user-profiles", { cache: "no-store" })
+    if (!response.ok) {
+      remoteProfileId = null
+      return remoteProfileId
+    }
+    const profiles = (await response.json()) as Array<{ id: string }>
+    remoteProfileId = profiles[0]?.id ?? null
+    return remoteProfileId
+  } catch {
+    remoteProfileId = null
+    return remoteProfileId
+  }
+}
+
+const syncRemoteProfile = async (profile: ProfileData) => {
+  try {
+    const id = await resolveRemoteProfileId()
+    const payload = {
+      score: profile.score,
+      streakDays: profile.streakDays,
+      lastActionDate: profile.lastActionDate ?? null,
+    }
+
+    if (id) {
+      await fetch(`/api/public/user-profiles/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      return
+    }
+
+    const response = await fetch("/api/public/user-profiles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+    if (!response.ok) return
+    const created = (await response.json()) as { id?: string }
+    remoteProfileId = created.id ?? null
+  } catch {
+    // ignore optional remote sync failures
+  }
+}
+
+const persistRemoteAction = async (action: UserAction) => {
+  try {
+    await fetch("/api/public/user-actions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: action.type,
+        points: action.points,
+        meta: action.meta ?? {},
+      }),
+    })
+  } catch {
+    // ignore optional remote sync failures
+  }
+}
+
+const persistRemoteDecision = async (decision: DecisionEntry) => {
+  try {
+    await fetch("/api/public/decisions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        itemType: decision.itemType,
+        problemType: decision.problemType,
+        recommendation: decision.recommendation,
+        priority: decision.priority,
+        status: decision.status,
+        confidence: decision.confidence,
+        recommendedFeasible: decision.recommendedFeasible,
+        bestFeasibleOption: decision.bestFeasibleOption,
+        budgetNok: decision.budgetNok,
+        timeDays: decision.timeDays,
+        modelRepairabilityScore: decision.modelRepairabilityScore,
+        impactScore: decision.impactScore,
+        savingsMin: decision.savingsMin,
+        savingsMax: decision.savingsMax,
+        co2eSavedMin: decision.co2eSavedMin,
+        co2eSavedMax: decision.co2eSavedMax,
+        explainability: decision.explainability,
+        options: decision.options,
+        planB: decision.planB,
+      }),
+    })
+  } catch {
+    // ignore optional remote sync failures
+  }
+}
+
+const persistChallengeCompletion = async (challengeId: string, points: number) => {
+  try {
+    await fetch("/api/user/challenge-complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ challengeId, points }),
+    })
+  } catch {
+    // ignore optional remote sync failures
+  }
+}
+
+export const recordQuizAttempt = async (payload: {
+  score: number
+  maxScore: number
+  level: string
+  answers: number[]
+}) => {
+  try {
+    await fetch("/api/user/quiz-attempt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+  } catch {
+    // ignore optional remote sync failures
+  }
+}
+
 export const loadProfile = (): ProfileData => {
   if (typeof window === "undefined") return { ...DEFAULT_PROFILE }
   const raw = window.localStorage.getItem(STORAGE_KEY)
@@ -122,38 +271,58 @@ const applyAction = (profile: ProfileData, type: ActionType, points = actionPoin
   updateStreak(profile, dateKey)
   profile.score += points
 
-  profile.actions.unshift({
+  const action: UserAction = {
     id: crypto.randomUUID(),
     type,
     createdAt: new Date().toISOString(),
     meta,
     points,
-  })
+  }
 
+  profile.actions.unshift(action)
   profile.actions = profile.actions.slice(0, maxActions)
+
+  void persistRemoteAction(action)
 }
 
 export const recordAction = (type: ActionType, meta?: Record<string, string>, points?: number) => {
   const profile = loadProfile()
   applyAction(profile, type, points, meta)
   saveProfile(profile)
+  void syncRemoteProfile(profile)
   return profile
 }
 
-export const recordDecision = (input: DecisionInput, recommendation: Recommendation, impactScore: number, savings: [number, number]) => {
+export const recordDecision = (
+  input: DecisionInput,
+  decision: DecisionOutput,
+  impactScore: number,
+  savings: [number, number],
+) => {
   const profile = loadProfile()
+  const recommendedOption = decision.options.find((option) => option.type === decision.recommendation)
   const entry: DecisionEntry = {
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
     itemType: input.itemType,
     problemType: input.problemType,
-    recommendation,
+    recommendation: decision.recommendation,
     budgetNok: input.budgetNok,
     timeDays: input.timeDays,
     priority: input.priority,
     impactScore,
     savingsMin: savings[0],
     savingsMax: savings[1],
+    status: decision.status,
+    confidence: decision.confidence,
+    recommendedFeasible: decision.recommendedFeasible,
+    bestFeasibleOption: decision.bestFeasibleOption,
+    modelRepairabilityScore: input.modelRepairabilityScore,
+    co2eSavedMin: recommendedOption?.co2eSavedMin,
+    co2eSavedMax: recommendedOption?.co2eSavedMax,
+    explainability: decision.explainability,
+    options: decision.options,
+    planB: decision.planB,
   }
 
   profile.decisionHistory.unshift(entry)
@@ -161,6 +330,8 @@ export const recordDecision = (input: DecisionInput, recommendation: Recommendat
 
   applyAction(profile, "decision_complete")
   saveProfile(profile)
+  void persistRemoteDecision(entry)
+  void syncRemoteProfile(profile)
 
   return profile
 }
@@ -171,6 +342,8 @@ export const completeChallenge = (challengeId: string, points: number) => {
     profile.completedChallenges.push(challengeId)
     applyAction(profile, "challenge_complete", points, { challengeId })
     saveProfile(profile)
+    void persistChallengeCompletion(challengeId, points)
+    void syncRemoteProfile(profile)
   }
 
   return profile
@@ -178,5 +351,6 @@ export const completeChallenge = (challengeId: string, points: number) => {
 
 export const resetProfile = () => {
   if (typeof window === "undefined") return
+  remoteProfileId = undefined
   window.localStorage.removeItem(STORAGE_KEY)
 }

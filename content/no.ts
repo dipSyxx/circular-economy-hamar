@@ -1,24 +1,26 @@
-import type { Actor, Challenge } from "@/lib/data";
+import type { Challenge } from "@/lib/data";
 import { itemTypeLabels, problemTypeLabels } from "@/lib/enum-labels";
 
 export const site = {
-  name: "SirkulærHamar",
-  title: "SirkulærHamar - Gjenbruk, Reparasjon, Bærekraft",
+  name: "Sirkulær Norge",
+  title: "Sirkulær Norge - Gjenbruk, reparasjon og smartere valg",
   description:
-    "Din guide til sirkulære tilbud i Hamar. Finn bruktbutikker, reparatører og lær hvordan du kan leve mer bærekraftig.",
+    "Din guide til sirkulære tilbud i hele Norge. Finn bruktbutikker, reparatører, gjenvinning og lokale ombruksløsninger.",
   keywords: [
     "sirkulær",
     "gjenbruk",
-    "hamar",
+    "norge",
     "bærekraft",
     "reparasjon",
     "brukt",
+    "gjenvinning",
   ],
 };
 
 export const navigation = [
   { href: "/", label: "Hjem" },
   { href: "/aktorer", label: "Aktører" },
+  { href: "/guider", label: "Guider" },
   { href: "/decide", label: "Beslutning" },
   { href: "/kart", label: "Kart" },
   { href: "/quiz", label: "Quiz" },
@@ -121,13 +123,13 @@ export const themeCopy = {
 };
 
 export const heroContent = {
-  badge: "Lokale sirkulære tilbud i Hamar",
+  badge: "Sirkulære tilbud i hele Norge",
   title: {
     lead: "Kjøp brukt. Reparer.",
-    highlight: "Spar penger og miljøet.",
+    highlight: "Finn riktig aktør der du bor.",
   },
   description:
-    "Finn de beste bruktbutikkene, reparatørene og gjenvinningsstedene i Hamar. Vi gjør det enkelt å ta sirkulære valg.",
+    "Finn bruktbutikker, reparatører, ombrukssteder og gjenvinning i hele Norge. Vi gjør det enklere å ta sirkulære valg med lokale neste steg.",
   primaryCta: { label: "Start beslutning", href: "/decide" },
   secondaryCta: { label: "Utforsk aktører", href: "/aktorer" },
   quickLinks: [
@@ -153,9 +155,9 @@ export const heroContent = {
 };
 
 export const homeContent = {
-  actorsTitle: "Sirkulære aktører i Hamar",
+  actorsTitle: "Sirkulære aktører i Norge",
   actorsDescription:
-    "Disse lokale aktørene hjelper deg med å handle mer bærekraftig. Kjøp brukt, få ting reparert, og gi ting nytt liv.",
+    "Utforsk lokale aktører som hjelper deg å kjøpe brukt, reparere, gi videre og resirkulere riktigere der du bor.",
 };
 
 export const sectionContent = {
@@ -167,9 +169,9 @@ export const sectionContent = {
 
 export const pageCopy = {
   actors: {
-    title: "Sirkulære aktører i Hamar",
+    title: "Sirkulære aktører i Norge",
     description:
-      "Utforsk lokale bruktbutikker, reparatører og gjenvinningssteder. Hver aktør bidrar til en mer bærekraftig by.",
+      "Utforsk bruktbutikker, reparatører, ombrukssteder og gjenvinning på tvers av fylker og kommuner i Norge.",
     badges: [
       "Ombruk/second hand",
       "Utleie/utlån",
@@ -195,7 +197,7 @@ export const pageCopy = {
     ctaTitle: "Klar til å gjøre en forskjell?",
     ctaDescription:
       "Nå som du vet mer om hvorfor sirkulær økonomi er viktig, er det på tide å sette kunnskapen ut i praksis!",
-    ctaPrimary: { label: "Finn aktører i Hamar", href: "/aktorer" },
+    ctaPrimary: { label: "Finn aktører i Norge", href: "/aktorer" },
     ctaSecondary: { label: "Ta sirkulærquizen", href: "/quiz" },
   },
   quiz: {
@@ -209,14 +211,14 @@ export const pageCopy = {
       "Lurer du på om du bør reparere eller kjøpe nytt? Vår kalkulator hjelper deg å ta det smarteste valget for lommeboka og miljøet.",
   },
   map: {
-    title: "Sirkulært kart over Hamar",
+    title: "Sirkulært kart over Norge",
     description:
       "Finn bruktbutikker, reparatører og gjenvinningssteder nær deg.",
   },
   decide: {
     title: "Beslutningsmotor",
     description:
-      "Svar på noen raske spørsmål og få et smart, sirkulært valg - med lokale aktører som neste steg.",
+      "Svar på noen raske spørsmål og få et smart, sirkulært valg med lokale aktører som neste steg.",
   },
   challenges: {
     title: "Oppdrag",
@@ -333,7 +335,7 @@ export const ctaContent = {
     "Lever inn e-avfall på riktig sted",
     "Ta med en venn til bruktbutikk",
   ],
-  primaryCta: { label: "Finn aktører i Hamar", href: "/aktorer" },
+  primaryCta: { label: "Finn aktører i Norge", href: "/aktorer" },
   secondaryCta: { label: "Ta sirkulærquizen", href: "/quiz" },
 };
 
@@ -349,11 +351,11 @@ export const quizCopy = {
   pointsLabel: "poeng",
   shareLabel: "Del resultatet",
   retryLabel: "Ta quizen på nytt",
-  exploreActorsLabel: "Utforsk aktører i Hamar",
+  exploreActorsLabel: "Utforsk aktører i Norge",
   challengesTitle: "Utfordringer for deg",
   challengesDescription: "Fullfør utfordringer for å bli enda mer sirkulær!",
   shareTemplate:
-    "Jeg fikk {score}/{maxScore} på SirkulærHamar-quizen og er en {title}! Ta quizen du også: ",
+    "Jeg fikk {score}/{maxScore} på Sirkulær Norge-quizen og er en {title}! Ta quizen du også: ",
   copiedLabel: "Kopiert til utklippstavle!",
 };
 
@@ -376,7 +378,7 @@ export const calculatorCopy = {
     used: "Kjøpe brukt",
     new: "Kjøpe nytt",
   },
-  recommendedActorsLabel: "Anbefalt aktør i Hamar:",
+  recommendedActorsLabel: "Anbefalt aktør i ditt område:",
   resetLabel: "Beregn på nytt",
   deviceOptions: [
     { value: "phone", label: "Telefon / Mobil" },
@@ -678,6 +680,30 @@ export const decideCopy = {
     opensAtLabel: "Åpner kl.",
     priceRangeLabel: "Prisestimat",
     etaLabel: "Tidsbruk",
+    countyLabel: "Fylke",
+    countyPlaceholder: "Hele Norge",
+    municipalityLabel: "Kommune/by",
+    municipalityPlaceholder: "Alle kommuner/byer",
+    transportModeLabel: "Transport",
+    transportModePlaceholder: "Velg transport",
+    maxTravelMinutesLabel: "Maks reisetid (min)",
+    liveMatchLoadingLabel: "Henter lokale forslag...",
+    liveMatchErrorLabel: "Kunne ikke hente lokale forslag akkurat na.",
+    fallbackTravelLimitLabel:
+      "Ingen aktorer passet reisegrensen din, sa vi viser de beste alternativene likevel.",
+    whyThisActorTitle: "Hvorfor denne aktoren",
+    travelApproximateLabel: "Omtrentlig",
+    coverageReasonLabels: {
+      base_location: "Lokalt tilbud",
+      service_area_municipality: "Dekker kommunen din",
+      service_area_county: "Dekker fylket ditt",
+      nationwide_fallback: "Landsdekkende",
+    },
+    transportModeLabels: {
+      driving: "Bil",
+      cycling: "Sykkel",
+      walking: "Ga",
+    },
   },
   optionCopy: {
     repair: {
@@ -709,14 +735,15 @@ export const decideCopy = {
 
 export const footerContent = {
   about:
-    "Din guide til bærekraftige valg i Hamar. Gjenbruk, reparer, resirkuler.",
+    "Din guide til bærekraftige valg i Norge. Gjenbruk, reparer, gi videre og resirkuler smartere.",
   navigationTitle: "Navigasjon",
   actorsTitle: "Aktører",
   sourcesTitle: "Kilder",
   actorLinks: [
-    { label: "Kirppis Hamar", href: "/aktorer/kirppis-hamar" },
-    { label: "Resirkula", href: "/aktorer/resirkula" },
-    { label: "Mobit Hamar", href: "/aktorer/mobit-hamar" },
+    { label: "Alle aktører", href: "/aktorer" },
+    { label: "Praktiske guider", href: "/guider" },
+    { label: "Utforsk fylker", href: "/fylker" },
+    { label: "Beslutningsmotor", href: "/decide" },
   ],
   sourceLinks: [
     { label: "NDLA", href: "https://ndla.no" },
@@ -724,242 +751,8 @@ export const footerContent = {
     { label: "Miljøstatus", href: "https://miljostatus.miljodirektoratet.no" },
   ],
   copyright:
-    "© 2025 SirkulærHamar. Laget som skoleprosjekt om sirkulær økonomi.",
+    "© 2026 Sirkulær Norge. Bygget for å gjøre sirkulære valg enklere i hele Norge.",
 };
-
-export const actors = [
-  {
-    id: "kirppis-hamar",
-    name: "Kirppis Hamar",
-    slug: "kirppis-hamar",
-    category: "brukt",
-    description:
-      "Bruktbutikk på Maxi Storsenter med skattejakt-opplevelse og standutleie.",
-    longDescription:
-      "Kirppis Hamar er en bruktbutikk der du kan kjøpe og selge brukte varer via standutleie. Butikken håndterer salget for deg, og utvalget endrer seg hele tiden - perfekt for en skattejakt etter klær, interiør og småmøbler.",
-    address: "Aslak Bolts gate 48, 2316 Hamar",
-    lat: 60.798701,
-    lng: 11.04672,
-    phone: "70 23 92 02",
-    email: "hamar@kirppis.no",
-    website: "https://www.kirppis.no/min-kirppis/",
-    instagram: "https://www.instagram.com/kirppishamar/",
-    openingHours: ["Man-fre: 10:00-21:00", "Lør: 10:00-18:00", "Søn: Stengt"],
-    openingHoursOsm: "Mo-Fr 10:00-21:00; Sa 10:00-18:00; Su off",
-    tags: ["klær", "møbler", "interiør", "stand", "vintage"],
-    benefits: [
-      "Spar penger på unike funn",
-      "Gir brukte varer nytt liv",
-      "Enkelt å selge via standutleie",
-      "Nytt utvalg hver uke",
-    ],
-    howToUse: [
-      "Stikk innom og let etter skatter",
-      "Spør om standutleie hvis du vil selge",
-      "Følg Instagram for oppdateringer",
-      "Ta med det du vil levere til salg",
-    ],
-    image: "/thrift-store-interior-with-vintage-clothes-and-fur.jpg",
-    sources: [
-      {
-        type: "website",
-        title: "Kirppis Hamar - Min Kirppis",
-        url: "https://www.kirppis.no/min-kirppis/",
-        capturedAt: "2026-01-14",
-        note: "Adresse, åpningstider og kontaktinformasjon.",
-      },
-      {
-        type: "social",
-        title: "Kirppis Hamar Instagram",
-        url: "https://www.instagram.com/kirppishamar/",
-        capturedAt: "2026-01-14",
-        note: "Bilder, tilbud og oppdateringer.",
-      },
-      {
-        type: "map",
-        title: "Kirppis Hamar på kart",
-        url: "https://goo.gl/maps/5ige2e7jacAqNRgbA",
-        capturedAt: "2026-01-14",
-        note: "Plassering ved Maxi Storsenter.",
-      },
-    ],
-  },
-  {
-    id: "resirkula",
-    name: "Resirkula",
-    slug: "resirkula",
-    category: "brukt",
-    description:
-      "Gjenbrukskjøpesenter i Kretsløpsparken med ombruk og kvalitetssikrede varer.",
-    longDescription:
-      "Resirkula er et gjenbrukskjøpesenter i Kretsløpsparken der varer fra ombruk blir kvalitetssikret og solgt på nytt. Her finner du flere butikker under samme tak og et spesielt fokus på ombruk og redusert avfall.",
-    address: "Holmefaret 16, 2320 Furnes",
-    lat: 60.842008,
-    lng: 11.086002,
-    website: "https://www.resirkula.no/",
-    instagram: "https://www.instagram.com/resirkula/",
-    openingHours: [
-      "Man-tors: 10:00-17:00",
-      "Fre: 10:00-16:00",
-      "Lør: 10:00-15:00",
-      "Søn: Stengt",
-    ],
-    openingHoursOsm:
-      "Mo-Th 10:00-17:00; Fr 10:00-16:00; Sa 10:00-15:00; Su off",
-    tags: ["gjenbruk", "ombruk", "møbler", "elektronikk", "butikker"],
-    benefits: [
-      "Kvalitetssikrede bruktvarer",
-      "Reduserer avfall lokalt",
-      "Mange kategorier i ett senter",
-      "Bra for møbler og elektronikk",
-    ],
-    howToUse: [
-      "Planlegg turen med åpningstidene",
-      "Sjekk flere butikker under samme tak",
-      "Spør om ombruk og innlevering",
-      "Ta med venner og gjør det til en runde",
-    ],
-    image: "/organized-secondhand-store-with-furniture-and-elec.jpg",
-    sources: [
-      {
-        type: "website",
-        title: "Resirkula",
-        url: "https://www.resirkula.no/",
-        capturedAt: "2026-01-14",
-        note: "Beskrivelse av konsept og adresse.",
-      },
-      {
-        type: "website",
-        title: "Åpningstider Resirkula",
-        url: "https://www.resirkula.no/apningstider-2/apningstider",
-        capturedAt: "2026-01-14",
-        note: "Oppdaterte åpningstider.",
-      },
-      {
-        type: "social",
-        title: "Resirkula Instagram",
-        url: "https://www.instagram.com/resirkula/",
-        capturedAt: "2026-01-14",
-        note: "Bilder og kampanjer.",
-      },
-    ],
-  },
-  {
-    id: "mobit-hamar",
-    name: "Mobit Hamar",
-    slug: "mobit-hamar",
-    category: "reparasjon",
-    description: "Lokal mobil- og IT-service med rådgivning og reparasjoner.",
-    longDescription:
-      "Mobit Hamar tilbyr service og reparasjon av mobil og IT-utstyr, samt rådgivning for å få enheten din til å vare lenger. De hjelper med feilsøking, bytte av deler og gir deg et ærlig estimat før du bestemmer deg.",
-    address: "Furnesvegen 122A, 2318 Hamar",
-    lat: 60.8058547,
-    lng: 11.0844027,
-    phone: "62 55 60 00",
-    email: "hamar@mobit.no",
-    website: "https://www.mobit.no/forhandlere/hamar",
-    openingHours: ["Se nettsiden for åpningstider"],
-    tags: ["mobil", "PC", "service", "reparasjon", "IT"],
-    benefits: [
-      "Forlenger levetiden på elektronikk",
-      "Reduserer e-avfall",
-      "Lokal og rask service",
-      "Får et prisoverslag før du bestemmer deg",
-    ],
-    howToUse: [
-      "Beskriv problemet og be om vurdering",
-      "Få prisestimat og tidsbruk",
-      "Lever inn enheten",
-      "Hent ferdig reparert - eller få råd om brukt",
-    ],
-    repairServices: [
-      { problemType: "screen", itemTypes: ["phone", "laptop"], priceMin: 900, priceMax: 1800, etaDays: 2 },
-      { problemType: "battery", itemTypes: ["phone", "laptop"], priceMin: 500, priceMax: 1200, etaDays: 1 },
-      { problemType: "slow", itemTypes: ["phone", "laptop"], priceMin: 400, priceMax: 900, etaDays: 1 },
-      { problemType: "no_power", itemTypes: ["phone", "laptop"], priceMin: 900, priceMax: 2000, etaDays: 3 },
-      { problemType: "water", itemTypes: ["phone", "laptop"], priceMin: 1200, priceMax: 3000, etaDays: 4 },
-    ],
-    image: "/electronics-repair-shop-with-technician-fixing-sma.jpg",
-    sources: [
-      {
-        type: "website",
-        title: "Mobit Hamar",
-        url: "https://www.mobit.no/forhandlere/hamar",
-        capturedAt: "2026-01-14",
-        note: "Adresse, telefon og kontaktinformasjon.",
-      },
-      {
-        type: "social",
-        title: "Mobit Hamar Facebook",
-        url: "https://www.facebook.com/mobithamar",
-        capturedAt: "2026-01-14",
-        note: "Lokale oppdateringer og kundedialog.",
-      },
-      {
-        type: "social",
-        title: "Mobit Hamar LinkedIn",
-        url: "https://www.linkedin.com/company/mobit-hamar-og-gj%C3%B8vik/",
-        capturedAt: "2026-01-14",
-        note: "Bakgrunn og bedriftsinfo.",
-      },
-    ],
-  },
-  {
-    id: "kretslopsparken-gjenvinning",
-    name: "Kretsløpsparken gjenvinningsstasjon",
-    slug: "kretslopsparken-gjenvinning",
-    category: "gjenvinning",
-    description:
-      "Gjenvinningsstasjon i Kretsløpsparken for sortering av avfall og e-avfall.",
-    longDescription:
-      "Kretsløpsparken er Sirkula sin gjenvinningsstasjon i Hamar-området. Her leverer du e-avfall og andre fraksjoner riktig, og Resirkula ligger i samme område for ombruk før gjenvinning.",
-    address: "Arnkvernvegen 169, 2320 Furnes",
-    lat: 60.84291,
-    lng: 11.085123,
-    phone: "62 54 37 00",
-    email: "post@sirkula.no",
-    website: "https://www.sirkula.no/gjenvinningsstasjoner/kretslopsparken/",
-    openingHours: ["Se nettsiden for åpningstider"],
-    tags: ["e-avfall", "gjenvinning", "sortering", "ombruk"],
-    benefits: [
-      "Hjelper deg å sortere riktig",
-      "Reduserer farlig avfall i restavfall",
-      "Kobler ombruk og gjenvinning i samme område",
-      "Lokal leveringsplass for Hamar-regionen",
-    ],
-    howToUse: [
-      "Sorter hjemme før du drar",
-      "Sjekk åpningstider på nettsiden",
-      "Lever e-avfall og andre fraksjoner riktig",
-      "Besøk Resirkula hvis noe kan ombrukes",
-    ],
-    image:
-      "https://www.sirkula.no/getfile.php/132780-1731567328/1.%20Sirkula.no/Sider/Bildearkiv%20Sirkula/Gjenvinningstasjoner/Kretsl%C3%B8psparken/SirkulaKretslopspark_26.jpg%20%28extra_large%29.webp",
-    sources: [
-      {
-        type: "website",
-        title: "Kretsløpsparken gjenvinningsstasjon",
-        url: "https://www.sirkula.no/gjenvinningsstasjoner/kretslopsparken/",
-        capturedAt: "2026-01-14",
-        note: "Adresse og beskrivelse av stasjonen.",
-      },
-      {
-        type: "map",
-        title: "Kretsløpsparken på kart",
-        url: "https://www.google.com/maps/search/?api=1&query=Arnkvernvegen+169+2320+Furnes",
-        capturedAt: "2026-01-14",
-        note: "Plassering i Kretsløpsparken.",
-      },
-      {
-        type: "website",
-        title: "Gjenvinningsstasjoner - Sirkula",
-        url: "https://www.sirkula.no/gjenvinningsstasjoner/",
-        capturedAt: "2026-01-14",
-        note: "Oversikt over Sirkula sine stasjoner.",
-      },
-    ],
-  },
-] satisfies Actor[];
 
 export const quizQuestions = [
   {
@@ -1032,7 +825,7 @@ export const quizResults = {
     tips: [
       "Prøv å besøke en bruktbutikk denne uka",
       'Før du kjøper noe nytt, spør deg selv: "Trenger jeg dette?"',
-      "Lær hvor du leverer e-avfall i Hamar",
+      "Lær hvor du leverer e-avfall der du bor",
     ],
     badge: "🌱",
   },
@@ -1072,7 +865,7 @@ export const challenges = [
   {
     id: "brukt-2",
     title: "Skattejeger",
-    description: "Besøk en bruktbutikk i Hamar",
+    description: "Besøk en bruktbutikk i nærheten",
     points: 15,
     icon: "🧭",
     category: "brukt",

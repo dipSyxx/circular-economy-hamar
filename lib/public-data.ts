@@ -1,9 +1,15 @@
 import "server-only"
 
-import { cookies, headers } from "next/headers"
+import { unstable_cache } from "next/cache"
+import { prisma } from "@/lib/prisma"
+import { getActorTrustState } from "@/lib/actor-trust"
+import { getActorQualitySummary } from "@/lib/source-quality"
+import {
+  filterActorsByCountyScope,
+  filterActorsByMunicipalityScope,
+} from "@/lib/actor-scope"
 import type {
   Actor,
-  ActorCategory,
   Challenge,
   Co2eSource,
   Co2eSourceItem,
@@ -14,371 +20,383 @@ import type {
   QuizResult,
   RepairData,
   RepairEstimate,
-  RepairService,
-  Source,
-  SourceType,
 } from "@/lib/data"
-import type { ItemType, ProblemType } from "@/lib/decision-engine"
 
-type ActorRecord = {
-  id: string
-  name: string
-  slug: string
-  category: ActorCategory
-  description: string
-  longDescription: string
-  address: string
-  lat: number
-  lng: number
-  phone: string | null
-  email: string | null
-  website: string | null
-  instagram: string | null
-  openingHours: string[]
-  openingHoursOsm: string | null
-  tags: string[]
-  benefits: string[]
-  howToUse: string[]
-  image: string | null
-}
-
-type ActorSourceRecord = {
-  id: string
-  actorId: string
-  type: SourceType
-  title: string
-  url: string
-  capturedAt: string | null
-  note: string | null
-}
-
-type ActorRepairServiceRecord = {
-  id: string
-  actorId: string
-  problemType: ProblemType
-  itemTypes: ItemType[]
-  priceMin: number
-  priceMax: number
-  etaDays: number | null
-}
-
-type ChallengeRecord = {
-  id: string
-  key: string
-  title: string
-  description: string
-  points: number
-  icon: string
-  category: ActorCategory
-}
-
-type QuizQuestionRecord = {
-  id: string
-  key: string
-  question: string
-  sortOrder: number
-}
-
-type QuizOptionRecord = {
-  id: string
-  questionId: string
-  text: string
-  points: number
-  sortOrder: number
-}
-
-type QuizResultRecord = {
-  id: string
-  level: QuizLevel
-  title: string
-  description: string
-  tips: string[]
-  badge: string
-}
-
-type RepairEstimateRecord = RepairEstimate & {
-  id: string
-  itemType: ItemType
-  problemType: ProblemType
-}
-
-type FactRecord = Fact & {
-  id: string
-  key: string
-  sortOrder: number
-}
-
-type DetailedFactRecord = Omit<DetailedFact, "sources"> & {
-  id: string
-  key: string
-  sortOrder: number
-}
-
-type DetailedFactSourceRecord = {
-  id: string
-  detailedFactId: string
-  name: string
-  url: string
-  sortOrder: number
-}
-
-type Co2eSourceRecord = {
-  id: string
-  key: string
-  title: string
-  url: string
-  capturedAt: string | null
-  anchors: string[]
-}
-
-type Co2eSourceItemRecord = {
-  id: string
-  sourceId: string
-  itemType: ItemType
-}
-
-const getBaseUrl = async () => {
-  const headerList = await headers()
-  const host = headerList.get("x-forwarded-host") ?? headerList.get("host")
-  const proto = headerList.get("x-forwarded-proto") ?? "http"
-  if (host) {
-    return `${proto}://${host}`
-  }
-
-  const envUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.NEXT_PUBLIC_APP_URL ??
-    process.env.VERCEL_URL
-  if (envUrl) {
-    return envUrl.startsWith("http") ? envUrl : `https://${envUrl}`
-  }
-
-  return "http://localhost:3000"
-}
-
-const formatDate = (value: string | null) => {
+const formatDate = (value?: Date | null) => {
   if (!value) return undefined
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return undefined
-  return date.toISOString().slice(0, 10)
+  return value.toISOString().slice(0, 10)
 }
 
-const fetchPublic = async <T>(
-  path: string,
-  params?: Record<string, string | number | undefined>,
-): Promise<T> => {
-  const baseUrl = await getBaseUrl()
-  const url = new URL(path, baseUrl)
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== "") {
-        url.searchParams.set(key, String(value))
+const getActorsCached = unstable_cache(
+  async (): Promise<Actor[]> => {
+    const actors = await prisma.actor.findMany({
+      where: { status: "approved" },
+      include: {
+        baseCounty: true,
+        baseMunicipality: {
+          include: {
+            county: true,
+          },
+        },
+        serviceAreas: {
+          include: {
+            county: true,
+            municipality: {
+              include: {
+                county: true,
+              },
+            },
+          },
+        },
+        repairServices: true,
+        sources: true,
+      },
+      orderBy: [
+        { nationwide: "desc" },
+        { county: "asc" },
+        { municipality: "asc" },
+        { name: "asc" },
+      ],
+    })
+
+    return actors.map((actor) => {
+      const qualitySummary = getActorQualitySummary({
+        verificationStatus: actor.verificationStatus,
+        verifiedAt: actor.verifiedAt,
+        sources: actor.sources.map((source) => ({
+          type: source.type,
+          title: source.title,
+          url: source.url,
+          capturedAt: source.capturedAt,
+          note: source.note,
+        })),
+      })
+      const sourceCount = qualitySummary.uniqueSourceCount
+      const trustState = getActorTrustState({
+        verificationStatus: actor.verificationStatus,
+        verifiedAt: actor.verifiedAt,
+        sourceCount,
+        qualitySummary,
+      })
+      const countyName = actor.baseCounty?.name ?? actor.baseMunicipality?.county.name ?? actor.county ?? undefined
+      const countySlug = actor.baseCounty?.slug ?? actor.baseMunicipality?.county.slug ?? actor.countySlug ?? undefined
+      const municipalityName = actor.baseMunicipality?.name ?? actor.municipality ?? undefined
+      const municipalitySlug = actor.baseMunicipality?.slug ?? actor.municipalitySlug ?? undefined
+      const serviceAreaCountySlugs = Array.from(
+        new Set(
+          actor.serviceAreas.flatMap((serviceArea) => {
+            if (serviceArea.county?.slug) return [serviceArea.county.slug]
+            if (serviceArea.municipality?.county.slug) return [serviceArea.municipality.county.slug]
+            return []
+          }),
+        ),
+      )
+      const serviceAreaMunicipalitySlugs = Array.from(
+        new Set(
+          actor.serviceAreas.flatMap((serviceArea) => (serviceArea.municipality?.slug ? [serviceArea.municipality.slug] : [])),
+        ),
+      )
+
+      return {
+        id: actor.id,
+        name: actor.name,
+        slug: actor.slug,
+        category: actor.category,
+        description: actor.description,
+        longDescription: actor.longDescription,
+        address: actor.address,
+        postalCode: actor.postalCode,
+        country: actor.country ?? undefined,
+        county: countyName,
+        countySlug,
+        municipality: municipalityName,
+        municipalitySlug,
+        city: actor.city ?? undefined,
+        area: actor.area,
+        lat: actor.lat,
+        lng: actor.lng,
+        phone: actor.phone,
+        email: actor.email,
+        website: actor.website,
+        instagram: actor.instagram,
+        openingHours: actor.openingHours,
+        openingHoursOsm: actor.openingHoursOsm,
+        tags: actor.tags,
+        benefits: actor.benefits,
+        howToUse: actor.howToUse,
+        image: actor.image,
+        nationwide: actor.nationwide,
+        serviceAreaCountySlugs,
+        serviceAreaMunicipalitySlugs,
+        verificationStatus: actor.verificationStatus,
+        verifiedAt: formatDate(actor.verifiedAt),
+        freshnessStatus: trustState.freshnessStatus,
+        isTrusted: trustState.isTrusted,
+        sourceCount,
+        dueState: qualitySummary.dueState,
+        qualitySummary,
+        repairServices: actor.repairServices.map((service) => ({
+          problemType: service.problemType,
+          itemTypes: service.itemTypes.length ? service.itemTypes : undefined,
+          priceMin: service.priceMin,
+          priceMax: service.priceMax,
+          etaDays: service.etaDays ?? undefined,
+        })),
+        sources: actor.sources.map((source) => ({
+          type: source.type,
+          title: source.title,
+          url: source.url,
+          capturedAt: formatDate(source.capturedAt),
+          note: source.note ?? undefined,
+        })),
       }
     })
-  }
+  },
+  ["public-actors"],
+  { revalidate: 300, tags: ["public-actors"] },
+)
 
-  const cookieHeader = (await cookies()).toString()
-  const response = await fetch(url, {
-    cache: "no-store",
-    headers: cookieHeader ? { cookie: cookieHeader } : undefined,
-  })
-  if (!response.ok) {
-    throw new Error(`Public API request failed: ${response.status} ${response.statusText}`)
-  }
-  return (await response.json()) as T
-}
+const getChallengesCached = unstable_cache(
+  async (): Promise<Challenge[]> => {
+    const challenges = await prisma.challenge.findMany({
+      orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
+    })
 
-const groupBy = <T extends Record<string, any>>(items: T[], key: keyof T) => {
-  const map = new Map<string, T[]>()
-  for (const item of items) {
-    const groupKey = String(item[key] ?? "")
-    if (!groupKey) continue
-    const bucket = map.get(groupKey)
-    if (bucket) {
-      bucket.push(item)
-    } else {
-      map.set(groupKey, [item])
+    return challenges.map((challenge) => ({
+      id: challenge.id,
+      key: challenge.key,
+      title: challenge.title,
+      description: challenge.description,
+      points: challenge.points,
+      icon: challenge.icon,
+      category: challenge.category,
+    }))
+  },
+  ["public-challenges"],
+  { revalidate: 300, tags: ["public-challenges"] },
+)
+
+const getQuizDataCached = unstable_cache(
+  async (): Promise<{
+    quizQuestions: QuizQuestion[]
+    quizResults: Record<QuizLevel, QuizResult>
+  }> => {
+    const [questions, results] = await Promise.all([
+      prisma.quizQuestion.findMany({
+        include: { options: { orderBy: { sortOrder: "asc" } } },
+        orderBy: { sortOrder: "asc" },
+      }),
+      prisma.quizResult.findMany({ orderBy: { level: "asc" } }),
+    ])
+
+    const quizQuestions = questions.map((question) => ({
+      id: question.id,
+      question: question.question,
+      options: question.options.map((option) => ({
+        text: option.text,
+        points: option.points,
+      })),
+    }))
+
+    const quizResults = results.reduce(
+      (acc, result) => {
+        acc[result.level] = {
+          level: result.level,
+          title: result.title,
+          description: result.description,
+          tips: result.tips,
+          badge: result.badge,
+        }
+        return acc
+      },
+      {} as Record<QuizLevel, QuizResult>,
+    )
+
+    return { quizQuestions, quizResults }
+  },
+  ["public-quiz"],
+  { revalidate: 300, tags: ["public-quiz"] },
+)
+
+const getRepairDataCached = unstable_cache(
+  async (): Promise<RepairData> => {
+    const items = await prisma.repairEstimate.findMany({
+      orderBy: [{ itemType: "asc" }, { problemType: "asc" }],
+    })
+    const data: RepairData = {}
+
+    for (const item of items) {
+      if (!data[item.itemType]) {
+        data[item.itemType] = {}
+      }
+      data[item.itemType][item.problemType] = {
+        itemType: item.itemType,
+        problemType: item.problemType,
+        deviceType: item.deviceType,
+        issue: item.issue,
+        repairCostMin: item.repairCostMin,
+        repairCostMax: item.repairCostMax,
+        repairDays: item.repairDays,
+        usedPriceMin: item.usedPriceMin,
+        usedPriceMax: item.usedPriceMax,
+        newPrice: item.newPrice,
+        co2Saved: item.co2Saved,
+      }
     }
-  }
-  return map
-}
 
-const mapSource = (source: ActorSourceRecord): Source => ({
-  type: source.type,
-  title: source.title,
-  url: source.url,
-  capturedAt: formatDate(source.capturedAt),
-  note: source.note ?? undefined,
-})
+    return data
+  },
+  ["public-repair-data"],
+  { revalidate: 300, tags: ["public-repair-data"] },
+)
 
-const mapService = (service: ActorRepairServiceRecord): RepairService => ({
-  problemType: service.problemType,
-  itemTypes: service.itemTypes.length ? service.itemTypes : undefined,
-  priceMin: service.priceMin,
-  priceMax: service.priceMax,
-  etaDays: service.etaDays ?? undefined,
-})
+const getFactsCached = unstable_cache(
+  async (): Promise<Fact[]> => {
+    const facts = await prisma.fact.findMany({
+      orderBy: [{ sortOrder: "asc" }, { title: "asc" }],
+    })
 
-const mapActor = (
-  actor: ActorRecord,
-  sources: ActorSourceRecord[],
-  services: ActorRepairServiceRecord[],
-): Actor => ({
-  ...actor,
-  sources: sources.map(mapSource),
-  repairServices: services.map(mapService),
-})
+    return facts.map((fact) => ({
+      title: fact.title,
+      stat: fact.stat,
+      description: fact.description,
+      icon: fact.icon,
+    }))
+  },
+  ["public-facts"],
+  { revalidate: 300, tags: ["public-facts"] },
+)
+
+const getDetailedFactsCached = unstable_cache(
+  async (): Promise<DetailedFact[]> => {
+    const facts = await prisma.detailedFact.findMany({
+      include: {
+        sources: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+      orderBy: [{ sortOrder: "asc" }, { title: "asc" }],
+    })
+
+    return facts.map((fact) => ({
+      category: fact.category,
+      icon: fact.icon,
+      title: fact.title,
+      content: fact.content,
+      tips: fact.tips,
+      sources: fact.sources.map((source) => ({
+        name: source.name,
+        url: source.url,
+      })),
+    }))
+  },
+  ["public-detailed-facts"],
+  { revalidate: 300, tags: ["public-detailed-facts"] },
+)
+
+const getCo2eSourcesCached = unstable_cache(
+  async (): Promise<Co2eSource[]> => {
+    const sources = await prisma.co2eSource.findMany({ orderBy: { title: "asc" } })
+    return sources.map((source) => ({
+      id: source.id,
+      key: source.key,
+      title: source.title,
+      url: source.url,
+      capturedAt: formatDate(source.capturedAt),
+      anchors: source.anchors,
+    }))
+  },
+  ["public-co2e-sources"],
+  { revalidate: 300, tags: ["public-co2e-sources"] },
+)
+
+const getCo2eSourceItemsCached = unstable_cache(
+  async (): Promise<Co2eSourceItem[]> => {
+    const items = await prisma.co2eSourceItem.findMany({
+      orderBy: [{ itemType: "asc" }, { sourceId: "asc" }],
+    })
+    return items.map((item) => ({
+      id: item.id,
+      sourceId: item.sourceId,
+      itemType: item.itemType,
+    }))
+  },
+  ["public-co2e-source-items"],
+  { revalidate: 300, tags: ["public-co2e-source-items"] },
+)
 
 export const getActors = async (): Promise<Actor[]> => {
-  const [actors, sources, services] = await Promise.all([
-    fetchPublic<ActorRecord[]>("/api/public/actors"),
-    fetchPublic<ActorSourceRecord[]>("/api/public/actor-sources"),
-    fetchPublic<ActorRepairServiceRecord[]>("/api/public/actor-repair-services"),
-  ])
-  const sourcesByActor = groupBy(sources, "actorId")
-  const servicesByActor = groupBy(services, "actorId")
-
-  return actors.map((actor) =>
-    mapActor(actor, sourcesByActor.get(actor.id) ?? [], servicesByActor.get(actor.id) ?? []),
-  )
+  return getActorsCached()
 }
 
 export const getActorBySlug = async (slug: string): Promise<Actor | null> => {
-  const actors = await fetchPublic<ActorRecord[]>("/api/public/actors", { slug })
-  const actor = actors[0]
-  if (!actor) return null
-
-  const [sources, services] = await Promise.all([
-    fetchPublic<ActorSourceRecord[]>("/api/public/actor-sources", { actorId: actor.id }),
-    fetchPublic<ActorRepairServiceRecord[]>("/api/public/actor-repair-services", { actorId: actor.id }),
-  ])
-
-  return mapActor(actor, sources, services)
+  const actors = await getActorsCached()
+  return actors.find((actor) => actor.slug === slug) ?? null
 }
 
 export const getChallenges = async (): Promise<Challenge[]> => {
-  const challenges = await fetchPublic<ChallengeRecord[]>("/api/public/challenges")
-  return challenges.map((challenge) => ({
-    id: challenge.id,
-    key: challenge.key,
-    title: challenge.title,
-    description: challenge.description,
-    points: challenge.points,
-    icon: challenge.icon,
-    category: challenge.category,
-  }))
+  return getChallengesCached()
 }
 
-export const getQuizData = async (): Promise<{
-  quizQuestions: QuizQuestion[]
-  quizResults: Record<QuizLevel, QuizResult>
-}> => {
-  const [questions, options, results] = await Promise.all([
-    fetchPublic<QuizQuestionRecord[]>("/api/public/quiz-questions"),
-    fetchPublic<QuizOptionRecord[]>("/api/public/quiz-options"),
-    fetchPublic<QuizResultRecord[]>("/api/public/quiz-results"),
-  ])
-
-  const optionsByQuestion = groupBy(options, "questionId")
-  const quizQuestions = [...questions]
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((question) => ({
-      id: question.id,
-      question: question.question,
-      options: (optionsByQuestion.get(question.id) ?? [])
-        .sort((a, b) => a.sortOrder - b.sortOrder)
-        .map((option) => ({ text: option.text, points: option.points })),
-    }))
-
-  const quizResults = results.reduce(
-    (acc, result) => {
-      acc[result.level] = {
-        level: result.level,
-        title: result.title,
-        description: result.description,
-        tips: result.tips,
-        badge: result.badge,
-      }
-      return acc
-    },
-    {} as Record<QuizLevel, QuizResult>,
-  )
-
-  return { quizQuestions, quizResults }
+export const getQuizData = async () => {
+  return getQuizDataCached()
 }
 
 export const getRepairData = async (): Promise<RepairData> => {
-  const items = await fetchPublic<RepairEstimateRecord[]>("/api/public/repair-estimates")
-  const data: RepairData = {}
-
-  for (const item of items) {
-    if (!data[item.itemType]) {
-      data[item.itemType] = {}
-    }
-    data[item.itemType][item.problemType] = {
-      itemType: item.itemType,
-      problemType: item.problemType,
-      deviceType: item.deviceType,
-      issue: item.issue,
-      repairCostMin: item.repairCostMin,
-      repairCostMax: item.repairCostMax,
-      repairDays: item.repairDays,
-      usedPriceMin: item.usedPriceMin,
-      usedPriceMax: item.usedPriceMax,
-      newPrice: item.newPrice,
-      co2Saved: item.co2Saved,
-    }
-  }
-
-  return data
+  return getRepairDataCached()
 }
 
 export const getFacts = async (): Promise<Fact[]> => {
-  const facts = await fetchPublic<FactRecord[]>("/api/public/facts")
-  return facts.map((fact) => ({
-    title: fact.title,
-    stat: fact.stat,
-    description: fact.description,
-    icon: fact.icon,
-  }))
+  return getFactsCached()
 }
 
 export const getDetailedFacts = async (): Promise<DetailedFact[]> => {
-  const [facts, sources] = await Promise.all([
-    fetchPublic<DetailedFactRecord[]>("/api/public/detailed-facts"),
-    fetchPublic<DetailedFactSourceRecord[]>("/api/public/detailed-fact-sources"),
-  ])
-  const sourcesByFact = groupBy(sources, "detailedFactId")
-
-  return facts.map((fact) => ({
-    category: fact.category,
-    icon: fact.icon,
-    title: fact.title,
-    content: fact.content,
-    tips: fact.tips,
-    sources: (sourcesByFact.get(fact.id) ?? [])
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((source) => ({ name: source.name, url: source.url })),
-  }))
+  return getDetailedFactsCached()
 }
 
 export const getCo2eSources = async (): Promise<Co2eSource[]> => {
-  const sources = await fetchPublic<Co2eSourceRecord[]>("/api/public/co2e-sources")
-  return sources.map((source) => ({
-    id: source.id,
-    key: source.key,
-    title: source.title,
-    url: source.url,
-    capturedAt: formatDate(source.capturedAt),
-    anchors: source.anchors ?? [],
-  }))
+  return getCo2eSourcesCached()
 }
 
 export const getCo2eSourceItems = async (): Promise<Co2eSourceItem[]> => {
-  const items = await fetchPublic<Co2eSourceItemRecord[]>("/api/public/co2e-source-items")
-  return items.map((item) => ({
-    id: item.id,
-    sourceId: item.sourceId,
-    itemType: item.itemType,
-  }))
+  return getCo2eSourceItemsCached()
+}
+
+export const getActorsByCounty = async (countySlug: string) => {
+  const actors = await getActorsCached()
+  return filterActorsByCountyScope(actors, countySlug)
+}
+
+export const getActorsByMunicipality = async (countySlug: string, municipalitySlug: string) => {
+  const actors = await getActorsCached()
+  return filterActorsByMunicipalityScope(actors, countySlug, municipalitySlug)
+}
+
+export const getActorsByCategory = async (category: Actor["category"]) => {
+  const actors = await getActorsCached()
+  return actors.filter((actor) => actor.category === category)
+}
+
+export const getActorsByCountyAndCategory = async (
+  countySlug: string,
+  category: Actor["category"],
+) => {
+  const actors = await getActorsCached()
+  return filterActorsByCountyScope(actors, countySlug).filter((actor) => actor.category === category)
+}
+
+export const getActorsByMunicipalityAndCategory = async (
+  countySlug: string,
+  municipalitySlug: string,
+  category: Actor["category"],
+) => {
+  const actors = await getActorsCached()
+  return filterActorsByMunicipalityScope(actors, countySlug, municipalitySlug).filter(
+    (actor) => actor.category === category,
+  )
+}
+
+export const getRepairEstimateEntries = async (): Promise<RepairEstimate[]> => {
+  const data = await getRepairDataCached()
+  return Object.values(data).flatMap((problems) => Object.values(problems))
 }

@@ -1,0 +1,6 @@
+actor_slug,problem_type,item_types,price_min,price_max,eta_days
+mobit-hamar,screen,phone|laptop,900,1800,2
+mobit-hamar,battery,phone|laptop,500,1200,1
+mobit-hamar,slow,phone|laptop,400,900,1
+mobit-hamar,no_power,phone|laptop,900,2000,3
+mobit-hamar,water,phone|laptop,1200,3000,4

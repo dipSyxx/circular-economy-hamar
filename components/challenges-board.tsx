@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import type { Challenge } from "@/lib/data"
+import { authClient } from "@/lib/auth/client"
 import { completeChallenge, loadProfile, type ProfileData } from "@/lib/profile-store"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -13,11 +14,34 @@ interface ChallengesBoardProps {
 }
 
 export function ChallengesBoard({ challenges }: ChallengesBoardProps) {
+  const { data } = authClient.useSession()
+  const isSignedIn = Boolean(data?.session)
   const [profile, setProfile] = useState<ProfileData | null>(null)
 
   useEffect(() => {
-    setProfile(loadProfile())
-  }, [])
+    let active = true
+
+    const load = async () => {
+      if (!isSignedIn) {
+        if (active) setProfile(loadProfile())
+        return
+      }
+
+      try {
+        const response = await fetch("/api/user/profile-summary", { cache: "no-store" })
+        if (!response.ok) throw new Error("Unable to load profile")
+        const nextProfile = (await response.json()) as ProfileData
+        if (active) setProfile(nextProfile)
+      } catch {
+        if (active) setProfile(loadProfile())
+      }
+    }
+
+    void load()
+    return () => {
+      active = false
+    }
+  }, [isSignedIn])
 
   const completed = useMemo(() => new Set(profile?.completedChallenges ?? []), [profile])
   const completedCount = completed.size

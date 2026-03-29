@@ -1,17 +1,18 @@
-import { listAdminResource, createAdminResource } from "@/app/api/admin/_resource"
+﻿import { listAdminResource, createAdminResource } from "@/app/api/admin/_resource"
 
 type RouteParams = {
-  params: {
+  params: Promise<{
     resource: string
-  }
+  }>
 }
 
 export async function GET(request: Request, { params }: RouteParams) {
-  const { resource } = await Promise.resolve(params)
+  const { resource } = await params
   return listAdminResource(resource)
 }
 
 export async function POST(request: Request, { params }: RouteParams) {
-  const { resource } = await Promise.resolve(params)
+  const { resource } = await params
   return createAdminResource(resource, request)
 }
+

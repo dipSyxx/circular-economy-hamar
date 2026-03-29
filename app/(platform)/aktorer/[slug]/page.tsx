@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import type { Metadata } from "next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,12 +17,39 @@ import {
 import Link from "next/link"
 import { actorCopy, actorPageCopy } from "@/content/no"
 import type { SourceType } from "@/lib/data"
+import { ActorCorrectionDialog } from "@/components/actor-correction-dialog"
+import { RelatedGuidesSection } from "@/components/guides/related-guides-section"
+import { ActorTrustBadges } from "@/components/actor-trust-badges"
 import { categoryConfig } from "@/lib/categories"
+import { getGuidesForActor } from "@/lib/guides"
 import { getActorBySlug } from "@/lib/public-data"
 import { FavoriteButton } from "@/components/favorite-button"
+import { formatActorGeoLabel } from "@/lib/geo"
+import { getSiteUrl } from "@/lib/seo"
 
 interface ActorPageProps {
   params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({ params }: ActorPageProps): Promise<Metadata> {
+  const { slug } = await params
+  const actor = await getActorBySlug(slug)
+  if (!actor) {
+    return {}
+  }
+
+  const locationLabel = formatActorGeoLabel(actor)
+
+  return {
+    title: `${actor.name} | ${locationLabel || "Norge"}`,
+    description: actor.description,
+    alternates: { canonical: `${getSiteUrl()}/aktorer/${actor.slug}` },
+    openGraph: {
+      title: actor.name,
+      description: actor.description,
+      images: actor.image ? [{ url: actor.image }] : undefined,
+    },
+  }
 }
 
 export default async function ActorPage({ params }: ActorPageProps) {
@@ -53,9 +81,30 @@ export default async function ActorPage({ params }: ActorPageProps) {
   },${actor.lng + mapDeltaLng},${actor.lat + mapDeltaLat}&layer=mapnik&marker=${actor.lat},${actor.lng}`
   const mapLink = `https://www.openstreetmap.org/?mlat=${actor.lat}&mlon=${actor.lng}#map=16/${actor.lat}/${actor.lng}`
   const mapGoogleLink = `https://www.google.com/maps/search/?api=1&query=${actor.lat},${actor.lng}`
+  const geoLabel = formatActorGeoLabel(actor)
+  const relatedGuides = getGuidesForActor(actor)
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: actor.name,
+    description: actor.description,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: actor.address,
+      postalCode: actor.postalCode,
+      addressLocality: actor.city,
+      addressRegion: actor.county,
+      addressCountry: actor.country ?? "Norway",
+    },
+    telephone: actor.phone,
+    email: actor.email,
+    url: actor.website ?? `${getSiteUrl()}/aktorer/${actor.slug}`,
+    sameAs: [actor.website, actor.instagram].filter(Boolean),
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <Button variant="ghost" asChild className="mb-6">
         <Link href="/aktorer">
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -82,7 +131,16 @@ export default async function ActorPage({ params }: ActorPageProps) {
             </div>
 
             <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
-              <h1 className="text-4xl font-bold">{actor.name}</h1>
+              <div className="space-y-2">
+                <h1 className="text-4xl font-bold">{actor.name}</h1>
+                {geoLabel && <p className="text-sm text-muted-foreground">{geoLabel}</p>}
+                <ActorTrustBadges actor={actor} />
+                {actor.verifiedAt ? (
+                  <p className="text-xs text-muted-foreground">
+                    Sist verifisert {new Date(actor.verifiedAt).toLocaleDateString("no-NO")}
+                  </p>
+                ) : null}
+              </div>
               <FavoriteButton actorId={actor.id} />
             </div>
             <p className="text-lg text-muted-foreground">{actor.longDescription}</p>
@@ -158,9 +216,31 @@ export default async function ActorPage({ params }: ActorPageProps) {
               </div>
             </CardContent>
           </Card>
+
+          <RelatedGuidesSection
+            title="Praktiske guider som passer her"
+            description="Guidene under matcher kategorien til aktøren først, og fylket deretter."
+            guides={relatedGuides}
+          />
         </div>
 
         <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Tillit og datakvalitet</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <ActorTrustBadges actor={actor} />
+              <p className="text-sm text-muted-foreground">
+                {actor.isTrusted
+                  ? "Denne aktoren er redaksjonelt verifisert og har fortsatt gyldig friskhetsstatus."
+                  : actor.freshnessStatus === "stale"
+                    ? "Dataene finnes fortsatt i katalogen, men posten trenger ny verifisering."
+                    : "Posten er synlig, men har ikke full redaksjonell tillitsstatus i denne fasen."}
+              </p>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>{actorPageCopy.contactTitle}</CardTitle>
@@ -257,32 +337,62 @@ export default async function ActorPage({ params }: ActorPageProps) {
               <CardTitle>{actorPageCopy.sourcesTitle}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {actor.sources.map((source) => (
-                <div key={source.url} className="space-y-1">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Badge variant="secondary">{sourceLabels[source.type]}</Badge>
-                    <a
-                      href={source.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-primary hover:underline"
-                    >
-                      {source.title}
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
+              {actor.sources.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Ingen kilder er registrert ennå.</p>
+              ) : (
+                actor.sources.map((source) => (
+                  <div key={source.url} className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Badge variant="secondary">{sourceLabels[source.type]}</Badge>
+                      <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-primary hover:underline"
+                      >
+                        {source.title}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
+                    {source.note && (
+                      <p className="text-xs text-muted-foreground">
+                        {actorPageCopy.sourcesNoteLabel}: {source.note}
+                      </p>
+                    )}
+                    {source.capturedAt && (
+                      <p className="text-xs text-muted-foreground">
+                        {actorPageCopy.sourcesCapturedLabel}: {source.capturedAt}
+                      </p>
+                    )}
                   </div>
-                  {source.note && (
-                    <p className="text-xs text-muted-foreground">
-                      {actorPageCopy.sourcesNoteLabel}: {source.note}
-                    </p>
-                  )}
-                  {source.capturedAt && (
-                    <p className="text-xs text-muted-foreground">
-                      {actorPageCopy.sourcesCapturedLabel}: {source.capturedAt}
-                    </p>
-                  )}
-                </div>
-              ))}
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Finner du feil?</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Hjelp oss holde katalogen oppdatert med korrigeringer, nye kilder eller endrede kontaktdata.
+              </p>
+              <ActorCorrectionDialog
+                actor={{
+                  id: actor.id,
+                  name: actor.name,
+                  address: actor.address,
+                  postalCode: actor.postalCode ?? null,
+                  county: actor.county,
+                  municipality: actor.municipality,
+                  city: actor.city,
+                  phone: actor.phone ?? null,
+                  email: actor.email ?? null,
+                  website: actor.website ?? null,
+                  openingHoursOsm: actor.openingHoursOsm ?? null,
+                }}
+              />
             </CardContent>
           </Card>
 

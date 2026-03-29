@@ -20,6 +20,7 @@ import { AddressSearchInput } from "@/components/address-search-input"
 import { ImageUploadField } from "@/components/image-upload"
 import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { SearchableSelect } from "@/components/ui/searchable-select"
+import { getCountyByName, getMunicipalitiesForCounty, norwayCounties } from "@/lib/geo"
 import {
   formatCategoryLabel,
   formatEnumLabel,
@@ -131,7 +132,21 @@ const actorFormSections = [
   },
   {
     title: "Kontakt og plassering",
-    keys: ["address", "lat", "lng", "phone", "email", "website", "instagram"],
+    keys: [
+      "address",
+      "postalCode",
+      "county",
+      "municipality",
+      "city",
+      "area",
+      "lat",
+      "lng",
+      "phone",
+      "email",
+      "website",
+      "instagram",
+      "nationwide",
+    ],
   },
   {
     title: "Bilde",
@@ -153,6 +168,7 @@ const actorFormSections = [
 ]
 
 const actorFieldOrder = actorFormSections.flatMap((section) => section.keys)
+const actorHiddenKeys = new Set(["baseCountyId", "baseMunicipalityId"])
 
 const getEnumOptions = (resourceKey: string, field: string) => {
   return enumOptionsByResource[resourceKey]?.[field]
@@ -618,6 +634,7 @@ export function ResourceManager({
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [slugTouched, setSlugTouched] = useState(false)
+  const [actorCityOverride, setActorCityOverride] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [filters, setFilters] = useState<Record<string, string | boolean | null>>({})
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -920,14 +937,37 @@ export function ResourceManager({
     setSelectedId(null)
     setDraft(buildDraft({}, defaultPayload))
     setSlugTouched(false)
+    setActorCityOverride(false)
     setDialogOpen(true)
   }
 
   const openEdit = (item: AdminRow) => {
+    const shouldOverrideCity =
+      Boolean(
+        typeof item.city === "string" &&
+          typeof item.municipality === "string" &&
+          item.city.trim() &&
+          item.city.trim() !== item.municipality.trim(),
+      )
     setMode("edit")
     setSelectedId(item.id ?? null)
-    setDraft(buildDraft(item, defaultPayload))
+    setDraft(
+      buildDraft(
+        {
+          ...item,
+          city:
+            !shouldOverrideCity &&
+            typeof item.city === "string" &&
+            !item.city.trim() &&
+            typeof item.municipality === "string"
+              ? item.municipality
+              : item.city,
+        },
+        defaultPayload,
+      ),
+    )
     setSlugTouched(true)
+    setActorCityOverride(shouldOverrideCity)
     setDialogOpen(true)
   }
 
@@ -1010,7 +1050,9 @@ export function ResourceManager({
   }
 
   const isActorResource = resourceKey === "actors"
-  const actorExtraKeys = isActorResource ? formKeys.filter((key) => !actorFieldOrder.includes(key)) : []
+  const actorExtraKeys = isActorResource
+    ? formKeys.filter((key) => !actorFieldOrder.includes(key) && !actorHiddenKeys.has(key))
+    : []
 
   const renderField = (key: string) => {
     const meta = fieldMeta[key] ?? { kind: "string" }
@@ -1030,6 +1072,10 @@ export function ResourceManager({
       const isMultiline = meta.kind === "array" || meta.kind === "object" || isLongTextField(key, value)
       const isActorNameField = isActorResource && key === "name" && meta.kind === "string"
       const isActorSlugField = isActorResource && key === "slug" && meta.kind === "string"
+      const actorCountySlug = isActorResource && typeof draft.county === "string"
+        ? getCountyByName(draft.county)?.slug ?? ""
+        : ""
+      const actorMunicipalityOptions = actorCountySlug ? getMunicipalitiesForCounty(actorCountySlug) : []
 
     const commonProps = {
       id: key,
@@ -1054,7 +1100,124 @@ export function ResourceManager({
               getSearchValue={(item) => getLookupSearchValue(lookupConfig.resource, item)}
               placeholder={`Velg ${formatColumnLabel(key)}`}
             />
-          ) : enumOptions && meta.kind !== "array" ? (
+            ) : isActorResource && key === "county" && meta.kind === "string" ? (
+              <Select
+                value={typeof value === "string" && value ? value : NONE_VALUE}
+                onValueChange={(next) =>
+                  setDraft((prev) => {
+                    const nextCounty = next === NONE_VALUE ? "" : next
+                    const nextCountySlug = getCountyByName(nextCounty)?.slug ?? ""
+                    const nextMunicipalities = nextCountySlug ? getMunicipalitiesForCounty(nextCountySlug) : []
+                    const currentMunicipality =
+                      typeof prev.municipality === "string" ? prev.municipality : ""
+                    const municipalityStillValid = nextMunicipalities.some(
+                      (municipality) => municipality.name === currentMunicipality,
+                    )
+
+                    return {
+                      ...prev,
+                      county: nextCounty,
+                      municipality: municipalityStillValid ? currentMunicipality : "",
+                      city:
+                        !actorCityOverride
+                          ? municipalityStillValid
+                            ? currentMunicipality
+                            : ""
+                          : prev.city,
+                    }
+                  })
+                }
+                disabled={isReadOnly}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Velg fylke" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE_VALUE}>Ingen</SelectItem>
+                  {norwayCounties.map((county) => (
+                    <SelectItem key={county.slug} value={county.name}>
+                      {county.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : isActorResource && key === "municipality" && meta.kind === "string" ? (
+              <Select
+                value={typeof value === "string" && value ? value : NONE_VALUE}
+                onValueChange={(next) =>
+                  setDraft((prev) => {
+                    const nextMunicipality = next === NONE_VALUE ? "" : next
+                    return {
+                      ...prev,
+                      municipality: nextMunicipality,
+                      city:
+                        !actorCityOverride
+                          ? nextMunicipality
+                          : typeof prev.city === "string"
+                            ? prev.city
+                            : "",
+                    }
+                  })
+                }
+                disabled={isReadOnly || !actorCountySlug}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Velg kommune" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE_VALUE}>Ingen</SelectItem>
+                  {actorMunicipalityOptions.map((municipality) => (
+                    <SelectItem key={`${municipality.countySlug}:${municipality.slug}`} value={municipality.name}>
+                      {municipality.name}
+                    </SelectItem>
+                  ))}
+                  {!actorMunicipalityOptions.some((municipality) => municipality.name === value) &&
+                  typeof value === "string" &&
+                  value ? (
+                    <SelectItem value={value}>{value}</SelectItem>
+                  ) : null}
+                </SelectContent>
+              </Select>
+            ) : isActorResource && key === "city" && meta.kind === "string" ? (
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Checkbox
+                    checked={actorCityOverride}
+                    onCheckedChange={(checked) => {
+                      const nextOverride = Boolean(checked)
+                      setActorCityOverride(nextOverride)
+                      if (!nextOverride) {
+                        setDraft((prev) => ({
+                          ...prev,
+                          city: typeof prev.municipality === "string" ? prev.municipality : "",
+                        }))
+                      }
+                    }}
+                    disabled={isReadOnly}
+                  />
+                  Annet sted / bydel
+                </label>
+                <Input
+                  {...commonProps}
+                  type="text"
+                  value={typeof value === "string" ? value : ""}
+                  onChange={(event) => setDraft((prev) => ({ ...prev, [key]: event.target.value }))}
+                  placeholder={
+                    actorCityOverride
+                      ? "Oslo sentrum"
+                      : typeof draft.municipality === "string" && draft.municipality
+                        ? draft.municipality
+                        : "Velg kommune først"
+                  }
+                  disabled={isReadOnly || (!actorCityOverride && Boolean(draft.municipality))}
+                />
+                {!actorCityOverride && typeof draft.municipality === "string" && draft.municipality ? (
+                  <p className="text-xs text-muted-foreground">
+                    By/sted følger valgt kommune med mindre du slår på overstyring.
+                  </p>
+                ) : null}
+              </div>
+            ) : enumOptions && meta.kind !== "array" ? (
             useSearchableSelect ? (
               <SearchableSelect
                 value={typeof value === "string" ? value : NONE_VALUE}

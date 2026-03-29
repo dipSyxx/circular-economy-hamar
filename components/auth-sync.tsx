@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { authClient } from "@/lib/auth/client"
+import { loadProfile } from "@/lib/profile-store"
 
 export function AuthSync() {
   const session = authClient.useSession()
@@ -15,7 +16,14 @@ export function AuthSync() {
 
     lastSyncedUserId.current = userId
 
-    fetch("/api/user/sync", { method: "POST" }).catch(() => {
+    Promise.all([
+      fetch("/api/user/sync", { method: "POST" }),
+      fetch("/api/user/profile-import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loadProfile()),
+      }),
+    ]).catch(() => {
       lastSyncedUserId.current = null
     })
   }, [session.isPending, session.data?.user?.id])

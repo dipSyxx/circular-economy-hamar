@@ -37,6 +37,17 @@ type PendingActor = {
   description: string
   longDescription: string
   address: string
+  postalCode: string | null
+  country: string
+  county: string
+  countySlug: string
+  municipality: string
+  municipalitySlug: string
+  city: string
+  area: string | null
+  nationwide: boolean
+  verificationStatus: string
+  verifiedAt: string | null
   lat: number
   lng: number
   phone: string | null
@@ -164,6 +175,8 @@ export function PendingActorsPanel({ initialActors, reviewerId }: PendingActorsP
           status,
           reviewedById: reviewerId,
           reviewedAt: new Date().toISOString(),
+          verificationStatus: status === "approved" ? "editorial_verified" : "unverified",
+          verifiedAt: status === "approved" ? new Date().toISOString() : null,
         }),
       })
 
@@ -292,6 +305,34 @@ export function PendingActorsPanel({ initialActors, reviewerId }: PendingActorsP
                   <div className="sm:col-span-2">
                     <p className="text-xs text-muted-foreground">Adresse</p>
                     <p className="text-sm">{selectedActor.address}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Postnummer</p>
+                    <p className="text-sm">{selectedActor.postalCode ?? "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Fylke</p>
+                    <p className="text-sm">{selectedActor.county}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Kommune</p>
+                    <p className="text-sm">{selectedActor.municipality}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">By / sted</p>
+                    <p className="text-sm">{selectedActor.city}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Omrade</p>
+                    <p className="text-sm">{selectedActor.area ?? "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Scope</p>
+                    <p className="text-sm">{selectedActor.nationwide ? "Landsdekkende" : "Lokal"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Verifisering</p>
+                    <p className="text-sm">{formatEnumLabel(selectedActor.verificationStatus)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Breddegrad</p>
