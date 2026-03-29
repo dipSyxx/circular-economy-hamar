@@ -13,6 +13,7 @@
     "init:county-imports": "tsx scripts/init-county-import.ts --all",
     "import:pilot": "tsx scripts/import-pilot-catalog.ts",
     "lint": "eslint .",
+    "seed:articles": "tsx scripts/seed-editorial-articles.ts",
     "start": "next start",
     "seed": "prisma db seed"
   },

@@ -1,7 +1,7 @@
 ﻿"use client"
 
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react"
-import { CheckIcon, ChevronsUpDownIcon, Search, SlidersHorizontal, XIcon } from "lucide-react"
+import { CheckIcon, ChevronsUpDownIcon, Plus, Search, SlidersHorizontal, Trash2, XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -21,6 +21,7 @@ import { ImageUploadField } from "@/components/image-upload"
 import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { getCountyByName, getMunicipalitiesForCounty, norwayCounties } from "@/lib/geo"
+import { EDITORIAL_THEMES } from "@/lib/data"
 import {
   formatCategoryLabel,
   formatEnumLabel,
@@ -52,6 +53,18 @@ type LookupConfig = {
   searchFields: string[]
 }
 
+type ArticleCtaLinkDraft = {
+  label: string
+  href: string
+}
+
+type ArticleBodySectionDraft = {
+  title: string
+  body: string[]
+  checklist: string[]
+  ctaLinks: ArticleCtaLinkDraft[]
+}
+
 const READ_ONLY_FIELDS = new Set(["id", "createdAt", "updatedAt"])
 const NONE_VALUE = "__none__"
 
@@ -68,6 +81,7 @@ const confidenceLevel = ["low", "medium", "high"]
 const actionType = ["decision_complete", "go_call", "go_directions", "go_website", "open_actor", "challenge_complete"]
 const quizLevel = ["starter", "pa_vei", "gjenbrukshelt"]
 const userRole = ["user", "admin"]
+const editorialTheme = EDITORIAL_THEMES
 
 const enumOptionsByResource: Record<string, Record<string, ReadonlyArray<string>>> = {
   actors: {
@@ -83,6 +97,10 @@ const enumOptionsByResource: Record<string, Record<string, ReadonlyArray<string>
   },
   "actor-sources": {
     type: sourceType,
+  },
+  articles: {
+    theme: editorialTheme,
+    relatedCategories: actorCategory,
   },
   decisions: {
     itemType,
@@ -203,6 +221,310 @@ const stripReadOnlyFields = (value: AdminRow, options?: { keepId?: boolean }) =>
   delete data.createdAt
   delete data.updatedAt
   return data
+}
+
+const createEmptyArticleCtaLink = (): ArticleCtaLinkDraft => ({
+  label: "",
+  href: "",
+})
+
+const createEmptyArticleBodySection = (): ArticleBodySectionDraft => ({
+  title: "",
+  body: [""],
+  checklist: [],
+  ctaLinks: [],
+})
+
+const normalizeStringArray = (value: unknown) =>
+  Array.isArray(value) ? value.map((entry) => String(entry ?? "")) : []
+
+const normalizeArticleBodySections = (value: unknown): ArticleBodySectionDraft[] => {
+  if (!Array.isArray(value)) return []
+
+  return value.map((entry) => {
+    if (!entry || typeof entry !== "object") {
+      return createEmptyArticleBodySection()
+    }
+
+    const input = entry as Record<string, unknown>
+    const ctaLinks = Array.isArray(input.ctaLinks)
+      ? input.ctaLinks.map((link) => {
+          if (!link || typeof link !== "object") return createEmptyArticleCtaLink()
+          const inputLink = link as Record<string, unknown>
+          return {
+            label: typeof inputLink.label === "string" ? inputLink.label : "",
+            href: typeof inputLink.href === "string" ? inputLink.href : "",
+          }
+        })
+      : []
+
+    return {
+      title: typeof input.title === "string" ? input.title : "",
+      body: normalizeStringArray(input.body).length ? normalizeStringArray(input.body) : [""],
+      checklist: normalizeStringArray(input.checklist),
+      ctaLinks,
+    }
+  })
+}
+
+type ArticleBodySectionsEditorProps = {
+  value: unknown
+  disabled?: boolean
+  onChange: (value: ArticleBodySectionDraft[]) => void
+}
+
+function ArticleBodySectionsEditor({
+  value,
+  disabled,
+  onChange,
+}: ArticleBodySectionsEditorProps) {
+  const sections = normalizeArticleBodySections(value)
+
+  const updateSections = (nextSections: ArticleBodySectionDraft[]) => {
+    onChange(nextSections)
+  }
+
+  const updateSection = (
+    index: number,
+    updater: (section: ArticleBodySectionDraft) => ArticleBodySectionDraft,
+  ) => {
+    updateSections(sections.map((section, sectionIndex) => (sectionIndex === index ? updater(section) : section)))
+  }
+
+  const updateBodyItem = (sectionIndex: number, bodyIndex: number, nextValue: string) => {
+    updateSection(sectionIndex, (section) => ({
+      ...section,
+      body: section.body.map((item, index) => (index === bodyIndex ? nextValue : item)),
+    }))
+  }
+
+  const updateChecklistValue = (sectionIndex: number, nextValue: string) => {
+    updateSection(sectionIndex, (section) => ({
+      ...section,
+      checklist: nextValue
+        .split(/\r?\n/)
+        .map((item) => item.trim())
+        .filter(Boolean),
+    }))
+  }
+
+  const addBodyParagraph = (sectionIndex: number) => {
+    updateSection(sectionIndex, (section) => ({
+      ...section,
+      body: [...section.body, ""],
+    }))
+  }
+
+  const removeBodyParagraph = (sectionIndex: number, bodyIndex: number) => {
+    updateSection(sectionIndex, (section) => ({
+      ...section,
+      body:
+        section.body.length <= 1
+          ? [""]
+          : section.body.filter((_, index) => index !== bodyIndex),
+    }))
+  }
+
+  const updateCta = (
+    sectionIndex: number,
+    ctaIndex: number,
+    field: keyof ArticleCtaLinkDraft,
+    nextValue: string,
+  ) => {
+    updateSection(sectionIndex, (section) => ({
+      ...section,
+      ctaLinks: section.ctaLinks.map((cta, index) =>
+        index === ctaIndex ? { ...cta, [field]: nextValue } : cta,
+      ),
+    }))
+  }
+
+  const addCta = (sectionIndex: number) => {
+    updateSection(sectionIndex, (section) => ({
+      ...section,
+      ctaLinks: [...section.ctaLinks, createEmptyArticleCtaLink()],
+    }))
+  }
+
+  const removeCta = (sectionIndex: number, ctaIndex: number) => {
+    updateSection(sectionIndex, (section) => ({
+      ...section,
+      ctaLinks: section.ctaLinks.filter((_, index) => index !== ctaIndex),
+    }))
+  }
+
+  const addSection = () => {
+    updateSections([...sections, createEmptyArticleBodySection()])
+  }
+
+  const removeSection = (sectionIndex: number) => {
+    updateSections(sections.filter((_, index) => index !== sectionIndex))
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-md border border-dashed border-border/70 bg-muted/20 p-3 text-sm text-muted-foreground">
+        Bygg artikkelen seksjon for seksjon. Legg inn tittel, avsnitt, valgfri sjekkliste og eventuelle CTA-knapper.
+      </div>
+
+      {sections.length === 0 ? (
+        <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+          Ingen seksjoner ennå.
+        </div>
+      ) : (
+        sections.map((section, sectionIndex) => (
+          <Card key={`article-section-${sectionIndex}`} className="border-border/70">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base">Seksjon {sectionIndex + 1}</CardTitle>
+                  <CardDescription>Innhold som vises som eget blokk på artikkelsiden.</CardDescription>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeSection(sectionIndex)}
+                  disabled={disabled}
+                >
+                  <Trash2 className="size-4" />
+                  <span className="sr-only">Fjern seksjon</span>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Tittel</Label>
+                <Input
+                  value={section.title}
+                  onChange={(event) =>
+                    updateSection(sectionIndex, (current) => ({
+                      ...current,
+                      title: event.target.value,
+                    }))
+                  }
+                  disabled={disabled}
+                  placeholder="For eksempel: Hvorfor dette valget fungerer lokalt"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Avsnitt</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addBodyParagraph(sectionIndex)}
+                    disabled={disabled}
+                  >
+                    <Plus className="mr-2 size-4" />
+                    Legg til avsnitt
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {section.body.map((paragraph, bodyIndex) => (
+                    <div key={`article-section-${sectionIndex}-body-${bodyIndex}`} className="space-y-2">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Avsnitt {bodyIndex + 1}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeBodyParagraph(sectionIndex, bodyIndex)}
+                          disabled={disabled}
+                        >
+                          Fjern
+                        </Button>
+                      </div>
+                      <Textarea
+                        value={paragraph}
+                        onChange={(event) => updateBodyItem(sectionIndex, bodyIndex, event.target.value)}
+                        disabled={disabled}
+                        className="min-h-[100px]"
+                        placeholder="Skriv ett avsnitt her"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Sjekkliste (én linje per punkt)</Label>
+                <Textarea
+                  value={section.checklist.join("\n")}
+                  onChange={(event) => updateChecklistValue(sectionIndex, event.target.value)}
+                  disabled={disabled}
+                  className="min-h-[100px]"
+                  placeholder={"Punkt 1\nPunkt 2\nPunkt 3"}
+                />
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>CTA-lenker</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addCta(sectionIndex)}
+                    disabled={disabled}
+                  >
+                    <Plus className="mr-2 size-4" />
+                    Legg til CTA
+                  </Button>
+                </div>
+                {section.ctaLinks.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Ingen CTA-lenker i denne seksjonen.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {section.ctaLinks.map((cta, ctaIndex) => (
+                      <div
+                        key={`article-section-${sectionIndex}-cta-${ctaIndex}`}
+                        className="grid gap-3 rounded-md border p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
+                      >
+                        <Input
+                          value={cta.label}
+                          onChange={(event) =>
+                            updateCta(sectionIndex, ctaIndex, "label", event.target.value)
+                          }
+                          disabled={disabled}
+                          placeholder="Knappetekst"
+                        />
+                        <Input
+                          value={cta.href}
+                          onChange={(event) =>
+                            updateCta(sectionIndex, ctaIndex, "href", event.target.value)
+                          }
+                          disabled={disabled}
+                          placeholder="/aktorer eller https://..."
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeCta(sectionIndex, ctaIndex)}
+                          disabled={disabled}
+                        >
+                          <Trash2 className="size-4" />
+                          <span className="sr-only">Fjern CTA</span>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))
+      )}
+
+      <Button type="button" variant="outline" onClick={addSection} disabled={disabled}>
+        <Plus className="mr-2 size-4" />
+        Legg til seksjon
+      </Button>
+    </div>
+  )
 }
 
 const inferFieldMeta = (value: unknown): FieldMeta => {
@@ -1037,6 +1359,7 @@ export function ResourceManager({
   }
 
   const isActorResource = resourceKey === "actors"
+  const isArticleResource = resourceKey === "articles"
   const actorExtraKeys = isActorResource
     ? formKeys.filter((key) => !actorFieldOrder.includes(key) && !actorHiddenKeys.has(key))
     : []
@@ -1057,8 +1380,11 @@ export function ResourceManager({
       const isEditableId = allowIdOnCreate && mode === "create" && key === "id"
       const isReadOnly = READ_ONLY_FIELDS.has(key) && !isEditableId
       const isMultiline = meta.kind === "array" || meta.kind === "object" || isLongTextField(key, value)
-      const isActorNameField = isActorResource && key === "name" && meta.kind === "string"
-      const isActorSlugField = isActorResource && key === "slug" && meta.kind === "string"
+      const isAutoSlugSourceField =
+        ((isActorResource && key === "name") || (isArticleResource && key === "title")) &&
+        meta.kind === "string"
+      const isAutoSlugField =
+        (isActorResource || isArticleResource) && key === "slug" && meta.kind === "string"
       const actorCountySlug = isActorResource && typeof draft.county === "string"
         ? getCountyByName(draft.county)?.slug ?? ""
         : ""
@@ -1175,6 +1501,20 @@ export function ResourceManager({
                   </p>
                 ) : null}
               </div>
+            ) : isArticleResource && key === "bodySections" && meta.kind === "array" ? (
+            <ArticleBodySectionsEditor
+              value={value}
+              onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
+              disabled={isReadOnly}
+            />
+            ) : isArticleResource && key === "relatedCounties" && meta.kind === "array" ? (
+            <MultiSelect
+              value={Array.isArray(value) ? value : []}
+              options={norwayCounties.map((county) => county.slug)}
+              getLabel={(slug) => norwayCounties.find((county) => county.slug === slug)?.name ?? slug}
+              onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
+              disabled={isReadOnly}
+            />
             ) : enumOptions && meta.kind !== "array" ? (
             useSearchableSelect ? (
               <SearchableSelect
@@ -1282,8 +1622,18 @@ export function ResourceManager({
             ) : (
               <Input
                 {...commonProps}
-                type={meta.kind === "number" ? "number" : "text"}
-                value={formatInputValue(value, meta) as string}
+                type={
+                  isArticleResource && key === "publishedAt"
+                    ? "date"
+                    : meta.kind === "number"
+                      ? "number"
+                      : "text"
+                }
+                value={
+                  isArticleResource && key === "publishedAt"
+                    ? (formatInputValue(value, meta) as string).slice(0, 10)
+                    : (formatInputValue(value, meta) as string)
+                }
                 onChange={(event) => {
                   const nextValue = event.target.value
                   if (meta.kind === "number") {
@@ -1293,7 +1643,7 @@ export function ResourceManager({
                     }))
                     return
                   }
-                  if (isActorSlugField) {
+                  if (isAutoSlugField) {
                     setSlugTouched(true)
                   }
                   setDraft((prev) => {
@@ -1301,7 +1651,7 @@ export function ResourceManager({
                       ...prev,
                       [key]: nextValue,
                     }
-                    if (isActorNameField && !slugTouched) {
+                    if (isAutoSlugSourceField && !slugTouched) {
                       nextDraft.slug = slugify(nextValue)
                     }
                     return nextDraft

@@ -53,7 +53,7 @@ export default async function GuideDetailPage({ params }: GuidePageProps) {
 
   const [relatedActors] = await Promise.all([getRelatedActorsForGuide(guide)])
   const relatedGuides = getRelatedGuidesForGuide(guide.slug)
-  const relatedArticles = getArticlesForGuide(guide)
+  const relatedArticles = await getArticlesForGuide(guide)
   const countyLinks = getGuideCountyLinks(guide)
   const categoryLinks = getGuideCategoryLinks(guide)
 

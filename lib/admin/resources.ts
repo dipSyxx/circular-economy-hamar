@@ -1,4 +1,4 @@
-export type AdminResourceGroupKey = "actors" | "tasks" | "quiz" | "facts" | "co2e" | "users"
+export type AdminResourceGroupKey = "actors" | "content" | "tasks" | "quiz" | "facts" | "co2e" | "users"
 
 export type AdminResourceGroupMeta = {
   key: AdminResourceGroupKey
@@ -18,6 +18,11 @@ export const adminResourceGroups: AdminResourceGroupMeta[] = [
     key: "actors",
     label: "Aktører",
     description: "Aktører og tilknyttede tjenester og kilder.",
+  },
+  {
+    key: "content",
+    label: "Innhold",
+    description: "Redaksjonelt innhold og artikler.",
   },
   {
     key: "tasks",
@@ -64,6 +69,12 @@ export const adminResources: AdminResourceMeta[] = [
     label: "Aktørkilder",
     description: "Kilder og referanser per aktør.",
     group: "actors",
+  },
+  {
+    key: "articles",
+    label: "Artikler",
+    description: "Redaksjonelle artikler for hub, SEO og internlenking.",
+    group: "content",
   },
   {
     key: "challenges",
@@ -205,6 +216,26 @@ export const adminResourceDefaults: Record<string, object> = {
     url: "https://example.com",
     capturedAt: "2026-01-01",
     note: "Valgfri merknad",
+  },
+  articles: {
+    slug: "ny-redaksjonell-artikkel",
+    title: "Ny redaksjonell artikkel",
+    summary: "Kort oppsummering av hva artikkelen forklarer og hvorfor den er relevant.",
+    seoTitle: "Ny redaksjonell artikkel | Sirkulær Norge",
+    seoDescription: "Kort SEO-beskrivelse for artikkelen.",
+    publishedAt: "2026-03-29",
+    readingMinutes: 4,
+    theme: "local-discovery",
+    relatedCategories: ["brukt"],
+    relatedCounties: ["oslo"],
+    bodySections: [
+      {
+        title: "Første seksjon",
+        body: ["Første avsnitt.", "Andre avsnitt."],
+        checklist: ["Punkt 1", "Punkt 2"],
+        ctaLinks: [{ label: "Utforsk aktører", href: "/aktorer" }],
+      },
+    ],
   },
   challenges: {
     key: "brukt-1",

@@ -9,6 +9,7 @@ export const adminResourceConfig: Record<string, AdminResourceConfig> = {
   actors: { model: "actor", orderBy: { updatedAt: "desc" } },
   "actor-repair-services": { model: "actorRepairService", orderBy: [{ actorId: "asc" }, { priceMin: "asc" }] },
   "actor-sources": { model: "actorSource", orderBy: [{ actorId: "asc" }, { title: "asc" }] },
+  articles: { model: "article", orderBy: [{ publishedAt: "desc" }, { title: "asc" }] },
   challenges: { model: "challenge", orderBy: [{ category: "asc" }, { sortOrder: "asc" }] },
   "quiz-questions": { model: "quizQuestion", orderBy: [{ sortOrder: "asc" }, { question: "asc" }] },
   "quiz-options": { model: "quizOption", orderBy: [{ questionId: "asc" }, { sortOrder: "asc" }] },

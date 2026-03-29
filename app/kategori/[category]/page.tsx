@@ -39,7 +39,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const actors = await getActorsByCategory(category as (typeof categoryOrder)[number])
   const label = actorCopy.categoryLongLabels[category as keyof typeof actorCopy.categoryLongLabels] ?? category
   const relatedGuides = getGuidesForCategory(category as (typeof categoryOrder)[number])
-  const relatedArticles = getArticlesForCategory(category as (typeof categoryOrder)[number])
+  const relatedArticles = await getArticlesForCategory(category as (typeof categoryOrder)[number])
 
   return (
     <div className="container mx-auto px-4 py-10 space-y-8">

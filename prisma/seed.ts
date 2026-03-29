@@ -3,6 +3,7 @@ import { PrismaClient, QuizLevel } from "@prisma/client"
 import { PrismaNeon } from "@prisma/adapter-neon"
 import { prepareActorPersistData } from "../lib/actor-write"
 import { loadBootstrapActorFixtures } from "../lib/bootstrap-actors"
+import { upsertBootstrapArticles } from "../lib/bootstrap-articles"
 import { seedCanonicalGeoTaxonomy } from "../lib/geo-taxonomy"
 import {
   challenges,
@@ -335,7 +336,12 @@ async function seedCo2eSources() {
   }
 }
 
+async function seedArticles() {
+  await upsertBootstrapArticles(prisma)
+}
+
 async function clearSeedData() {
+  await prisma.article.deleteMany()
   await prisma.actorServiceArea.deleteMany()
   await prisma.actorRepairService.deleteMany()
   await prisma.actorSource.deleteMany()
@@ -363,6 +369,7 @@ async function main() {
   await seedRepairEstimates()
   await seedFacts()
   await seedCo2eSources()
+  await seedArticles()
 }
 
 main()

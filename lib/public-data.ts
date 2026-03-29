@@ -1,6 +1,7 @@
 import "server-only"
 
 import { unstable_cache } from "next/cache"
+import type { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { getActorTrustState } from "@/lib/actor-trust"
 import { getActorQualitySummary } from "@/lib/source-quality"
@@ -27,132 +28,157 @@ const formatDate = (value?: Date | null) => {
   return value.toISOString().slice(0, 10)
 }
 
+const actorPublicInclude = {
+  baseCounty: true,
+  baseMunicipality: {
+    include: {
+      county: true,
+    },
+  },
+  serviceAreas: {
+    include: {
+      county: true,
+      municipality: {
+        include: {
+          county: true,
+        },
+      },
+    },
+  },
+  repairServices: true,
+  sources: true,
+} as const satisfies Prisma.ActorInclude
+
+const fetchApprovedActorRows = (orderBy: Prisma.ActorFindManyArgs["orderBy"]) =>
+  prisma.actor.findMany({
+    where: { status: "approved" },
+    include: actorPublicInclude,
+    orderBy,
+  })
+
+type PublicActorRecord = Awaited<ReturnType<typeof fetchApprovedActorRows>>[number]
+
+const mapActorRecord = (actor: PublicActorRecord): Actor => {
+  const qualitySummary = getActorQualitySummary({
+    verificationStatus: actor.verificationStatus,
+    verifiedAt: actor.verifiedAt,
+    sources: actor.sources.map((source) => ({
+      type: source.type,
+      title: source.title,
+      url: source.url,
+      capturedAt: source.capturedAt,
+      note: source.note,
+    })),
+  })
+  const sourceCount = qualitySummary.uniqueSourceCount
+  const trustState = getActorTrustState({
+    verificationStatus: actor.verificationStatus,
+    verifiedAt: actor.verifiedAt,
+    sourceCount,
+    qualitySummary,
+  })
+  const countyName = actor.baseCounty?.name ?? actor.baseMunicipality?.county.name ?? actor.county ?? undefined
+  const countySlug = actor.baseCounty?.slug ?? actor.baseMunicipality?.county.slug ?? actor.countySlug ?? undefined
+  const municipalityName = actor.baseMunicipality?.name ?? actor.municipality ?? undefined
+  const municipalitySlug = actor.baseMunicipality?.slug ?? actor.municipalitySlug ?? undefined
+  const serviceAreaCountySlugs = Array.from(
+    new Set(
+      actor.serviceAreas.flatMap((serviceArea) => {
+        if (serviceArea.county?.slug) return [serviceArea.county.slug]
+        if (serviceArea.municipality?.county.slug) return [serviceArea.municipality.county.slug]
+        return []
+      }),
+    ),
+  )
+  const serviceAreaMunicipalitySlugs = Array.from(
+    new Set(
+      actor.serviceAreas.flatMap((serviceArea) =>
+        serviceArea.municipality?.slug ? [serviceArea.municipality.slug] : [],
+      ),
+    ),
+  )
+
+  return {
+    id: actor.id,
+    name: actor.name,
+    slug: actor.slug,
+    category: actor.category,
+    description: actor.description,
+    longDescription: actor.longDescription,
+    address: actor.address,
+    postalCode: actor.postalCode,
+    country: actor.country ?? undefined,
+    county: countyName,
+    countySlug,
+    municipality: municipalityName,
+    municipalitySlug,
+    city: actor.city ?? undefined,
+    area: actor.area,
+    lat: actor.lat,
+    lng: actor.lng,
+    phone: actor.phone,
+    email: actor.email,
+    website: actor.website,
+    instagram: actor.instagram,
+    openingHours: actor.openingHours,
+    openingHoursOsm: actor.openingHoursOsm,
+    tags: actor.tags,
+    benefits: actor.benefits,
+    howToUse: actor.howToUse,
+    image: actor.image,
+    nationwide: actor.nationwide,
+    serviceAreaCountySlugs,
+    serviceAreaMunicipalitySlugs,
+    verificationStatus: actor.verificationStatus,
+    verifiedAt: formatDate(actor.verifiedAt),
+    freshnessStatus: trustState.freshnessStatus,
+    isTrusted: trustState.isTrusted,
+    sourceCount,
+    dueState: qualitySummary.dueState,
+    qualitySummary,
+    repairServices: actor.repairServices.map((service) => ({
+      problemType: service.problemType,
+      itemTypes: service.itemTypes.length ? service.itemTypes : undefined,
+      priceMin: service.priceMin,
+      priceMax: service.priceMax,
+      etaDays: service.etaDays ?? undefined,
+    })),
+    sources: actor.sources.map((source) => ({
+      type: source.type,
+      title: source.title,
+      url: source.url,
+      capturedAt: formatDate(source.capturedAt),
+      note: source.note ?? undefined,
+    })),
+  }
+}
+
 const getActorsCached = unstable_cache(
   async (): Promise<Actor[]> => {
-    const actors = await prisma.actor.findMany({
-      where: { status: "approved" },
-      include: {
-        baseCounty: true,
-        baseMunicipality: {
-          include: {
-            county: true,
-          },
-        },
-        serviceAreas: {
-          include: {
-            county: true,
-            municipality: {
-              include: {
-                county: true,
-              },
-            },
-          },
-        },
-        repairServices: true,
-        sources: true,
-      },
-      orderBy: [
+    const actors = await fetchApprovedActorRows([
         { nationwide: "desc" },
         { county: "asc" },
         { municipality: "asc" },
         { name: "asc" },
-      ],
-    })
+      ])
 
-    return actors.map((actor) => {
-      const qualitySummary = getActorQualitySummary({
-        verificationStatus: actor.verificationStatus,
-        verifiedAt: actor.verifiedAt,
-        sources: actor.sources.map((source) => ({
-          type: source.type,
-          title: source.title,
-          url: source.url,
-          capturedAt: source.capturedAt,
-          note: source.note,
-        })),
-      })
-      const sourceCount = qualitySummary.uniqueSourceCount
-      const trustState = getActorTrustState({
-        verificationStatus: actor.verificationStatus,
-        verifiedAt: actor.verifiedAt,
-        sourceCount,
-        qualitySummary,
-      })
-      const countyName = actor.baseCounty?.name ?? actor.baseMunicipality?.county.name ?? actor.county ?? undefined
-      const countySlug = actor.baseCounty?.slug ?? actor.baseMunicipality?.county.slug ?? actor.countySlug ?? undefined
-      const municipalityName = actor.baseMunicipality?.name ?? actor.municipality ?? undefined
-      const municipalitySlug = actor.baseMunicipality?.slug ?? actor.municipalitySlug ?? undefined
-      const serviceAreaCountySlugs = Array.from(
-        new Set(
-          actor.serviceAreas.flatMap((serviceArea) => {
-            if (serviceArea.county?.slug) return [serviceArea.county.slug]
-            if (serviceArea.municipality?.county.slug) return [serviceArea.municipality.county.slug]
-            return []
-          }),
-        ),
-      )
-      const serviceAreaMunicipalitySlugs = Array.from(
-        new Set(
-          actor.serviceAreas.flatMap((serviceArea) => (serviceArea.municipality?.slug ? [serviceArea.municipality.slug] : [])),
-        ),
-      )
-
-      return {
-        id: actor.id,
-        name: actor.name,
-        slug: actor.slug,
-        category: actor.category,
-        description: actor.description,
-        longDescription: actor.longDescription,
-        address: actor.address,
-        postalCode: actor.postalCode,
-        country: actor.country ?? undefined,
-        county: countyName,
-        countySlug,
-        municipality: municipalityName,
-        municipalitySlug,
-        city: actor.city ?? undefined,
-        area: actor.area,
-        lat: actor.lat,
-        lng: actor.lng,
-        phone: actor.phone,
-        email: actor.email,
-        website: actor.website,
-        instagram: actor.instagram,
-        openingHours: actor.openingHours,
-        openingHoursOsm: actor.openingHoursOsm,
-        tags: actor.tags,
-        benefits: actor.benefits,
-        howToUse: actor.howToUse,
-        image: actor.image,
-        nationwide: actor.nationwide,
-        serviceAreaCountySlugs,
-        serviceAreaMunicipalitySlugs,
-        verificationStatus: actor.verificationStatus,
-        verifiedAt: formatDate(actor.verifiedAt),
-        freshnessStatus: trustState.freshnessStatus,
-        isTrusted: trustState.isTrusted,
-        sourceCount,
-        dueState: qualitySummary.dueState,
-        qualitySummary,
-        repairServices: actor.repairServices.map((service) => ({
-          problemType: service.problemType,
-          itemTypes: service.itemTypes.length ? service.itemTypes : undefined,
-          priceMin: service.priceMin,
-          priceMax: service.priceMax,
-          etaDays: service.etaDays ?? undefined,
-        })),
-        sources: actor.sources.map((source) => ({
-          type: source.type,
-          title: source.title,
-          url: source.url,
-          capturedAt: formatDate(source.capturedAt),
-          note: source.note ?? undefined,
-        })),
-      }
-    })
+    return actors.map(mapActorRecord)
   },
   ["public-actors"],
+  { revalidate: 300, tags: ["public-actors"] },
+)
+
+const getLatestActorsCached = unstable_cache(
+  async (limit: number): Promise<Actor[]> => {
+    const actors = await fetchApprovedActorRows([
+      { createdAt: "desc" },
+      { updatedAt: "desc" },
+      { name: "asc" },
+    ])
+
+    return actors.slice(0, limit).map(mapActorRecord)
+  },
+  ["public-latest-actors"],
   { revalidate: 300, tags: ["public-actors"] },
 )
 
@@ -327,6 +353,10 @@ const getCo2eSourceItemsCached = unstable_cache(
 
 export const getActors = async (): Promise<Actor[]> => {
   return getActorsCached()
+}
+
+export const getLatestActors = async (limit = 6): Promise<Actor[]> => {
+  return getLatestActorsCached(limit)
 }
 
 export const getActorBySlug = async (slug: string): Promise<Actor | null> => {

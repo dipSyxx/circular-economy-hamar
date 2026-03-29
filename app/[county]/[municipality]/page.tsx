@@ -78,7 +78,7 @@ export default async function MunicipalityPage({ params }: MunicipalityPageProps
       count: actors.filter((actor) => actor.category === category).length,
     }))
   const relatedGuides = getGuidesForMunicipality(countyMeta.slug)
-  const relatedArticles = getArticlesForMunicipality(countyMeta.slug)
+  const relatedArticles = await getArticlesForMunicipality(countyMeta.slug)
   const rolloutMode = getPilotRolloutMode(
     countyMeta.slug,
     countyActors.map((actor) => ({

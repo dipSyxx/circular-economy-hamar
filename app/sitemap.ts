@@ -10,8 +10,8 @@ import { getSiteUrl } from "@/lib/seo"
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl()
   const guides = getGuides()
-  const articles = getArticles()
-  const [actors, actorPages] = await Promise.all([
+  const [articles, actors, actorPages] = await Promise.all([
+    getArticles(),
     getActors(),
     prisma.actor.findMany({
       where: { status: "approved" },

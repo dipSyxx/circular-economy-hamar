@@ -13,6 +13,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { authClient } from "@/lib/auth/client"
 import { accountLocalization } from "@/content/auth-localization"
 import { BrandLogo } from "@/components/brand-logo"
+import { ActorSubmissionDialog } from "@/components/actor-submission-dialog"
 
 const authRoutes = {
   signIn: "/auth/sign-in",
@@ -96,6 +97,11 @@ export function Navigation() {
 
         {/* Mobile Navigation */}
         <div className="flex items-center gap-2">
+          <ActorSubmissionDialog
+            triggerVariant="outline"
+            triggerSize="sm"
+            triggerClassName="hidden md:inline-flex"
+          />
           {hasSession ? (
             <UserButton
               size="icon"
@@ -122,6 +128,7 @@ export function Navigation() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px]">
               <div className="flex flex-col gap-4 mt-8">
+                <ActorSubmissionDialog triggerVariant="outline" triggerClassName="w-full" />
                 {navigation.map((item) => (
                   <Link
                     key={item.href}

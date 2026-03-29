@@ -192,6 +192,27 @@ enum CountyRolloutStage {
   ready
 }
 
+model Article {
+  id                String          @id @default(cuid())
+  slug              String          @unique
+  title             String
+  summary           String
+  seoTitle          String          @map("seo_title")
+  seoDescription    String          @map("seo_description")
+  publishedAt       DateTime        @map("published_at")
+  readingMinutes    Int             @map("reading_minutes")
+  theme             String
+  relatedCategories ActorCategory[] @map("related_categories")
+  relatedCounties   String[]        @map("related_counties")
+  bodySections      Json            @map("body_sections")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  @@index([publishedAt, title])
+  @@index([theme, publishedAt])
+  @@map("articles")
+}
+
 model User {
   id        String   @id
   email     String?  @unique

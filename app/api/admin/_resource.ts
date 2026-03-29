@@ -8,6 +8,7 @@ import {
   assertActorCategorySupportsExistingRepairServices,
   prepareActorPersistData,
 } from "@/lib/actor-write"
+import { prepareArticlePersistData } from "@/lib/article-write"
 import { safeDeleteBlob } from "@/lib/blob"
 import { refreshAutomationStateForActors, refreshAutomationStateForCounties } from "@/lib/admin/automation"
 
@@ -26,6 +27,7 @@ const revalidatePublicResource = (resource: string) => {
     "detailed-fact-sources": ["public-detailed-facts"],
     "co2e-sources": ["public-co2e-sources"],
     "co2e-source-items": ["public-co2e-source-items"],
+    articles: ["public-articles"],
   }
 
   for (const tag of tagsByResource[resource] ?? []) {
@@ -66,6 +68,10 @@ export const createAdminResource = async (resource: string, request: Request) =>
       const prepared = await prepareActorPersistData(prisma, data as never)
       data = prepared.actorData
       affectedCountySlug = typeof prepared.actorData.countySlug === "string" ? prepared.actorData.countySlug : null
+    }
+
+    if (resource === "articles") {
+      data = prepareArticlePersistData(data as Record<string, unknown>)
     }
 
     if (resource === "actor-repair-services") {
@@ -155,6 +161,17 @@ export const updateAdminResource = async (resource: string, id: string, request:
       affectedActorIds.add(id)
       if (existingActor.countySlug) affectedCountySlugs.add(existingActor.countySlug)
       if (typeof prepared.actorData.countySlug === "string") affectedCountySlugs.add(prepared.actorData.countySlug)
+    }
+
+    if (resource === "articles") {
+      const existingArticle = await prisma.article.findUnique({ where: { id } })
+      if (!existingArticle) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 })
+      }
+      data = prepareArticlePersistData({
+        ...existingArticle,
+        ...data,
+      })
     }
 
     if (resource === "actor-repair-services") {

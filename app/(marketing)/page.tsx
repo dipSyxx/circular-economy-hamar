@@ -4,12 +4,15 @@ import { RelatedArticlesSection } from "@/components/editorial/related-articles-
 import { FactCards } from "@/components/fact-cards"
 import { CTASection } from "@/components/cta-section"
 import { homeContent } from "@/content/no"
-import { getArticles } from "@/lib/editorial"
-import { getActors, getFacts } from "@/lib/public-data"
+import { getLatestArticles } from "@/lib/editorial"
+import { getFacts, getLatestActors } from "@/lib/public-data"
 
 export default async function HomePage() {
-  const [actors, facts] = await Promise.all([getActors(), getFacts()])
-  const featuredArticles = getArticles().slice(0, 3)
+  const [actors, facts, featuredArticles] = await Promise.all([
+    getLatestActors(6),
+    getFacts(),
+    getLatestArticles(3),
+  ])
 
   return (
     <div>
@@ -20,6 +23,7 @@ export default async function HomePage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{homeContent.actorsTitle}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">{homeContent.actorsDescription}</p>
+            <p className="mt-3 text-sm text-muted-foreground">Nylig lagt til i katalogen.</p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -34,7 +38,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4">
           <RelatedArticlesSection
             title="Redaksjonelle artikler"
-            description="Forstå lokale mønstre, tillitssignaler og hvordan du bruker katalogen smartere før du går videre til guide eller aktør."
+            description="Her ser du de nyeste redaksjonelle artiklene om lokale mønstre, tillitssignaler og hvordan du bruker katalogen smartere."
             articles={featuredArticles}
           />
         </div>

@@ -85,7 +85,7 @@ export default async function ActorPage({ params }: ActorPageProps) {
   const mapGoogleLink = `https://www.google.com/maps/search/?api=1&query=${actor.lat},${actor.lng}`
   const geoLabel = formatActorGeoLabel(actor)
   const relatedGuides = getGuidesForActor(actor)
-  const relatedArticles = getArticlesForActor(actor)
+  const relatedArticles = await getArticlesForActor(actor)
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",

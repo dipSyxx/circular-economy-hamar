@@ -1,14 +1,15 @@
 import "server-only"
 
-import { articleDocs, editorialHubCopy, editorialThemeLabels } from "@/content/editorial/no"
+import { unstable_cache } from "next/cache"
+import { editorialHubCopy, editorialThemeLabels } from "@/content/editorial/no"
 import { getActorGeographyMatchPriority } from "@/lib/actor-scope"
 import { categoryOrder } from "@/lib/categories"
-import type { Actor, ActorCategory, ArticleDoc, EditorialTheme, GuideDoc } from "@/lib/data"
+import type { Actor, ActorCategory, ArticleDoc, EditorialTheme, GuideDoc, GuideSection } from "@/lib/data"
 import { getCountyBySlug } from "@/lib/geo"
 import { getGuidesForCategory } from "@/lib/guides"
+import { prisma } from "@/lib/prisma"
 import { getActors } from "@/lib/public-data"
 
-const articleBySlug = new Map(articleDocs.map((article) => [article.slug, article]))
 const compareByPublishedDate = (left: ArticleDoc, right: ArticleDoc) => {
   const dateDelta = new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime()
   if (dateDelta !== 0) return dateDelta
@@ -46,6 +47,83 @@ const dedupeGuides = (guides: GuideDoc[]) => {
   })
 }
 
+const normalizeBodySections = (value: unknown): GuideSection[] => {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") return null
+      const input = entry as Record<string, unknown>
+      const title = typeof input.title === "string" ? input.title.trim() : ""
+      const body = Array.isArray(input.body)
+        ? input.body.map((paragraph) => String(paragraph).trim()).filter(Boolean)
+        : []
+      if (!title || body.length === 0) return null
+
+      const checklist = Array.isArray(input.checklist)
+        ? input.checklist.map((item) => String(item).trim()).filter(Boolean)
+        : undefined
+      const ctaLinks = Array.isArray(input.ctaLinks)
+        ? input.ctaLinks
+            .map((link) => {
+              if (!link || typeof link !== "object") return null
+              const inputLink = link as Record<string, unknown>
+              const label = typeof inputLink.label === "string" ? inputLink.label.trim() : ""
+              const href = typeof inputLink.href === "string" ? inputLink.href.trim() : ""
+              if (!label || !href) return null
+              return { label, href }
+            })
+            .filter((link): link is { label: string; href: string } => link !== null)
+        : undefined
+
+      return {
+        title,
+        body,
+        ...(checklist && checklist.length > 0 ? { checklist } : {}),
+        ...(ctaLinks && ctaLinks.length > 0 ? { ctaLinks } : {}),
+      }
+    })
+    .filter((section): section is GuideSection => section !== null)
+}
+
+const mapArticleRecord = (article: Awaited<ReturnType<typeof prisma.article.findMany>>[number]): ArticleDoc => ({
+  slug: article.slug,
+  title: article.title,
+  summary: article.summary,
+  seoTitle: article.seoTitle,
+  seoDescription: article.seoDescription,
+  publishedAt: article.publishedAt.toISOString().slice(0, 10),
+  readingMinutes: article.readingMinutes,
+  theme: article.theme as EditorialTheme,
+  relatedCategories: article.relatedCategories,
+  relatedCounties: article.relatedCounties,
+  bodySections: normalizeBodySections(article.bodySections),
+})
+
+const getArticlesCached = unstable_cache(
+  async (): Promise<ArticleDoc[]> => {
+    const articles = await prisma.article.findMany({
+      orderBy: [{ publishedAt: "desc" }, { title: "asc" }],
+    })
+    return articles.map(mapArticleRecord)
+  },
+  ["public-articles"],
+  { revalidate: 300, tags: ["public-articles"] },
+)
+
+const getLatestArticlesCached = unstable_cache(
+  async (limit: number): Promise<ArticleDoc[]> => {
+    const articles = await prisma.article.findMany({
+      orderBy: [{ createdAt: "desc" }, { publishedAt: "desc" }, { title: "asc" }],
+      take: limit,
+    })
+
+    return articles.map(mapArticleRecord)
+  },
+  ["public-latest-articles"],
+  { revalidate: 300, tags: ["public-articles"] },
+)
+
 const articleMatchesCounty = (article: ArticleDoc, countySlug?: string | null) =>
   Boolean(countySlug && article.relatedCounties.includes(countySlug))
 
@@ -67,67 +145,75 @@ const getBestCountyPriority = (actor: Actor, countySlugs: string[]) => {
 
 export const getEditorialHubCopy = () => editorialHubCopy
 
-export const getArticles = () => articleDocs
+export const getArticles = async () => getArticlesCached()
 
-export const getArticleBySlug = (slug: string) => articleBySlug.get(slug) ?? null
+export const getLatestArticles = async (limit = 3) => getLatestArticlesCached(limit)
+
+export const getArticleBySlug = async (slug: string) => {
+  const articles = await getArticles()
+  return articles.find((article) => article.slug === slug) ?? null
+}
 
 export const getArticleHref = (slug: string) => `/artikler/${slug}`
 
 export const getEditorialThemeLabel = (theme: EditorialTheme) => editorialThemeLabels[theme]
 
-export const getArticlesGroupedByTheme = () => {
+export const getArticlesGroupedByTheme = async () => {
+  const articles = await getArticles()
   const groups = new Map<EditorialTheme, ArticleDoc[]>()
 
-  for (const article of articleDocs) {
+  for (const article of articles) {
     const bucket = groups.get(article.theme) ?? []
     bucket.push(article)
     groups.set(article.theme, bucket)
   }
 
   return Array.from(groups.entries())
-    .map(([theme, articles]) => ({
+    .map(([theme, bucket]) => ({
       theme,
       themeLabel: editorialThemeLabels[theme],
-      articles: [...articles].sort(compareByPublishedDate),
+      articles: [...bucket].sort(compareByPublishedDate),
     }))
     .sort((left, right) => left.themeLabel.localeCompare(right.themeLabel, "no-NO"))
 }
 
-export const getArticlesForActor = (actor: Actor, limit = 3) => {
-  const articles = articleDocs
-    .map((article) => ({
-      article,
-      categoryMatch: articleMatchesCategory(article, actor.category) ? 1 : 0,
-      countyMatch: articleMatchesCounty(article, actor.countySlug) ? 1 : 0,
-    }))
-    .filter(({ categoryMatch, countyMatch }) => categoryMatch || countyMatch)
-    .sort((left, right) => {
-      if (left.categoryMatch !== right.categoryMatch) return right.categoryMatch - left.categoryMatch
-      if (left.countyMatch !== right.countyMatch) return right.countyMatch - left.countyMatch
-      return compareByPublishedDate(left.article, right.article)
-    })
-    .map(({ article }) => article)
+export const getArticlesForActor = async (actor: Actor, limit = 3) => {
+  const articles = await getArticles()
 
-  return dedupeArticles(articles).slice(0, limit)
+  return dedupeArticles(
+    articles
+      .map((article) => ({
+        article,
+        categoryMatch: articleMatchesCategory(article, actor.category) ? 1 : 0,
+        countyMatch: articleMatchesCounty(article, actor.countySlug) ? 1 : 0,
+      }))
+      .filter(({ categoryMatch, countyMatch }) => categoryMatch || countyMatch)
+      .sort((left, right) => {
+        if (left.categoryMatch !== right.categoryMatch) return right.categoryMatch - left.categoryMatch
+        if (left.countyMatch !== right.countyMatch) return right.countyMatch - left.countyMatch
+        return compareByPublishedDate(left.article, right.article)
+      })
+      .map(({ article }) => article),
+  ).slice(0, limit)
 }
 
-export const getArticlesForCounty = (countySlug: string, limit = 4) =>
+export const getArticlesForCounty = async (countySlug: string, limit = 4) =>
   dedupeArticles(
-    articleDocs
+    (await getArticles())
       .filter((article) => articleMatchesCounty(article, countySlug))
       .sort(compareByPublishedDate),
   ).slice(0, limit)
 
-export const getArticlesForMunicipality = (countySlug: string, limit = 4) =>
+export const getArticlesForMunicipality = async (countySlug: string, limit = 4) =>
   getArticlesForCounty(countySlug, limit)
 
-export const getArticlesForCategory = (
+export const getArticlesForCategory = async (
   category: ActorCategory,
   countySlug?: string | null,
   limit = 4,
 ) =>
   dedupeArticles(
-    articleDocs
+    (await getArticles())
       .filter((article) => articleMatchesCategory(article, category))
       .sort((left, right) => {
         const leftCountyMatch = articleMatchesCounty(left, countySlug) ? 1 : 0
@@ -137,9 +223,9 @@ export const getArticlesForCategory = (
       }),
   ).slice(0, limit)
 
-export const getArticlesForGuide = (guide: GuideDoc, limit = 3) =>
+export const getArticlesForGuide = async (guide: GuideDoc, limit = 3) =>
   dedupeArticles(
-    articleDocs
+    (await getArticles())
       .map((article) => ({
         article,
         categoryOverlap: article.relatedCategories.filter((category) =>
@@ -162,11 +248,11 @@ export const getArticlesForGuide = (guide: GuideDoc, limit = 3) =>
       .map(({ article }) => article),
   ).slice(0, limit)
 
-export const getRelatedArticlesForArticle = (slug: string, limit = 4) => {
-  const article = getArticleBySlug(slug)
+export const getRelatedArticlesForArticle = async (slug: string, limit = 4) => {
+  const [article, articles] = await Promise.all([getArticleBySlug(slug), getArticles()])
   if (!article) return []
 
-  return [...articleDocs]
+  return [...articles]
     .filter((candidate) => candidate.slug !== slug)
     .sort((left, right) => {
       const leftCategoryOverlap = left.relatedCategories.filter((category) =>
@@ -230,10 +316,15 @@ export const getRelatedActorsForArticle = async (article: ArticleDoc, limit = 6)
     .slice(0, limit)
 }
 
-export const getGuidesForArticle = (article: ArticleDoc, limit = 3) => {
-  const fromCategories = article.relatedCategories.flatMap((category) =>
-    getGuidesForCategory(category, article.relatedCounties[0] ?? null, limit),
-  )
+export const getGuidesForArticle = async (article: ArticleDoc, limit = 3) => {
+  const fromCategories = (
+    await Promise.all(
+      article.relatedCategories.map((category) =>
+        getGuidesForCategory(category, article.relatedCounties[0] ?? null, limit),
+      ),
+    )
+  ).flat()
+
   return dedupeGuides(
     fromCategories.sort((left, right) => left.title.localeCompare(right.title, "no-NO")),
   ).slice(0, limit)

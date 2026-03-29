@@ -72,7 +72,7 @@ export default async function CountyPage({ params }: CountyPageProps) {
       count: actors.filter((actor) => actor.category === category).length,
     }))
   const relatedGuides = getGuidesForCounty(countyMeta.slug)
-  const relatedArticles = getArticlesForCounty(countyMeta.slug)
+  const relatedArticles = await getArticlesForCounty(countyMeta.slug)
 
   return (
     <div className="container mx-auto px-4 py-10 space-y-10">

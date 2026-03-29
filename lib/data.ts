@@ -33,6 +33,13 @@ export type EditorialTheme =
   | "trust-and-quality"
   | "circular-systems"
 
+export const EDITORIAL_THEMES = [
+  "local-discovery",
+  "repair-economy",
+  "trust-and-quality",
+  "circular-systems",
+] as const satisfies ReadonlyArray<EditorialTheme>
+
 export interface GuideCtaLink {
   label: string
   href: string

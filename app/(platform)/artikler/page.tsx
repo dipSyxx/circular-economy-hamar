@@ -11,9 +11,9 @@ export const metadata: Metadata = {
   alternates: { canonical: `${getSiteUrl()}/artikler` },
 }
 
-export default function ArticlesHubPage() {
+export default async function ArticlesHubPage() {
   const hubCopy = getEditorialHubCopy()
-  const articleGroups = getArticlesGroupedByTheme()
+  const articleGroups = await getArticlesGroupedByTheme()
 
   return (
     <div className="container mx-auto space-y-10 px-4 py-10">

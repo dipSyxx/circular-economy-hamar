@@ -27,12 +27,12 @@ type ArticlePageProps = {
 }
 
 export async function generateStaticParams() {
-  return getArticles().map((article) => ({ slug: article.slug }))
+  return (await getArticles()).map((article) => ({ slug: article.slug }))
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const { slug } = await params
-  const article = getArticleBySlug(slug)
+  const article = await getArticleBySlug(slug)
   if (!article) return {}
 
   return {
@@ -49,12 +49,14 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 
 export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   const { slug } = await params
-  const article = getArticleBySlug(slug)
+  const article = await getArticleBySlug(slug)
   if (!article) notFound()
 
   const [relatedActors] = await Promise.all([getRelatedActorsForArticle(article)])
-  const relatedArticles = getRelatedArticlesForArticle(article.slug)
-  const relatedGuides = getGuidesForArticle(article)
+  const [relatedArticles, relatedGuides] = await Promise.all([
+    getRelatedArticlesForArticle(article.slug),
+    getGuidesForArticle(article),
+  ])
   const countyLinks = getArticleCountyLinks(article)
   const categoryLinks = getArticleCategoryLinks(article)
 

@@ -85,7 +85,7 @@ export default async function MunicipalityCategoryPage({ params }: MunicipalityC
     category as (typeof categoryOrder)[number],
     countyMeta.slug,
   )
-  const relatedArticles = getArticlesForCategory(
+  const relatedArticles = await getArticlesForCategory(
     category as (typeof categoryOrder)[number],
     countyMeta.slug,
   )
