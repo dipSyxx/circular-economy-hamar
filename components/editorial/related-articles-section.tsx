@@ -20,7 +20,7 @@ export function RelatedArticlesSection({
         <h2 className="text-2xl font-semibold">{title}</h2>
         {description ? <p className="text-muted-foreground">{description}</p> : null}
       </div>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
         {articles.map((article) => (
           <ArticleCard key={article.slug} article={article} />
         ))}

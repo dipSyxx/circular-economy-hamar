@@ -207,6 +207,9 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.3(@types/react@19.2.8)
+      baseline-browser-mapping:
+        specifier: ^2.10.12
+        version: 2.10.12
       postcss:
         specifier: ^8.5
         version: 8.5.6
@@ -2717,8 +2720,9 @@ packages:
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
-  baseline-browser-mapping@2.9.14:
-    resolution: {integrity: sha512-B0xUquLkiGLgHhpPBqvl7GWegWBUNuujQ6kXd/r1U38ElPT6Ok8KZ8e+FpUGEc2ZoRQUzq/aUnaKFc/svWUGSg==}
+  baseline-browser-mapping@2.10.12:
+    resolution: {integrity: sha512-qyq26DxfY4awP2gIRXhhLWfwzwI+N5Nxk6iQi8EFizIaWIjqicQTE4sLnZZVdeKPRcVNoJOkkpfzoIYuvCKaIQ==}
+    engines: {node: '>=6.0.0'}
     hasBin: true
 
   better-auth@1.4.6:
@@ -6752,7 +6756,7 @@ snapshots:
 
   balanced-match@1.0.2: {}
 
-  baseline-browser-mapping@2.9.14: {}
+  baseline-browser-mapping@2.10.12: {}
 
   better-auth@1.4.6(next@16.0.10(@opentelemetry/api@1.9.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:
@@ -6793,7 +6797,7 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.9.14
+      baseline-browser-mapping: 2.10.12
       caniuse-lite: 1.0.30001764
       electron-to-chromium: 1.5.267
       node-releases: 2.0.27

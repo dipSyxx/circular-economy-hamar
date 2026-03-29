@@ -24,9 +24,9 @@ export default function GuidesHubPage() {
         <p className="text-sm text-muted-foreground">{hubCopy.helper}</p>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid items-start gap-6 lg:grid-cols-2">
         {guideGroups.map((group) => (
-          <div key={group.intent} className="space-y-3">
+          <div key={group.intent} className="flex min-w-0 flex-col gap-3 self-start">
             <div className="space-y-1">
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 {group.intentLabel}

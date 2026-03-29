@@ -11,7 +11,7 @@ type ArticleCardProps = {
 
 export function ArticleCard({ article }: ArticleCardProps) {
   return (
-    <Card className="h-full border-border/70">
+    <Card className="overflow-hidden border-border/70">
       <CardHeader className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary">{getEditorialThemeLabel(article.theme)}</Badge>

@@ -12,13 +12,13 @@ type GuideCardProps = {
 
 export function GuideCard({ guide }: GuideCardProps) {
   return (
-    <Card className="h-full transition-colors hover:border-primary/40">
+    <Card className="overflow-hidden transition-colors hover:border-primary/40">
       <CardHeader className="space-y-3">
         <Badge variant="secondary" className="w-fit">
           {getGuideIntentLabel(guide.primaryIntent)}
         </Badge>
         <div className="space-y-2">
-          <CardTitle className="text-xl">
+          <CardTitle className="text-xl leading-tight">
             <Link href={getGuideHref(guide.slug)} className="hover:text-primary">
               {guide.title}
             </Link>
@@ -26,7 +26,7 @@ export function GuideCard({ guide }: GuideCardProps) {
           <CardDescription>{guide.summary}</CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="flex h-full flex-col justify-between gap-4">
+      <CardContent className="flex flex-1 flex-col justify-between gap-4">
         <div className="flex flex-wrap gap-2">
           {guide.relatedCategories.slice(0, 3).map((category) => (
             <Badge key={category} variant="outline">
