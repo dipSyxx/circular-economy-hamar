@@ -6,12 +6,13 @@ import { useEffect, useState } from "react"
 import { UserButton } from "@neondatabase/auth/react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, Recycle, Shield, User } from "lucide-react"
+import { Menu, Shield, User } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { navigation, navigationCopy, site } from "@/content/no"
+import { navigation, navigationCopy } from "@/content/no"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { authClient } from "@/lib/auth/client"
 import { accountLocalization } from "@/content/auth-localization"
+import { BrandLogo } from "@/components/brand-logo"
 
 const authRoutes = {
   signIn: "/auth/sign-in",
@@ -73,12 +74,7 @@ export function Navigation() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Recycle className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-bold">{site.name}</span>
-        </Link>
+        <BrandLogo priority imageClassName="h-9 md:h-10" className="shrink-0" />
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">

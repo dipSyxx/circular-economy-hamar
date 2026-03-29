@@ -12,24 +12,26 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: site.title,
   description: site.description,
-  generator: "v0.app",
   keywords: site.keywords,
+  manifest: "/favicons/favicon-for-app/manifest.json",
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
+        url: "/favicons/favicon-for-app/favicon.ico",
+        sizes: "any",
       },
       {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
+        url: "/favicons/favicon-for-app/icon0.svg",
         type: "image/svg+xml",
       },
+      {
+        url: "/favicons/favicon-for-app/icon1.png",
+        type: "image/png",
+        sizes: "96x96",
+      },
     ],
-    apple: "/apple-icon.png",
+    shortcut: "/favicons/favicon-for-app/favicon.ico",
+    apple: "/favicons/favicon-for-app/apple-icon.png",
   },
 };
 

@@ -1,6 +1,6 @@
-﻿import Link from "next/link"
-import { Recycle } from "lucide-react"
-import { footerContent, navigation, site } from "@/content/no"
+import Link from "next/link"
+import { BrandLogo } from "@/components/brand-logo"
+import { footerContent, navigation } from "@/content/no"
 
 export function Footer() {
   return (
@@ -8,17 +8,12 @@ export function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <Recycle className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="text-lg font-bold">{site.name}</span>
-            </Link>
+            <BrandLogo variant="full" imageClassName="h-10" textClassName="text-base md:text-lg" />
             <p className="text-sm text-muted-foreground">{footerContent.about}</p>
           </div>
 
           <div>
-            <h3 className="font-semibold mb-4">{footerContent.navigationTitle}</h3>
+            <h3 className="mb-4 font-semibold">{footerContent.navigationTitle}</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {navigation.map((item) => (
                 <li key={item.href}>
@@ -31,7 +26,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-semibold mb-4">{footerContent.actorsTitle}</h3>
+            <h3 className="mb-4 font-semibold">{footerContent.actorsTitle}</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {footerContent.actorLinks.map((link) => (
                 <li key={link.href}>
@@ -44,7 +39,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-semibold mb-4">{footerContent.sourcesTitle}</h3>
+            <h3 className="mb-4 font-semibold">{footerContent.sourcesTitle}</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {footerContent.sourceLinks.map((link) => (
                 <li key={link.href}>
@@ -57,7 +52,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
+        <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
           <p>{footerContent.copyright}</p>
         </div>
       </div>
