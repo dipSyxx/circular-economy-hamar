@@ -5,7 +5,15 @@ import Link from "next/link"
 import { Flag } from "lucide-react"
 import { authClient } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -257,16 +265,15 @@ export function ActorCorrectionDialog({ actor }: ActorCorrectionDialogProps) {
 
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
           {success ? <p className="text-sm text-emerald-600">{success}</p> : null}
-
-          <div className="flex justify-end gap-3">
-            <Button variant="ghost" onClick={() => setOpen(false)}>
-              Lukk
-            </Button>
-            <Button onClick={submit} disabled={saving}>
-              Send inn forslag
-            </Button>
-          </div>
         </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setOpen(false)}>
+            Lukk
+          </Button>
+          <Button onClick={submit} disabled={saving}>
+            Send inn forslag
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
