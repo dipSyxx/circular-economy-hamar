@@ -11,6 +11,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { articleDocs } from "@/content/editorial/no"
 import { guideDocs } from "@/content/guides/no"
 import { adminResources } from "@/lib/admin/resources"
 import { cn } from "@/lib/utils"
@@ -30,6 +31,7 @@ type Crumb = {
 const baseLabels: Record<string, string> = {
   aktorer: "Aktører",
   guider: "Guider",
+  artikler: "Artikler",
   decide: "Beslutning",
   kart: "Kart",
   quiz: "Quiz",
@@ -50,6 +52,7 @@ const adminResourceLabels = new Map(
   adminResources.map((resource) => [resource.key, resource.label])
 )
 const guideLabels = new Map(guideDocs.map((guide) => [guide.slug, guide.title]))
+const articleLabels = new Map(articleDocs.map((article) => [article.slug, article.title]))
 
 const hiddenSegments = new Set(["account"])
 
@@ -83,6 +86,11 @@ const getSegmentLabel = (segment: string, previousSegment?: string) => {
   if (previousSegment === "guider") {
     const guideLabel = guideLabels.get(segment)
     if (guideLabel) return guideLabel
+  }
+
+  if (previousSegment === "artikler") {
+    const articleLabel = articleLabels.get(segment)
+    if (articleLabel) return articleLabel
   }
 
   return baseLabels[segment] ?? humanizeSegment(segment)

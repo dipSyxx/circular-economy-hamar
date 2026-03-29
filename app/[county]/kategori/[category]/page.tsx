@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { ActorsExplorer } from "@/components/actors-explorer"
+import { RelatedArticlesSection } from "@/components/editorial/related-articles-section"
 import { RelatedGuidesSection } from "@/components/guides/related-guides-section"
 import { PilotRolloutNote } from "@/components/pilot-rollout-note"
 import { Badge } from "@/components/ui/badge"
 import { actorCopy } from "@/content/no"
 import { categoryOrder } from "@/lib/categories"
+import { getArticlesForCategory } from "@/lib/editorial"
 import { getGuidesForCategory } from "@/lib/guides"
 import { getCountyBySlug, norwayCounties } from "@/lib/geo"
 import { getPilotRolloutMode } from "@/lib/pilot-coverage"
@@ -58,6 +60,10 @@ export default async function CountyCategoryPage({ params }: CountyCategoryPageP
     category as (typeof categoryOrder)[number],
     countyMeta.slug,
   )
+  const relatedArticles = getArticlesForCategory(
+    category as (typeof categoryOrder)[number],
+    countyMeta.slug,
+  )
   const rolloutMode = getPilotRolloutMode(
     countyMeta.slug,
     countyActors.map((actor) => ({
@@ -90,6 +96,11 @@ export default async function CountyCategoryPage({ params }: CountyCategoryPageP
         title={`${label} i ${countyMeta.name}: guider og neste steg`}
         description="Guidene prioriterer denne kategorien først og fylket deretter."
         guides={relatedGuides}
+      />
+      <RelatedArticlesSection
+        title={`${label} i ${countyMeta.name}: artikler og bakgrunn`}
+        description="Artiklene under prioriterer denne kategorien først og bruker fylket som lokal kontekst."
+        articles={relatedArticles}
       />
       <ActorsExplorer actors={actors} />
     </div>

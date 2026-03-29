@@ -1,12 +1,15 @@
 ﻿import { HeroSection } from "@/components/hero-section"
 import { ActorCard } from "@/components/actor-card"
+import { RelatedArticlesSection } from "@/components/editorial/related-articles-section"
 import { FactCards } from "@/components/fact-cards"
 import { CTASection } from "@/components/cta-section"
 import { homeContent } from "@/content/no"
+import { getArticles } from "@/lib/editorial"
 import { getActors, getFacts } from "@/lib/public-data"
 
 export default async function HomePage() {
   const [actors, facts] = await Promise.all([getActors(), getFacts()])
+  const featuredArticles = getArticles().slice(0, 3)
 
   return (
     <div>
@@ -24,6 +27,16 @@ export default async function HomePage() {
               <ActorCard key={actor.id} actor={actor} />
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="py-6">
+        <div className="container mx-auto px-4">
+          <RelatedArticlesSection
+            title="Redaksjonelle artikler"
+            description="Forstå lokale mønstre, tillitssignaler og hvordan du bruker katalogen smartere før du går videre til guide eller aktør."
+            articles={featuredArticles}
+          />
         </div>
       </section>
 

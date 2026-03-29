@@ -132,7 +132,7 @@ const buildInitialActor = (actor?: ActorDraft): ActorDraft => {
   if (!actor) return emptyActor
   return {
     ...actor,
-    city: actor.city.trim() || actor.municipality.trim(),
+    city: actor.municipality.trim() || actor.city.trim(),
   }
 }
 
@@ -279,13 +279,6 @@ export function ActorSubmissionForm({
     initialSources?.length ? initialSources : [emptySource()],
   )
   const [slugTouched, setSlugTouched] = useState(mode === "edit")
-  const [cityOverride, setCityOverride] = useState(
-    Boolean(
-      (initialActor?.city || "").trim() &&
-        (initialActor?.municipality || "").trim() &&
-        initialActor?.city.trim() !== initialActor?.municipality.trim(),
-    ),
-  )
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -362,7 +355,6 @@ export function ActorSubmissionForm({
     if (!actor.address.trim()) errors.push("Adresse er pakrevd.")
     if (!actor.county.trim()) errors.push("Fylke er pakrevd.")
     if (!actor.municipality.trim()) errors.push("Kommune er pakrevd.")
-    if (!(actor.city.trim() || actor.municipality.trim())) errors.push("By/sted er pakrevd.")
     if (!actor.openingHours.length) errors.push("Apningstider er pakrevd.")
     if (!actor.tags.length) errors.push("Legg til minst ett tag.")
     if (!actor.benefits.length) errors.push("Legg til minst en fordel.")
@@ -444,7 +436,7 @@ export function ActorSubmissionForm({
           postalCode: actor.postalCode.trim() || null,
           county: actor.county.trim(),
           municipality: actor.municipality.trim(),
-          city: (actor.city.trim() || actor.municipality.trim()),
+          city: actor.municipality.trim(),
           area: actor.area.trim() || null,
           lat: Number(actor.lat),
           lng: Number(actor.lng),
@@ -498,7 +490,6 @@ export function ActorSubmissionForm({
         setRepairServices([emptyRepairService()])
         setSources([emptySource()])
         setSlugTouched(false)
-        setCityOverride(false)
       }
 
       if (resolvedId) {
@@ -632,19 +623,14 @@ export function ActorSubmissionForm({
                 value={actor.county || undefined}
                 onValueChange={(value) => {
                   const nextCountySlug = getCountyByName(value)?.slug ?? ""
-                  updateActor("county", value)
-                  if (actor.municipality) {
-                    const nextMunicipalities = nextCountySlug ? getMunicipalitiesForCounty(nextCountySlug) : []
-                    const stillValid = nextMunicipalities.some((municipality) => municipality.name === actor.municipality)
-                    if (!stillValid) {
-                      updateActor("municipality", "")
-                      if (!cityOverride) {
-                        updateActor("city", "")
-                      }
-                    } else if (!cityOverride) {
-                      updateActor("city", actor.municipality)
-                    }
-                  }
+                  const nextMunicipalities = nextCountySlug ? getMunicipalitiesForCounty(nextCountySlug) : []
+                  const stillValid = nextMunicipalities.some((municipality) => municipality.name === actor.municipality)
+                  setActor((prev) => ({
+                    ...prev,
+                    county: value,
+                    municipality: stillValid ? prev.municipality : "",
+                    city: stillValid ? prev.municipality : "",
+                  }))
                 }}
               >
                 <SelectTrigger className="mt-1 w-full">
@@ -663,12 +649,7 @@ export function ActorSubmissionForm({
               <Label>Kommune</Label>
               <Select
                 value={actor.municipality || undefined}
-                onValueChange={(value) => {
-                  updateActor("municipality", value)
-                  if (!cityOverride) {
-                    updateActor("city", value)
-                  }
-                }}
+                onValueChange={(value) => setActor((prev) => ({ ...prev, municipality: value, city: value }))}
                 disabled={!selectedCountySlug || municipalityOptions.length === 0}
               >
                 <SelectTrigger className="mt-1 w-full">
@@ -688,32 +669,17 @@ export function ActorSubmissionForm({
               </Select>
             </div>
             <div>
-              <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="city">By / sted</Label>
-                <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Checkbox
-                    checked={cityOverride}
-                    onCheckedChange={(checked) => {
-                      const nextOverride = Boolean(checked)
-                      setCityOverride(nextOverride)
-                      if (!nextOverride) {
-                        updateActor("city", actor.municipality || "")
-                      }
-                    }}
-                  />
-                  Annet sted / bydel
-                </label>
-              </div>
+              <Label htmlFor="city">By / sted</Label>
               <Input
                 id="city"
-                value={actor.city}
-                onChange={(event) => updateActor("city", event.target.value)}
-                placeholder={cityOverride ? "Oslo sentrum" : actor.municipality || "Velg kommune først"}
-                disabled={!cityOverride && Boolean(actor.municipality)}
+                value={actor.municipality || actor.city}
+                placeholder={actor.municipality || "Velg kommune først"}
+                disabled
+                readOnly
               />
-              {!cityOverride && actor.municipality ? (
+              {actor.municipality ? (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  By/sted følger valgt kommune. Slå på overstyring hvis du trenger et mer spesifikt sted.
+                  By/sted følger valgt kommune. Bruk område-feltet hvis du trenger mer presisjon.
                 </p>
               ) : null}
             </div>

@@ -21,6 +21,7 @@ export const navigation = [
   { href: "/", label: "Hjem" },
   { href: "/aktorer", label: "Aktører" },
   { href: "/guider", label: "Guider" },
+  { href: "/artikler", label: "Artikler" },
   { href: "/decide", label: "Beslutning" },
   { href: "/kart", label: "Kart" },
   { href: "/quiz", label: "Quiz" },
@@ -742,6 +743,7 @@ export const footerContent = {
   actorLinks: [
     { label: "Alle aktører", href: "/aktorer" },
     { label: "Praktiske guider", href: "/guider" },
+    { label: "Redaksjonelle artikler", href: "/artikler" },
     { label: "Utforsk fylker", href: "/fylker" },
     { label: "Beslutningsmotor", href: "/decide" },
   ],

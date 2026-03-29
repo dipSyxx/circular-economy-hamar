@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useState } from "react"
 import { Download, FileUp, RefreshCcw } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -8,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { actorImportTemplates } from "@/lib/import-templates"
-import type { ActorImportBatchSummary, ActorImportRowSummary } from "@/lib/data"
+import type { ActorImportBatchSummary, ActorImportRowSummary, CountyRolloutWorkflow } from "@/lib/data"
 
 type ImportDetails = {
   batch: ActorImportBatchSummary
@@ -17,6 +18,7 @@ type ImportDetails = {
 
 type ImportsPanelProps = {
   initialBatches: ActorImportBatchSummary[]
+  countyWorkflow?: CountyRolloutWorkflow | null
 }
 
 const rowTypeLabels: Record<ActorImportRowSummary["rowType"], string> = {
@@ -25,7 +27,7 @@ const rowTypeLabels: Record<ActorImportRowSummary["rowType"], string> = {
   actor_repair_service: "reparasjon",
 }
 
-export function ImportsPanel({ initialBatches }: ImportsPanelProps) {
+export function ImportsPanel({ initialBatches, countyWorkflow }: ImportsPanelProps) {
   const [batches, setBatches] = useState(initialBatches)
   const [selectedBatch, setSelectedBatch] = useState<ImportDetails | null>(null)
   const [actorsFile, setActorsFile] = useState<File | null>(null)
@@ -33,6 +35,9 @@ export function ImportsPanel({ initialBatches }: ImportsPanelProps) {
   const [repairFile, setRepairFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const visibleBatches = countyWorkflow
+    ? batches.filter((batch) => batch.targetCounties.includes(countyWorkflow.status.countySlug))
+    : batches
 
   const downloadTemplate = (filename: string, content: string) => {
     const blob = new Blob([content], { type: "text/csv;charset=utf-8" })
@@ -138,6 +143,68 @@ export function ImportsPanel({ initialBatches }: ImportsPanelProps) {
 
   return (
     <div className="space-y-6">
+      {countyWorkflow ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{countyWorkflow.status.county}: guided bootstrap workflow</CardTitle>
+            <CardDescription>
+              Bruk county-spesifikke importer for a fylle targetene, lukke manglende klynger og bygge ut katalogen trinnvis.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-lg border p-3">
+                <p className="text-xs text-muted-foreground">Coverage target</p>
+                <p className="text-sm font-medium">
+                  {countyWorkflow.status.target.approvedActors} aktorer / {countyWorkflow.status.target.municipalities} kommuner
+                </p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-xs text-muted-foreground">Progress</p>
+                <p className="text-sm font-medium">{countyWorkflow.status.targetProgressLabel}</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-xs text-muted-foreground">Missing clusters</p>
+                <p className="text-sm font-medium">
+                  {countyWorkflow.status.missingClusterKeys.length > 0
+                    ? countyWorkflow.status.missingClusterKeys.join(", ")
+                    : "Ingen"}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-lg border p-3">
+                <p className="text-xs text-muted-foreground">Recommended directory</p>
+                <p className="font-mono text-sm">{countyWorkflow.recommendedDirectory}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Start lokalt med <code>pnpm run init:county-import -- --county={countyWorkflow.status.countySlug}</code>
+                </p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-xs text-muted-foreground">Uncovered municipalities</p>
+                <p className="text-sm font-medium">
+                  {countyWorkflow.uncoveredMunicipalities.length > 0
+                    ? countyWorkflow.uncoveredMunicipalities.slice(0, 8).map((entry) => entry.name).join(", ")
+                    : "Alle kjente kommuner i taxonomy har minst ett treff."}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" asChild>
+                <Link href={`/admin/rollout-workflow/${countyWorkflow.status.countySlug}`}>Til county workflow</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href={`/${countyWorkflow.status.countySlug}`} target="_blank">
+                  Apen offentlig fylkesside
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>CSV-import</CardTitle>
@@ -313,7 +380,7 @@ export function ImportsPanel({ initialBatches }: ImportsPanelProps) {
           <CardDescription>Siste batcher og deres status.</CardDescription>
         </CardHeader>
         <CardContent>
-          {batches.length === 0 ? (
+          {visibleBatches.length === 0 ? (
             <p className="text-sm text-muted-foreground">Ingen batcher ennå.</p>
           ) : (
             <Table>
@@ -327,7 +394,7 @@ export function ImportsPanel({ initialBatches }: ImportsPanelProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {batches.map((batch) => (
+                {visibleBatches.map((batch) => (
                   <TableRow key={batch.id}>
                     <TableCell className="font-medium">{batch.filename}</TableCell>
                     <TableCell>
@@ -345,6 +412,11 @@ export function ImportsPanel({ initialBatches }: ImportsPanelProps) {
               </TableBody>
             </Table>
           )}
+          {countyWorkflow && visibleBatches.length === 0 ? (
+            <p className="mt-3 text-sm text-muted-foreground">
+              Ingen batcher for {countyWorkflow.status.county} ennÃ¥. Start med county-spesifikk bootstrap over.
+            </p>
+          ) : null}
         </CardContent>
       </Card>
     </div>

@@ -2,10 +2,12 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { ActorsExplorer } from "@/components/actors-explorer"
+import { RelatedArticlesSection } from "@/components/editorial/related-articles-section"
 import { RelatedGuidesSection } from "@/components/guides/related-guides-section"
 import { Badge } from "@/components/ui/badge"
 import { actorCopy } from "@/content/no"
 import { categoryOrder } from "@/lib/categories"
+import { getArticlesForCategory } from "@/lib/editorial"
 import { getGuidesForCategory } from "@/lib/guides"
 import { getCountyBySlug, getMunicipalityBySlug } from "@/lib/geo"
 import { getActors, getActorsByMunicipalityAndCategory } from "@/lib/public-data"
@@ -83,6 +85,10 @@ export default async function MunicipalityCategoryPage({ params }: MunicipalityC
     category as (typeof categoryOrder)[number],
     countyMeta.slug,
   )
+  const relatedArticles = getArticlesForCategory(
+    category as (typeof categoryOrder)[number],
+    countyMeta.slug,
+  )
 
   return (
     <div className="container mx-auto px-4 py-10 space-y-8">
@@ -106,6 +112,12 @@ export default async function MunicipalityCategoryPage({ params }: MunicipalityC
         title={`Guider for ${categoryLabel.toLowerCase()} i ${municipalityName}`}
         description={`Disse guidene matcher kategorien først, men peker også tilbake til ${countyMeta.name} og lokale browse-flater.`}
         guides={relatedGuides}
+      />
+
+      <RelatedArticlesSection
+        title={`Artikler om ${categoryLabel.toLowerCase()} i ${municipalityName}`}
+        description={`Redaksjonelle artikler som bruker ${countyMeta.name} som lokal kontekst og utdyper hvorfor denne kategorien betyr noe.`}
+        articles={relatedArticles}
       />
 
       <ActorsExplorer actors={actors} />

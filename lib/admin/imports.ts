@@ -515,7 +515,6 @@ export const createActorImportPreview = async (input: ImportPreviewInput) => {
     if (!actorPayload.municipality || actorPayload.municipality === "Ukjent sted") {
       validationErrors.push("municipality er pakrevd.")
     }
-    if (!actorPayload.city || actorPayload.city === "Ukjent sted") validationErrors.push("city er pakrevd.")
     if (actorPayload.lat === null || actorPayload.lng === null) validationErrors.push("lat og lng er pakrevd.")
     if (actorPayload.countySlug && !getCountyBySlug(actorPayload.countySlug)) {
       validationErrors.push("county_slug er ugyldig.")

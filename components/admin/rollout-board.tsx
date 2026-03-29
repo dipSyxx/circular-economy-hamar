@@ -14,18 +14,22 @@ type RolloutBoardProps = {
   initialStatuses: CountyRolloutBoardRow[]
 }
 
-const stageLabel = (stage: CountyRolloutStage) => {
-  if (stage === "pilot") return "Pilot"
-  if (stage === "queued") return "Queued"
-  if (stage === "in_progress") return "In progress"
-  return "Ready"
-}
-
 export function RolloutBoard({ initialStatuses }: RolloutBoardProps) {
   const [statuses, setStatuses] = useState(initialStatuses)
   const [savingCountySlug, setSavingCountySlug] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [drafts, setDrafts] = useState<Record<string, { stage: CountyRolloutStage; priority: string; notes: string }>>(
+  const [drafts, setDrafts] = useState<
+    Record<
+      string,
+      {
+        stage: CountyRolloutStage
+        priority: string
+        targetApprovedActors: string
+        targetMunicipalities: string
+        notes: string
+      }
+    >
+  >(
     () =>
       Object.fromEntries(
         initialStatuses.map((status) => [
@@ -33,6 +37,8 @@ export function RolloutBoard({ initialStatuses }: RolloutBoardProps) {
           {
             stage: status.stage,
             priority: String(status.priority),
+            targetApprovedActors: String(status.target.approvedActors),
+            targetMunicipalities: String(status.target.municipalities),
             notes: status.notes ?? "",
           },
         ]),
@@ -63,6 +69,8 @@ export function RolloutBoard({ initialStatuses }: RolloutBoardProps) {
         body: JSON.stringify({
           stage: draft.stage,
           priority: Number(draft.priority),
+          targetApprovedActors: Number(draft.targetApprovedActors),
+          targetMunicipalities: Number(draft.targetMunicipalities),
           notes: draft.notes,
         }),
       })
@@ -88,6 +96,8 @@ export function RolloutBoard({ initialStatuses }: RolloutBoardProps) {
         [countySlug]: {
           stage: updatedStatus.stage,
           priority: String(updatedStatus.priority),
+          targetApprovedActors: String(updatedStatus.target.approvedActors),
+          targetMunicipalities: String(updatedStatus.target.municipalities),
           notes: updatedStatus.notes ?? "",
         },
       }))
@@ -134,6 +144,7 @@ export function RolloutBoard({ initialStatuses }: RolloutBoardProps) {
                 <TableHead>Fylke</TableHead>
                 <TableHead>Stage</TableHead>
                 <TableHead>Priority</TableHead>
+                <TableHead>Coverage target</TableHead>
                 <TableHead>Dekning</TableHead>
                 <TableHead>Risiko</TableHead>
                 <TableHead>Siste import</TableHead>
@@ -146,6 +157,8 @@ export function RolloutBoard({ initialStatuses }: RolloutBoardProps) {
                 const draft = drafts[status.countySlug] ?? {
                   stage: status.stage,
                   priority: String(status.priority),
+                  targetApprovedActors: String(status.target.approvedActors),
+                  targetMunicipalities: String(status.target.municipalities),
                   notes: status.notes ?? "",
                 }
                 const stageLocked = status.isPilotCounty || status.isBrowseReady
@@ -207,6 +220,43 @@ export function RolloutBoard({ initialStatuses }: RolloutBoardProps) {
                           }))
                         }
                       />
+                    </TableCell>
+                    <TableCell className="min-w-[220px]">
+                      <div className="grid gap-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input
+                            type="number"
+                            value={draft.targetApprovedActors}
+                            onChange={(event) =>
+                              setDrafts((current) => ({
+                                ...current,
+                                [status.countySlug]: {
+                                  ...draft,
+                                  targetApprovedActors: event.target.value,
+                                },
+                              }))
+                            }
+                            aria-label={`Target approved actors for ${status.county}`}
+                          />
+                          <Input
+                            type="number"
+                            value={draft.targetMunicipalities}
+                            onChange={(event) =>
+                              setDrafts((current) => ({
+                                ...current,
+                                [status.countySlug]: {
+                                  ...draft,
+                                  targetMunicipalities: event.target.value,
+                                },
+                              }))
+                            }
+                            aria-label={`Target municipalities for ${status.county}`}
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Malsatt: {status.targetProgressLabel}
+                        </p>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="space-y-2">
@@ -276,7 +326,10 @@ export function RolloutBoard({ initialStatuses }: RolloutBoardProps) {
                           {savingCountySlug === status.countySlug ? "Lagrer..." : "Lagre"}
                         </Button>
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href="/admin/imports">Imports</Link>
+                          <Link href={`/admin/imports?county=${status.countySlug}`}>Imports</Link>
+                        </Button>
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={`/admin/rollout-workflow/${status.countySlug}`}>Workflow</Link>
                         </Button>
                         <Button variant="ghost" size="sm" asChild>
                           <Link href={`/${status.countySlug}`} target="_blank">

@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { decideCopy, pageCopy } from "@/content/no"
 import {
-  evaluateDecision,
+  evaluateDecisionBase,
   type DecisionInput,
   type ItemType,
   type Priority,
   type ProblemType,
-} from "@/lib/decision-engine"
+} from "@/lib/decision-system"
 import type { Actor, Co2eSource, Co2eSourceItem } from "@/lib/data"
 import type {
   DecisionMatchFallbackReason,
@@ -76,7 +76,7 @@ export function DecisionWizard({ actors, co2eSources, co2eSourceItems }: Decisio
 
   const decision = useMemo(() => {
     if (!decisionInput) return null
-    return evaluateDecision(decisionInput)
+    return evaluateDecisionBase(decisionInput)
   }, [decisionInput])
 
   const recommendation = decision?.options[0]
@@ -144,10 +144,7 @@ export function DecisionWizard({ actors, co2eSources, co2eSourceItems }: Decisio
     ].join(":")
     if (lastRecordedRef.current === key) return
 
-    recordDecision(decisionInput, decision, recommendationOption.impactScore, [
-      recommendationOption.savingsMin,
-      recommendationOption.savingsMax,
-    ])
+    recordDecision(decisionInput, decision)
     lastRecordedRef.current = key
   }, [decision, decisionInput, showResult])
 

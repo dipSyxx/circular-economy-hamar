@@ -2,10 +2,12 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { ActorsExplorer } from "@/components/actors-explorer"
+import { RelatedArticlesSection } from "@/components/editorial/related-articles-section"
 import { RelatedGuidesSection } from "@/components/guides/related-guides-section"
 import { PilotRolloutNote } from "@/components/pilot-rollout-note"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { getArticlesForCounty } from "@/lib/editorial"
 import { getActorGeographyMatchPriority, getAvailableMunicipalityOptions } from "@/lib/actor-scope"
 import { categoryOrder } from "@/lib/categories"
 import { getGuidesForCounty } from "@/lib/guides"
@@ -70,6 +72,7 @@ export default async function CountyPage({ params }: CountyPageProps) {
       count: actors.filter((actor) => actor.category === category).length,
     }))
   const relatedGuides = getGuidesForCounty(countyMeta.slug)
+  const relatedArticles = getArticlesForCounty(countyMeta.slug)
 
   return (
     <div className="container mx-auto px-4 py-10 space-y-10">
@@ -130,6 +133,12 @@ export default async function CountyPage({ params }: CountyPageProps) {
         title={`Praktiske guider for ${countyMeta.name}`}
         description="Disse guidene peker videre til relevante kategorier, fylker og lokale neste steg."
         guides={relatedGuides}
+      />
+
+      <RelatedArticlesSection
+        title={`Redaksjonelle artikler for ${countyMeta.name}`}
+        description="Artiklene under forklarer lokale mønstre, rollout-gap og hvordan fylket henger sammen med kategoriene."
+        articles={relatedArticles}
       />
 
       <section className="space-y-4">

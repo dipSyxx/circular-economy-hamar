@@ -27,6 +27,12 @@ export type GuideIntent =
   | "rental"
   | "how-to-find-local-services"
 
+export type EditorialTheme =
+  | "local-discovery"
+  | "repair-economy"
+  | "trust-and-quality"
+  | "circular-systems"
+
 export interface GuideCtaLink {
   label: string
   href: string
@@ -46,6 +52,20 @@ export interface GuideDoc {
   seoTitle: string
   seoDescription: string
   primaryIntent: GuideIntent
+  relatedCategories: ActorCategory[]
+  relatedCounties: string[]
+  bodySections: GuideSection[]
+}
+
+export interface ArticleDoc {
+  slug: string
+  title: string
+  summary: string
+  seoTitle: string
+  seoDescription: string
+  publishedAt: string
+  readingMinutes: number
+  theme: EditorialTheme
   relatedCategories: ActorCategory[]
   relatedCounties: string[]
   bodySections: GuideSection[]
@@ -247,6 +267,12 @@ export interface CoverageClusterStatus {
   isReady: boolean
 }
 
+export interface CountyCoverageTarget {
+  approvedActors: number
+  municipalities: number
+  requiredClusters: CoverageClusterKey[]
+}
+
 export interface CountyCoverageSummary {
   county: string
   countySlug: string
@@ -298,6 +324,10 @@ export interface CountyRolloutBoardRow {
   countySlug: string
   stage: CountyRolloutStage
   priority: number
+  target: CountyCoverageTarget
+  targetApprovedActorsMet: boolean
+  targetMunicipalitiesMet: boolean
+  targetProgressLabel: string
   notes?: string | null
   isPilotCounty: boolean
   approvedActorCount: number
@@ -313,6 +343,24 @@ export interface CountyRolloutBoardRow {
     filename: string
     appliedAt?: string | null
   } | null
+}
+
+export interface CountyBootstrapGuideStep {
+  key: string
+  title: string
+  description: string
+}
+
+export interface CountyRolloutWorkflow {
+  status: CountyRolloutBoardRow
+  uncoveredMunicipalities: Array<{
+    slug: string
+    name: string
+  }>
+  importHistory: ActorImportBatchSummary[]
+  recommendedDirectory: string
+  recommendedFilenamePrefix: string
+  guideSteps: CountyBootstrapGuideStep[]
 }
 
 export interface RepairService {

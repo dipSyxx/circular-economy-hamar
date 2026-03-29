@@ -10,7 +10,8 @@ import type {
   Priority,
   Recommendation,
   ReasonKey,
-} from "@/lib/decision-engine"
+} from "@/lib/decision-system"
+import { deriveDecisionOutcomeMetrics } from "@/lib/decision-system"
 
 export type ActionType =
   | "decision_complete"
@@ -296,11 +297,9 @@ export const recordAction = (type: ActionType, meta?: Record<string, string>, po
 export const recordDecision = (
   input: DecisionInput,
   decision: DecisionOutput,
-  impactScore: number,
-  savings: [number, number],
 ) => {
   const profile = loadProfile()
-  const recommendedOption = decision.options.find((option) => option.type === decision.recommendation)
+  const metrics = deriveDecisionOutcomeMetrics(decision)
   const entry: DecisionEntry = {
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
@@ -310,16 +309,16 @@ export const recordDecision = (
     budgetNok: input.budgetNok,
     timeDays: input.timeDays,
     priority: input.priority,
-    impactScore,
-    savingsMin: savings[0],
-    savingsMax: savings[1],
+    impactScore: metrics.impactScore,
+    savingsMin: metrics.savingsMin,
+    savingsMax: metrics.savingsMax,
     status: decision.status,
     confidence: decision.confidence,
     recommendedFeasible: decision.recommendedFeasible,
     bestFeasibleOption: decision.bestFeasibleOption,
     modelRepairabilityScore: input.modelRepairabilityScore,
-    co2eSavedMin: recommendedOption?.co2eSavedMin,
-    co2eSavedMax: recommendedOption?.co2eSavedMax,
+    co2eSavedMin: metrics.co2eSavedMin,
+    co2eSavedMax: metrics.co2eSavedMax,
     explainability: decision.explainability,
     options: decision.options,
     planB: decision.planB,

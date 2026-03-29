@@ -634,7 +634,6 @@ export function ResourceManager({
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [slugTouched, setSlugTouched] = useState(false)
-  const [actorCityOverride, setActorCityOverride] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [filters, setFilters] = useState<Record<string, string | boolean | null>>({})
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -937,18 +936,10 @@ export function ResourceManager({
     setSelectedId(null)
     setDraft(buildDraft({}, defaultPayload))
     setSlugTouched(false)
-    setActorCityOverride(false)
     setDialogOpen(true)
   }
 
   const openEdit = (item: AdminRow) => {
-    const shouldOverrideCity =
-      Boolean(
-        typeof item.city === "string" &&
-          typeof item.municipality === "string" &&
-          item.city.trim() &&
-          item.city.trim() !== item.municipality.trim(),
-      )
     setMode("edit")
     setSelectedId(item.id ?? null)
     setDraft(
@@ -956,10 +947,7 @@ export function ResourceManager({
         {
           ...item,
           city:
-            !shouldOverrideCity &&
-            typeof item.city === "string" &&
-            !item.city.trim() &&
-            typeof item.municipality === "string"
+            typeof item.municipality === "string" && item.municipality.trim()
               ? item.municipality
               : item.city,
         },
@@ -967,7 +955,6 @@ export function ResourceManager({
       ),
     )
     setSlugTouched(true)
-    setActorCityOverride(shouldOverrideCity)
     setDialogOpen(true)
   }
 
@@ -1118,12 +1105,7 @@ export function ResourceManager({
                       ...prev,
                       county: nextCounty,
                       municipality: municipalityStillValid ? currentMunicipality : "",
-                      city:
-                        !actorCityOverride
-                          ? municipalityStillValid
-                            ? currentMunicipality
-                            : ""
-                          : prev.city,
+                      city: municipalityStillValid ? currentMunicipality : "",
                     }
                   })
                 }
@@ -1150,12 +1132,7 @@ export function ResourceManager({
                     return {
                       ...prev,
                       municipality: nextMunicipality,
-                      city:
-                        !actorCityOverride
-                          ? nextMunicipality
-                          : typeof prev.city === "string"
-                            ? prev.city
-                            : "",
+                      city: nextMunicipality,
                     }
                   })
                 }
@@ -1180,40 +1157,21 @@ export function ResourceManager({
               </Select>
             ) : isActorResource && key === "city" && meta.kind === "string" ? (
               <div className="space-y-2">
-                <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Checkbox
-                    checked={actorCityOverride}
-                    onCheckedChange={(checked) => {
-                      const nextOverride = Boolean(checked)
-                      setActorCityOverride(nextOverride)
-                      if (!nextOverride) {
-                        setDraft((prev) => ({
-                          ...prev,
-                          city: typeof prev.municipality === "string" ? prev.municipality : "",
-                        }))
-                      }
-                    }}
-                    disabled={isReadOnly}
-                  />
-                  Annet sted / bydel
-                </label>
                 <Input
                   {...commonProps}
                   type="text"
-                  value={typeof value === "string" ? value : ""}
-                  onChange={(event) => setDraft((prev) => ({ ...prev, [key]: event.target.value }))}
+                  value={typeof draft.municipality === "string" && draft.municipality ? draft.municipality : typeof value === "string" ? value : ""}
                   placeholder={
-                    actorCityOverride
-                      ? "Oslo sentrum"
-                      : typeof draft.municipality === "string" && draft.municipality
-                        ? draft.municipality
-                        : "Velg kommune først"
+                    typeof draft.municipality === "string" && draft.municipality
+                      ? draft.municipality
+                      : "Velg kommune først"
                   }
-                  disabled={isReadOnly || (!actorCityOverride && Boolean(draft.municipality))}
+                  disabled
+                  readOnly
                 />
-                {!actorCityOverride && typeof draft.municipality === "string" && draft.municipality ? (
+                {typeof draft.municipality === "string" && draft.municipality ? (
                   <p className="text-xs text-muted-foreground">
-                    By/sted følger valgt kommune med mindre du slår på overstyring.
+                    By/sted følger valgt kommune. Bruk area hvis du trenger mer presisjon.
                   </p>
                 ) : null}
               </div>

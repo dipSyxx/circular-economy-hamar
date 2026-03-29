@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { jsonError } from "@/app/api/public/_helpers"
-import { evaluateDecisionMatches } from "@/lib/decision-matching"
-import { TRANSPORT_MODES } from "@/lib/decision-match-types"
+import { TRANSPORT_MODES } from "@/lib/decision-system"
+import { evaluateDecisionForContext } from "@/lib/decision-system-server"
 import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { getActors } from "@/lib/public-data"
 
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       ...decisionInput
     } = parsed.data
 
-    const result = await evaluateDecisionMatches(decisionInput, actors, {
+    const result = await evaluateDecisionForContext(decisionInput, actors, {
       countySlug,
       municipalitySlug,
       userLat,

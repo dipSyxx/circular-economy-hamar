@@ -33,7 +33,6 @@ type FormState = {
   postalCode: string
   county: string
   municipality: string
-  city: string
   phone: string
   email: string
   website: string
@@ -47,7 +46,6 @@ const initialFormState: FormState = {
   postalCode: "",
   county: "",
   municipality: "",
-  city: "",
   phone: "",
   email: "",
   website: "",
@@ -84,7 +82,6 @@ export function ActorCorrectionDialog({ actor }: ActorCorrectionDialogProps) {
     if (form.municipality.trim() && form.municipality.trim() !== (actor.municipality ?? "")) {
       payload.municipality = form.municipality.trim()
     }
-    if (form.city.trim() && form.city.trim() !== (actor.city ?? "")) payload.city = form.city.trim()
     if (form.phone.trim() && form.phone.trim() !== (actor.phone ?? "")) payload.phone = form.phone.trim()
     if (form.email.trim() && form.email.trim() !== (actor.email ?? "")) payload.email = form.email.trim()
     if (form.website.trim() && form.website.trim() !== (actor.website ?? "")) payload.website = form.website.trim()
@@ -200,15 +197,6 @@ export function ActorCorrectionDialog({ actor }: ActorCorrectionDialogProps) {
                 value={form.postalCode}
                 onChange={(event) => updateField("postalCode", event.target.value)}
                 placeholder={actor.postalCode ?? ""}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="correction-city">By eller sted</Label>
-              <Input
-                id="correction-city"
-                value={form.city}
-                onChange={(event) => updateField("city", event.target.value)}
-                placeholder={actor.city ?? ""}
               />
             </div>
             <div className="grid gap-2">

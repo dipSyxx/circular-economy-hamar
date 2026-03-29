@@ -221,6 +221,7 @@ export function getMunicipalitiesForCounty(countySlug: string) {
 export function formatActorGeoLabel(input: {
   city?: string | null
   municipality?: string | null
+  area?: string | null
   county?: string | null
   nationwide?: boolean
 }) {
@@ -228,7 +229,7 @@ export function formatActorGeoLabel(input: {
     return "Landsdekkende i Norge"
   }
 
-  const parts = [input.city, input.municipality, input.county]
+  const parts = [input.area, input.city, input.municipality, input.county]
     .map((part) => part?.trim())
     .filter(Boolean)
 
@@ -265,7 +266,12 @@ export function normalizeActorGeo(input: ActorGeoInput): NormalizedActorGeo {
     normalizedMunicipalitySlugInput?.trim() ??
     cityAlias?.municipalitySlug ??
     slugifyNorwegian(municipality)
-  const city = providedCity || normalizedMunicipalityInput || municipality || "Ukjent sted"
+  const city = municipality || providedCity || "Ukjent sted"
+  const normalizedArea =
+    area ??
+    (providedCity && slugifyNorwegian(providedCity) !== slugifyNorwegian(municipality)
+      ? providedCity
+      : null)
 
   const fallbackCountySlug =
     matchedMunicipality?.countySlug ??
@@ -286,6 +292,6 @@ export function normalizeActorGeo(input: ActorGeoInput): NormalizedActorGeo {
     municipality,
     municipalitySlug,
     city,
-    area,
+    area: normalizedArea,
   }
 }

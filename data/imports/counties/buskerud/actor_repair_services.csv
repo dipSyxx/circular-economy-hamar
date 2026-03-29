@@ -1,0 +1,2 @@
+actor_slug,problem_type,item_types,price_min,price_max,eta_days
+eksempel-aktor,screen,phone|laptop,900,1800,2

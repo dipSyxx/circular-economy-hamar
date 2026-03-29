@@ -566,12 +566,14 @@ model ActorVerificationTask {
 }
 
 model CountyRolloutStatus {
-  countyId   String             @id @map("county_id")
-  stage      CountyRolloutStage @default(queued)
-  priority   Int                @default(100)
-  notes      String?
-  createdAt  DateTime           @default(now()) @map("created_at")
-  updatedAt  DateTime           @updatedAt @map("updated_at")
+  countyId                String             @id @map("county_id")
+  stage                   CountyRolloutStage @default(queued)
+  priority                Int                @default(100)
+  targetApprovedActors    Int                @default(4) @map("target_approved_actors")
+  targetMunicipalities    Int                @default(1) @map("target_municipalities")
+  notes                   String?
+  createdAt               DateTime           @default(now()) @map("created_at")
+  updatedAt               DateTime           @updatedAt @map("updated_at")
 
   county County @relation(fields: [countyId], references: [id], onDelete: Cascade)
 

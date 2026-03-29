@@ -1,12 +1,14 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { ActorsExplorer } from "@/components/actors-explorer"
+import { RelatedArticlesSection } from "@/components/editorial/related-articles-section"
 import { RelatedGuidesSection } from "@/components/guides/related-guides-section"
 import { PilotRolloutNote } from "@/components/pilot-rollout-note"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { actorCopy } from "@/content/no"
 import { categoryOrder } from "@/lib/categories"
+import { getArticlesForMunicipality } from "@/lib/editorial"
 import { getGuidesForMunicipality } from "@/lib/guides"
 import { getCountyBySlug, getMunicipalityBySlug, norwayCounties } from "@/lib/geo"
 import { getPilotRolloutMode } from "@/lib/pilot-coverage"
@@ -76,6 +78,7 @@ export default async function MunicipalityPage({ params }: MunicipalityPageProps
       count: actors.filter((actor) => actor.category === category).length,
     }))
   const relatedGuides = getGuidesForMunicipality(countyMeta.slug)
+  const relatedArticles = getArticlesForMunicipality(countyMeta.slug)
   const rolloutMode = getPilotRolloutMode(
     countyMeta.slug,
     countyActors.map((actor) => ({
@@ -126,6 +129,12 @@ export default async function MunicipalityPage({ params }: MunicipalityPageProps
         title={`Guider for ${municipalityName}`}
         description={`Disse guidene passer for behov du typisk vil løse i ${municipalityName} og ${countyMeta.name}.`}
         guides={relatedGuides}
+      />
+
+      <RelatedArticlesSection
+        title={`Artikler for ${municipalityName}`}
+        description={`Redaksjonelle artikler som gir mer kontekst for hvordan ${municipalityName} og ${countyMeta.name} brukes i katalogen.`}
+        articles={relatedArticles}
       />
 
       <ActorsExplorer actors={actors} />

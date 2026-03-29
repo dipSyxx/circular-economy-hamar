@@ -93,7 +93,7 @@ export const validateActorSubmission = (payload: SubmissionPayload) => {
   const address = ensureString(actor.address)
   const county = ensureString(actor.county)
   const municipality = ensureString(actor.municipality)
-  const city = ensureString(actor.city) || municipality
+  const city = municipality
   const openingHours = ensureStringArray(actor.openingHours)
   const tags = ensureStringArray(actor.tags)
   const benefits = ensureStringArray(actor.benefits)
@@ -106,8 +106,8 @@ export const validateActorSubmission = (payload: SubmissionPayload) => {
     return { ok: false as const, error: "Obligatoriske felt for aktoren mangler." }
   }
 
-  if (!county || !municipality || !city) {
-    return { ok: false as const, error: "Velg fylke, kommune og by/sted." }
+  if (!county || !municipality) {
+    return { ok: false as const, error: "Velg fylke og kommune." }
   }
 
   const countySlug = getCountyByName(county)?.slug ?? ""

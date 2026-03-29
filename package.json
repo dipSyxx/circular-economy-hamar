@@ -9,6 +9,8 @@
     "backfill:geo": "tsx scripts/backfill-geo-taxonomy.ts",
     "dev": "next dev",
     "generate:prisma-enums": "node scripts/generate-prisma-enums.js",
+    "init:county-import": "tsx scripts/init-county-import.ts",
+    "init:county-imports": "tsx scripts/init-county-import.ts --all",
     "import:pilot": "tsx scripts/import-pilot-catalog.ts",
     "lint": "eslint .",
     "start": "next start",

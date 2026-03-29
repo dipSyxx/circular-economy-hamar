@@ -11,7 +11,7 @@ export default async function AdminRolloutPage() {
       <div>
         <h1 className="text-3xl font-bold">Nationwide rollout board</h1>
         <p className="text-muted-foreground">
-          Operasjonell fylkesoversikt med stage, prioritet, dekningsklynger og siste importpåvirkning.
+          Operasjonell fylkesoversikt med stage, prioritet, coverage targets, county workflow og siste importpavirkning.
         </p>
       </div>
       <RolloutBoard initialStatuses={statuses} />

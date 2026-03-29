@@ -18,9 +18,11 @@ import Link from "next/link"
 import { actorCopy, actorPageCopy } from "@/content/no"
 import type { SourceType } from "@/lib/data"
 import { ActorCorrectionDialog } from "@/components/actor-correction-dialog"
+import { RelatedArticlesSection } from "@/components/editorial/related-articles-section"
 import { RelatedGuidesSection } from "@/components/guides/related-guides-section"
 import { ActorTrustBadges } from "@/components/actor-trust-badges"
 import { categoryConfig } from "@/lib/categories"
+import { getArticlesForActor } from "@/lib/editorial"
 import { getGuidesForActor } from "@/lib/guides"
 import { getActorBySlug } from "@/lib/public-data"
 import { FavoriteButton } from "@/components/favorite-button"
@@ -83,6 +85,7 @@ export default async function ActorPage({ params }: ActorPageProps) {
   const mapGoogleLink = `https://www.google.com/maps/search/?api=1&query=${actor.lat},${actor.lng}`
   const geoLabel = formatActorGeoLabel(actor)
   const relatedGuides = getGuidesForActor(actor)
+  const relatedArticles = getArticlesForActor(actor)
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -221,6 +224,11 @@ export default async function ActorPage({ params }: ActorPageProps) {
             title="Praktiske guider som passer her"
             description="Guidene under matcher kategorien til aktøren først, og fylket deretter."
             guides={relatedGuides}
+          />
+          <RelatedArticlesSection
+            title="Redaksjonelle artikler som gir mer kontekst"
+            description="Les mer om lokale mønstre, datakvalitet og hvordan denne typen tilbud passer inn i et større sirkulært bilde."
+            articles={relatedArticles}
           />
         </div>
 

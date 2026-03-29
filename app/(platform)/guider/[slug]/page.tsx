@@ -3,11 +3,13 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { ActorCard } from "@/components/actor-card"
+import { RelatedArticlesSection } from "@/components/editorial/related-articles-section"
 import { RelatedGuidesSection } from "@/components/guides/related-guides-section"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { actorCopy } from "@/content/no"
+import { getArticlesForGuide } from "@/lib/editorial"
 import {
   getGuideBySlug,
   getGuideCategoryLinks,
@@ -51,6 +53,7 @@ export default async function GuideDetailPage({ params }: GuidePageProps) {
 
   const [relatedActors] = await Promise.all([getRelatedActorsForGuide(guide)])
   const relatedGuides = getRelatedGuidesForGuide(guide.slug)
+  const relatedArticles = getArticlesForGuide(guide)
   const countyLinks = getGuideCountyLinks(guide)
   const categoryLinks = getGuideCategoryLinks(guide)
 
@@ -193,6 +196,12 @@ export default async function GuideDetailPage({ params }: GuidePageProps) {
         title="Flere praktiske guider"
         description="Neste steg fra andre sirkulære behov og intents."
         guides={relatedGuides}
+      />
+
+      <RelatedArticlesSection
+        title="Redaksjonelle artikler som utdyper guiden"
+        description="Bruk artiklene når du vil forstå sammenhenger, kvalitetssignaler og lokale mønstre bedre før du handler."
+        articles={relatedArticles}
       />
     </div>
   )

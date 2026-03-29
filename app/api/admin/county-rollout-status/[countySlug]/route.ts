@@ -5,9 +5,24 @@ import type { CountyRolloutStage } from "@/lib/data"
 
 const allowedStages = new Set<CountyRolloutStage>(["pilot", "queued", "in_progress", "ready"])
 
+const toFiniteNumber = (value: unknown) => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : undefined
+  }
+
+  return undefined
+}
+
 type CountyRolloutUpdateBody = {
   stage?: unknown
   priority?: unknown
+  targetApprovedActors?: unknown
+  targetMunicipalities?: unknown
   notes?: unknown
 }
 
@@ -24,12 +39,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ co
         typeof body.stage === "string" && allowedStages.has(body.stage as CountyRolloutStage)
           ? (body.stage as CountyRolloutStage)
           : undefined,
-      priority:
-        typeof body.priority === "number"
-          ? body.priority
-          : typeof body.priority === "string" && body.priority.trim()
-            ? Number(body.priority)
-            : undefined,
+      priority: toFiniteNumber(body.priority),
+      targetApprovedActors: toFiniteNumber(body.targetApprovedActors),
+      targetMunicipalities: toFiniteNumber(body.targetMunicipalities),
       notes: typeof body.notes === "string" ? body.notes.trim() : body.notes === null ? null : undefined,
     })
 

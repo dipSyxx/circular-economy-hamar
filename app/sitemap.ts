@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next"
+import { getArticles } from "@/lib/editorial"
 import { prisma } from "@/lib/prisma"
 import { categoryOrder } from "@/lib/categories"
 import { getGuides } from "@/lib/guides"
@@ -9,6 +10,7 @@ import { getSiteUrl } from "@/lib/seo"
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl()
   const guides = getGuides()
+  const articles = getArticles()
   const [actors, actorPages] = await Promise.all([
     getActors(),
     prisma.actor.findMany({
@@ -31,6 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/challenges",
     "/fylker",
     "/guider",
+    "/artikler",
     ...categoryOrder.map((category) => `/kategori/${category}`),
     ...norwayCounties.map((county) => `/${county.slug}`),
   ]
@@ -79,6 +82,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...guides.map((guide) => ({
       url: `${siteUrl}/guider/${guide.slug}`,
       lastModified: new Date(),
+    })),
+    ...articles.map((article) => ({
+      url: `${siteUrl}/artikler/${article.slug}`,
+      lastModified: new Date(article.publishedAt),
     })),
     ...actorPages.map((actor) => ({
       url: `${siteUrl}/aktorer/${actor.slug}`,
