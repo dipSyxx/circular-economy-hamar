@@ -17,7 +17,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
   const { id } = await params
   const existing = await prisma.actor.findUnique({ where: { id } })
-  if (!existing) return jsonError("Aktor ikke funnet.", 404)
+  if (!existing) return jsonError("Aktør ikke funnet.", 404)
   if (existing.createdById !== user.id) return jsonError("Forbidden", 403)
 
   const payload = (await request.json()) as SubmissionPayload
@@ -112,7 +112,7 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
 
   const { id } = await params
   const existing = await prisma.actor.findUnique({ where: { id } })
-  if (!existing) return jsonError("Aktor ikke funnet.", 404)
+  if (!existing) return jsonError("Aktør ikke funnet.", 404)
   if (existing.createdById !== user.id) return jsonError("Forbidden", 403)
 
   await prisma.actor.delete({ where: { id } })

@@ -37,7 +37,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ actor: buildAdminActorReviewItem(updatedActor) })
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Kunne ikke reverifisere aktoren." },
+      { error: error instanceof Error ? error.message : "Kunne ikke reverifisere aktøren." },
       { status: 400 },
     )
   }

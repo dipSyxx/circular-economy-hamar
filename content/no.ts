@@ -647,16 +647,16 @@ export const decideCopy = {
   },
   planB: {
     title: "Plan B",
-    description: "Dette valget passer ikke helt budsjett/tid. Pr?v dette som neste steg:",
+    description: "Dette valget passer ikke helt budsjett/tid. Prøv dette som neste steg:",
     reasons: {
       budget: "Budsjettet ditt er lavere enn anbefalt.",
       time: "Tiden din er for kort.",
     },
     steps: {
-      repair: ["Be om gratis diagnose", "Sjekk brukt som backup", "Vurder ? sette av litt mer budsjett"],
-      buy_used: ["Sjekk bruktmarkedet f?rst", "Avtal henting n?r du har tid", "Selg eller lever inn det gamle"],
-      donate: ["Sett av tid i kalenderen", "Sorter det som kan gis bort", "Lever til ombruk n?r du kan"],
-      recycle: ["Samle e-avfall hjemme", "Planlegg en tur til gjenvinning", "Sjekk ?pningstidene f?rst"],
+      repair: ["Be om gratis diagnose", "Sjekk brukt som backup", "Vurder å sette av litt mer budsjett"],
+      buy_used: ["Sjekk bruktmarkedet først", "Avtal henting når du har tid", "Selg eller lever inn det gamle"],
+      donate: ["Sett av tid i kalenderen", "Sorter det som kan gis bort", "Lever til ombruk når du kan"],
+      recycle: ["Samle e-avfall hjemme", "Planlegg en tur til gjenvinning", "Sjekk åpningstidene først"],
     },
   },
   goLabel: "Gå",
@@ -689,10 +689,10 @@ export const decideCopy = {
     transportModePlaceholder: "Velg transport",
     maxTravelMinutesLabel: "Maks reisetid (min)",
     liveMatchLoadingLabel: "Henter lokale forslag...",
-    liveMatchErrorLabel: "Kunne ikke hente lokale forslag akkurat na.",
+    liveMatchErrorLabel: "Kunne ikke hente lokale forslag akkurat nå.",
     fallbackTravelLimitLabel:
-      "Ingen aktorer passet reisegrensen din, sa vi viser de beste alternativene likevel.",
-    whyThisActorTitle: "Hvorfor denne aktoren",
+      "Ingen aktører passet reisegrensen din, så vi viser de beste alternativene likevel.",
+    whyThisActorTitle: "Hvorfor denne aktøren",
     travelApproximateLabel: "Omtrentlig",
     coverageReasonLabels: {
       base_location: "Lokalt tilbud",
@@ -703,7 +703,7 @@ export const decideCopy = {
     transportModeLabels: {
       driving: "Bil",
       cycling: "Sykkel",
-      walking: "Ga",
+      walking: "Gå",
     },
   },
   optionCopy: {

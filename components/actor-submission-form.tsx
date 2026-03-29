@@ -283,11 +283,11 @@ export function ActorSubmissionForm({
   const [success, setSuccess] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  const headingTitle = mode === "edit" ? "Oppdater aktor" : "Registrer ny aktor"
+  const headingTitle = mode === "edit" ? "Oppdater aktør" : "Registrer ny aktør"
   const headingDescription =
     mode === "edit"
-      ? "Oppdater feltene og send inn pa nytt for godkjenning."
-      : "Fyll inn feltene. Innsendingen blir gjennomgatt av en administrator for publisering."
+      ? "Oppdater feltene og send inn på nytt for godkjenning."
+      : "Fyll inn feltene. Innsendingen blir gjennomgått av en administrator for publisering."
 
   const slugPreview = useMemo(
     () => (slugTouched ? actor.slug : slugify(actor.name)),
@@ -348,24 +348,24 @@ export function ActorSubmissionForm({
 
   const validate = () => {
     const errors: string[] = []
-    if (!actor.name.trim()) errors.push("Navn er pakrevd.")
-    if (!slugPreview.trim()) errors.push("Slug er pakrevd.")
-    if (!actor.description.trim()) errors.push("Kort beskrivelse er pakrevd.")
-    if (!actor.longDescription.trim()) errors.push("Lang beskrivelse er pakrevd.")
-    if (!actor.address.trim()) errors.push("Adresse er pakrevd.")
-    if (!actor.county.trim()) errors.push("Fylke er pakrevd.")
-    if (!actor.municipality.trim()) errors.push("Kommune er pakrevd.")
-    if (!actor.openingHours.length) errors.push("Apningstider er pakrevd.")
+    if (!actor.name.trim()) errors.push("Navn er påkrevd.")
+    if (!slugPreview.trim()) errors.push("Slug er påkrevd.")
+    if (!actor.description.trim()) errors.push("Kort beskrivelse er påkrevd.")
+    if (!actor.longDescription.trim()) errors.push("Lang beskrivelse er påkrevd.")
+    if (!actor.address.trim()) errors.push("Adresse er påkrevd.")
+    if (!actor.county.trim()) errors.push("Fylke er påkrevd.")
+    if (!actor.municipality.trim()) errors.push("Kommune er påkrevd.")
+    if (!actor.openingHours.length) errors.push("Åpningstider er påkrevd.")
     if (!actor.tags.length) errors.push("Legg til minst ett tag.")
     if (!actor.benefits.length) errors.push("Legg til minst en fordel.")
     if (!actor.howToUse.length) errors.push("Legg til minst ett tips for bruk.")
     if (!actor.lat.trim() || !actor.lng.trim()) {
-      errors.push("Gyldige koordinater er pakrevd.")
+      errors.push("Gyldige koordinater er påkrevd.")
     } else {
       const lat = Number(actor.lat)
       const lng = Number(actor.lng)
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-        errors.push("Gyldige koordinater er pakrevd.")
+        errors.push("Gyldige koordinater er påkrevd.")
       }
     }
 
@@ -380,15 +380,15 @@ export function ActorSubmissionForm({
       if (!service.problemType) errors.push(`Tjeneste #${index + 1}: problemtype mangler.`)
       if (!service.itemTypes.length) errors.push(`Tjeneste #${index + 1}: velg minst en type.`)
       if (!service.priceMin.trim() || !service.priceMax.trim()) {
-        errors.push(`Tjeneste #${index + 1}: pris ma fylles ut.`)
+        errors.push(`Tjeneste #${index + 1}: pris må fylles ut.`)
         return
       }
       const min = Number(service.priceMin)
       const max = Number(service.priceMax)
       if (!Number.isFinite(min) || !Number.isFinite(max)) {
-        errors.push(`Tjeneste #${index + 1}: pris ma fylles ut.`)
+        errors.push(`Tjeneste #${index + 1}: pris må fylles ut.`)
       } else if (min > max) {
-        errors.push(`Tjeneste #${index + 1}: pris min kan ikke vaere hoyere enn max.`)
+        errors.push(`Tjeneste #${index + 1}: pris min kan ikke være høyere enn max.`)
       }
     })
 
@@ -473,7 +473,7 @@ export function ActorSubmissionForm({
 
       if (!response.ok) {
         const data = (await response.json().catch(() => null)) as { error?: string } | null
-        throw new Error(data?.error || "Kunne ikke sende inn aktoren.")
+        throw new Error(data?.error || "Kunne ikke sende inn aktøren.")
       }
 
       const data = (await response.json().catch(() => null)) as { actor?: { id?: string } } | null
@@ -481,8 +481,8 @@ export function ActorSubmissionForm({
 
       setSuccess(
         mode === "edit"
-          ? "Aktoren er oppdatert og sendt inn pa nytt."
-          : "Takk. Aktoren er sendt inn og venter pa godkjenning.",
+          ? "Aktøren er oppdatert og sendt inn på nytt."
+          : "Takk. Aktøren er sendt inn og venter på godkjenning.",
       )
 
       if (mode === "create") {
@@ -515,7 +515,7 @@ export function ActorSubmissionForm({
 
   const loginPrompt = (
     <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">Logg inn for a sende inn en aktor til vurdering.</p>
+      <p className="text-sm text-muted-foreground">Logg inn for å sende inn en aktør til vurdering.</p>
       {loginActions}
     </div>
   )
@@ -538,7 +538,7 @@ export function ActorSubmissionForm({
                     updateActor("slug", slugify(value))
                   }
                 }}
-                placeholder="Navn pa aktor"
+                placeholder="Navn på aktør"
               />
             </div>
             <div>
@@ -757,7 +757,7 @@ export function ActorSubmissionForm({
                 <Checkbox checked={actor.nationwide} onCheckedChange={(value) => updateActor("nationwide", Boolean(value))} />
                 <div>
                   <p className="font-medium">Landsdekkende tilbud</p>
-                  <p className="text-xs text-muted-foreground">Kryss av hvis aktoren leverer utover ett lokalt nedslagsfelt.</p>
+                  <p className="text-xs text-muted-foreground">Kryss av hvis aktøren leverer utover ett lokalt nedslagsfelt.</p>
                 </div>
               </label>
             </div>
@@ -774,7 +774,7 @@ export function ActorSubmissionForm({
           <p className="text-sm font-semibold">Detaljer og innhold</p>
           <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="sm:col-span-2">
-              <Label>Apningstider</Label>
+              <Label>Åpningstider</Label>
               <TagInput value={actor.openingHours} onChange={(value) => updateActor("openingHours", value)} placeholder="Legg til og trykk Enter" />
             </div>
             <div>
@@ -1008,20 +1008,20 @@ export function ActorSubmissionForm({
         <>
           <DialogFooter>
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Sender..." : submitLabel ?? (mode === "edit" ? "Oppdater aktor" : "Send inn aktor")}
+              {submitting ? "Sender..." : submitLabel ?? (mode === "edit" ? "Oppdater aktør" : "Send inn aktør")}
             </Button>
           </DialogFooter>
           <span className="text-xs text-muted-foreground">
-            Aktoren far status "pending" til den er godkjent av administrator.
+            Aktøren får status "pending" til den er godkjent av administrator.
           </span>
         </>
       ) : (
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={submitting}>
-            {submitting ? "Sender..." : submitLabel ?? (mode === "edit" ? "Oppdater aktor" : "Send inn aktor")}
+            {submitting ? "Sender..." : submitLabel ?? (mode === "edit" ? "Oppdater aktør" : "Send inn aktør")}
           </Button>
           <span className="text-xs text-muted-foreground">
-            Aktoren far status "pending" til den er godkjent av administrator.
+            Aktøren får status "pending" til den er godkjent av administrator.
           </span>
         </div>
       )}
@@ -1044,7 +1044,7 @@ export function ActorSubmissionForm({
       <Card>
         <CardHeader>
           <CardTitle>{headingTitle}</CardTitle>
-          <CardDescription>Logg inn for a sende inn en aktor til vurdering.</CardDescription>
+          <CardDescription>Logg inn for å sende inn en aktør til vurdering.</CardDescription>
         </CardHeader>
         <CardContent>{loginActions}</CardContent>
       </Card>

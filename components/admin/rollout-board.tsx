@@ -202,7 +202,7 @@ export function RolloutBoard({ initialStatuses }: RolloutBoardProps) {
                         <p className="mt-1 text-xs text-muted-foreground">
                           {status.isPilotCounty
                             ? "Pilotfylker styres automatisk."
-                            : "Ready settes automatisk nar alle fire klynger er pa plass."}
+                            : "Ready settes automatisk når alle fire klynger er på plass."}
                         </p>
                       ) : null}
                     </TableCell>
@@ -261,7 +261,7 @@ export function RolloutBoard({ initialStatuses }: RolloutBoardProps) {
                     <TableCell>
                       <div className="space-y-2">
                         <p className="text-sm">
-                          {status.approvedActorCount} aktorer i {status.municipalityCount} kommuner/byer
+                          {status.approvedActorCount} aktører i {status.municipalityCount} kommuner/byer
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {status.coverageClusters.map((cluster) => (

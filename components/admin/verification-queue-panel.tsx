@@ -110,12 +110,12 @@ export function VerificationQueuePanel({ initialTasks }: VerificationQueuePanelP
       })
       const payload = (await response.json().catch(() => null)) as { error?: string } | null
       if (!response.ok) {
-        throw new Error(payload?.error || "Kunne ikke reverifisere aktoren.")
+        throw new Error(payload?.error || "Kunne ikke reverifisere aktøren.")
       }
 
       await reloadTasks()
     } catch (error) {
-      setActionError(error instanceof Error ? error.message : "Kunne ikke reverifisere aktoren.")
+      setActionError(error instanceof Error ? error.message : "Kunne ikke reverifisere aktøren.")
     } finally {
       setActionTaskId(null)
     }
@@ -163,11 +163,11 @@ export function VerificationQueuePanel({ initialTasks }: VerificationQueuePanelP
           <div>
             <CardTitle>Verification Queue</CardTitle>
             <CardDescription>
-              Admin-first taskkø for reverifisering, snoozing og manuell opprydding av stale eller blokkerte aktorer.
+              Admin-first taskkø for reverifisering, snoozing og manuell opprydding av stale eller blokkerte aktører.
             </CardDescription>
           </div>
           <Button variant="outline" asChild>
-            <Link href="/admin/rollout">Apen rollout board</Link>
+            <Link href="/admin/rollout">Åpne rollout board</Link>
           </Button>
         </div>
         <div className="grid gap-4 md:grid-cols-4">
@@ -218,7 +218,7 @@ export function VerificationQueuePanel({ initialTasks }: VerificationQueuePanelP
               <SelectValue placeholder="Omrade" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle omrader</SelectItem>
+              <SelectItem value="all">Alle områder</SelectItem>
               <SelectItem value="pilot">Pilot</SelectItem>
               <SelectItem value="non-pilot">Ikke pilot</SelectItem>
             </SelectContent>

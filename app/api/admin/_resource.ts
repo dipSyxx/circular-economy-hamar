@@ -71,7 +71,7 @@ export const createAdminResource = async (resource: string, request: Request) =>
     if (resource === "actor-repair-services") {
       const actorId = typeof data.actorId === "string" ? data.actorId : ""
       if (!actorId) {
-        return NextResponse.json({ error: "actorId er pakrevd." }, { status: 400 })
+        return NextResponse.json({ error: "actorId er påkrevd." }, { status: 400 })
       }
       await assertActorCanAcceptRepairServices(prisma, actorId)
       affectedActorIds.add(actorId)
@@ -80,7 +80,7 @@ export const createAdminResource = async (resource: string, request: Request) =>
     if (resource === "actor-sources") {
       const actorId = typeof data.actorId === "string" ? data.actorId : ""
       if (!actorId) {
-        return NextResponse.json({ error: "actorId er pakrevd." }, { status: 400 })
+        return NextResponse.json({ error: "actorId er påkrevd." }, { status: 400 })
       }
       affectedActorIds.add(actorId)
     }

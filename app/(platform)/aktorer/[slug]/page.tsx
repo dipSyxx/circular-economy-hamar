@@ -241,7 +241,7 @@ export default async function ActorPage({ params }: ActorPageProps) {
               <ActorTrustBadges actor={actor} />
               <p className="text-sm text-muted-foreground">
                 {actor.isTrusted
-                  ? "Denne aktoren er redaksjonelt verifisert og har fortsatt gyldig friskhetsstatus."
+                  ? "Denne aktøren er redaksjonelt verifisert og har fortsatt gyldig friskhetsstatus."
                   : actor.freshnessStatus === "stale"
                     ? "Dataene finnes fortsatt i katalogen, men posten trenger ny verifisering."
                     : "Posten er synlig, men har ikke full redaksjonell tillitsstatus i denne fasen."}

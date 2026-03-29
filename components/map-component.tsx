@@ -130,7 +130,7 @@ type TagOption = {
 const sortOptions: { value: SortKey; label: string }[] = [
   { value: "default", label: "Standard" },
   { value: "favorite", label: "Favoritter først" },
-  { value: "distance", label: "Naermest meg" },
+  { value: "distance", label: "Nærmest meg" },
   { value: "name_asc", label: "Navn A-Z" },
   { value: "name_desc", label: "Navn Z-A" },
   { value: "category", label: "Kategori" },
@@ -829,7 +829,7 @@ export function MapComponent({ actors }: MapComponentProps) {
                     </label>
                     {!isSignedIn && (
                       <p className="mt-2 text-xs text-muted-foreground">
-                        Logg inn for a bruke favoritter.
+                        Logg inn for å bruke favoritter.
                       </p>
                     )}
                   </div>

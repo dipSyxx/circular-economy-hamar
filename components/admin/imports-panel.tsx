@@ -22,7 +22,7 @@ type ImportsPanelProps = {
 }
 
 const rowTypeLabels: Record<ActorImportRowSummary["rowType"], string> = {
-  actor: "aktor",
+  actor: "aktør",
   actor_source: "kilde",
   actor_repair_service: "reparasjon",
 }
@@ -77,7 +77,7 @@ export function ImportsPanel({ initialBatches, countyWorkflow }: ImportsPanelPro
 
   const previewImport = async () => {
     if (!actorsFile) {
-      setError("actors.csv er pakrevd.")
+      setError("actors.csv er påkrevd.")
       return
     }
 
@@ -104,13 +104,13 @@ export function ImportsPanel({ initialBatches, countyWorkflow }: ImportsPanelPro
 
       const payload = (await response.json()) as { error?: string } & Partial<ImportDetails>
       if (!response.ok || !payload.batch || !payload.rows) {
-        throw new Error(payload.error ?? "Kunne ikke generere forhandsvisning.")
+        throw new Error(payload.error ?? "Kunne ikke generere forhåndsvisning.")
       }
 
       setSelectedBatch({ batch: payload.batch, rows: payload.rows })
       updateBatchHistory(payload.batch)
     } catch (previewError) {
-      setError(previewError instanceof Error ? previewError.message : "Kunne ikke generere forhandsvisning.")
+      setError(previewError instanceof Error ? previewError.message : "Kunne ikke generere forhåndsvisning.")
     } finally {
       setLoading(false)
     }
@@ -148,7 +148,7 @@ export function ImportsPanel({ initialBatches, countyWorkflow }: ImportsPanelPro
           <CardHeader>
             <CardTitle>{countyWorkflow.status.county}: guided bootstrap workflow</CardTitle>
             <CardDescription>
-              Bruk county-spesifikke importer for a fylle targetene, lukke manglende klynger og bygge ut katalogen trinnvis.
+              Bruk county-spesifikke importer for å fylle targetene, lukke manglende klynger og bygge ut katalogen trinnvis.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -156,7 +156,7 @@ export function ImportsPanel({ initialBatches, countyWorkflow }: ImportsPanelPro
               <div className="rounded-lg border p-3">
                 <p className="text-xs text-muted-foreground">Coverage target</p>
                 <p className="text-sm font-medium">
-                  {countyWorkflow.status.target.approvedActors} aktorer / {countyWorkflow.status.target.municipalities} kommuner
+                  {countyWorkflow.status.target.approvedActors} aktører / {countyWorkflow.status.target.municipalities} kommuner
                 </p>
               </div>
               <div className="rounded-lg border p-3">
@@ -197,7 +197,7 @@ export function ImportsPanel({ initialBatches, countyWorkflow }: ImportsPanelPro
               </Button>
               <Button variant="outline" asChild>
                 <Link href={`/${countyWorkflow.status.countySlug}`} target="_blank">
-                  Apen offentlig fylkesside
+                  Åpne offentlig fylkesside
                 </Link>
               </Button>
             </div>
@@ -283,7 +283,7 @@ export function ImportsPanel({ initialBatches, countyWorkflow }: ImportsPanelPro
           <CardHeader>
             <CardTitle>Aktiv batch: {selectedBatch.batch.filename}</CardTitle>
             <CardDescription>
-              Status: {selectedBatch.batch.status}. Gjennomga radene under før du bruker batchen.
+              Status: {selectedBatch.batch.status}. Gjennomgå radene under før du bruker batchen.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -367,7 +367,7 @@ export function ImportsPanel({ initialBatches, countyWorkflow }: ImportsPanelPro
             </Table>
             {selectedBatch.rows.length > 60 ? (
               <p className="text-xs text-muted-foreground">
-                Viser de 60 forste radene. Hele batchen er lagret og kan hentes igjen fra historikken.
+                Viser de 60 første radene. Hele batchen er lagret og kan hentes igjen fra historikken.
               </p>
             ) : null}
           </CardContent>
@@ -414,7 +414,7 @@ export function ImportsPanel({ initialBatches, countyWorkflow }: ImportsPanelPro
           )}
           {countyWorkflow && visibleBatches.length === 0 ? (
             <p className="mt-3 text-sm text-muted-foreground">
-              Ingen batcher for {countyWorkflow.status.county} ennÃ¥. Start med county-spesifikk bootstrap over.
+              Ingen batcher for {countyWorkflow.status.county} ennå. Start med county-spesifikk bootstrap over.
             </p>
           ) : null}
         </CardContent>

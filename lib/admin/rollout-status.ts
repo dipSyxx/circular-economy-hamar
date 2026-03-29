@@ -240,7 +240,7 @@ export const listCountyRolloutStatuses = async () => {
       target,
       targetApprovedActorsMet,
       targetMunicipalitiesMet,
-      targetProgressLabel: `${summary?.approvedActorCount ?? 0}/${target.approvedActors} aktorer · ${summary?.municipalityCount ?? 0}/${target.municipalities} kommuner`,
+      targetProgressLabel: `${summary?.approvedActorCount ?? 0}/${target.approvedActors} aktører · ${summary?.municipalityCount ?? 0}/${target.municipalities} kommuner`,
       notes: status?.notes ?? null,
       isPilotCounty: isPilotCounty(county.slug),
       approvedActorCount: summary?.approvedActorCount ?? 0,
@@ -448,7 +448,7 @@ export const getCountyRolloutWorkflow = async (countySlug: string): Promise<Coun
       {
         key: "targets",
         title: "Fyll coverage targets først",
-        description: `Målbildet er minst ${status.target.approvedActors} godkjente aktorer pa tvers av ${status.target.municipalities} kommuner, i tillegg til alle fire serviceklynger.`,
+        description: `Målbildet er minst ${status.target.approvedActors} godkjente aktører på tvers av ${status.target.municipalities} kommuner, i tillegg til alle fire serviceklynger.`,
       },
       {
         key: "clusters",
@@ -456,12 +456,12 @@ export const getCountyRolloutWorkflow = async (countySlug: string): Promise<Coun
         description:
           status.missingClusterKeys.length > 0
             ? `Mangler akkurat na: ${status.missingClusterKeys.join(", ")}. Prioriter disse i neste importbatch.`
-            : "Alle serviceklynger er allerede dekket. Fokuser pa flere kommuner og bedre kildekvalitet.",
+            : "Alle serviceklynger er allerede dekket. Fokuser på flere kommuner og bedre kildekvalitet.",
       },
       {
         key: "review",
         title: "Bruk import + reverifisering sammen",
-        description: "Etter apply skal fylket sjekkes i verification queue og rollout board for stale eller blocked aktorer.",
+        description: "Etter apply skal fylket sjekkes i verification queue og rollout board for stale eller blocked aktører.",
       },
     ],
   }

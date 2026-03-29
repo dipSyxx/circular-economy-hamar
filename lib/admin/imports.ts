@@ -346,7 +346,7 @@ const listActorImportRows = async (batchId: string) => {
 export const createActorImportPreview = async (input: ImportPreviewInput) => {
   const actorRows = parseCsv(input.actorsCsv)
   if (actorRows.length === 0) {
-    throw new Error("actors.csv er pakrevd og kan ikke vaere tom.")
+    throw new Error("actors.csv er påkrevd og kan ikke være tom.")
   }
 
   const [sourceRows, repairServiceRows, existingActors, existingSources, existingServices] = await Promise.all([
@@ -470,7 +470,7 @@ export const createActorImportPreview = async (input: ImportPreviewInput) => {
     const slug = pickRowValue(row, "actor_slug", "slug")
 
     if (!slug) {
-      validationErrors.push("actor_slug er pakrevd.")
+      validationErrors.push("actor_slug er påkrevd.")
     } else if (seenActorSlugs.has(slug)) {
       validationErrors.push("actor_slug er duplisert i actors.csv.")
     } else {
@@ -506,16 +506,16 @@ export const createActorImportPreview = async (input: ImportPreviewInput) => {
       }
     }
 
-    if (!actorPayload.name) validationErrors.push("name er pakrevd.")
+    if (!actorPayload.name) validationErrors.push("name er påkrevd.")
     if (!actorCategorySet.has(actorPayload.category)) validationErrors.push("category er ugyldig.")
-    if (!actorPayload.description) validationErrors.push("description er pakrevd.")
-    if (!actorPayload.longDescription) validationErrors.push("long_description er pakrevd.")
-    if (!actorPayload.address) validationErrors.push("address er pakrevd.")
-    if (!actorPayload.county || actorPayload.county === "Ukjent fylke") validationErrors.push("county er pakrevd.")
+    if (!actorPayload.description) validationErrors.push("description er påkrevd.")
+    if (!actorPayload.longDescription) validationErrors.push("long_description er påkrevd.")
+    if (!actorPayload.address) validationErrors.push("address er påkrevd.")
+    if (!actorPayload.county || actorPayload.county === "Ukjent fylke") validationErrors.push("county er påkrevd.")
     if (!actorPayload.municipality || actorPayload.municipality === "Ukjent sted") {
-      validationErrors.push("municipality er pakrevd.")
+      validationErrors.push("municipality er påkrevd.")
     }
-    if (actorPayload.lat === null || actorPayload.lng === null) validationErrors.push("lat og lng er pakrevd.")
+    if (actorPayload.lat === null || actorPayload.lng === null) validationErrors.push("lat og lng er påkrevd.")
     if (actorPayload.countySlug && !getCountyBySlug(actorPayload.countySlug)) {
       validationErrors.push("county_slug er ugyldig.")
     }
@@ -556,7 +556,7 @@ export const createActorImportPreview = async (input: ImportPreviewInput) => {
           : "create"
 
     if (action === "skip") {
-      warnings.push("Ingen endringer funnet mot eksisterende aktor.")
+      warnings.push("Ingen endringer funnet mot eksisterende aktør.")
     }
 
     previewRows.push({
@@ -595,18 +595,18 @@ export const createActorImportPreview = async (input: ImportPreviewInput) => {
     const title = normalizeOptional(pickRowValue(row, "title"))
     const url = normalizeOptional(pickRowValue(row, "url"))
 
-    if (!actorSlug) validationErrors.push("actor_slug er pakrevd.")
+    if (!actorSlug) validationErrors.push("actor_slug er påkrevd.")
     if (!sourceTypes.has(type)) validationErrors.push("type er ugyldig.")
-    if (!title) validationErrors.push("title er pakrevd.")
-    if (!url) validationErrors.push("url er pakrevd.")
+    if (!title) validationErrors.push("title er påkrevd.")
+    if (!url) validationErrors.push("url er påkrevd.")
 
     const actorTarget = actorSlug ? actorTargets.get(actorSlug) : null
     const matchedActor = actorTarget?.existingActor ?? (actorSlug ? actorsBySlug.get(actorSlug) ?? null : null)
     if (!actorTarget && !matchedActor && actorSlug) {
-      validationErrors.push("actor_slug matcher ingen importert eller eksisterende aktor.")
+      validationErrors.push("actor_slug matcher ingen importert eller eksisterende aktør.")
     }
     if (actorTarget?.action === "error") {
-      validationErrors.push("Kilde kan ikke importeres fordi aktorraden inneholder feil.")
+      validationErrors.push("Kilde kan ikke importeres fordi aktørraden inneholder feil.")
     }
 
     const duplicateKey = actorSlug && url ? buildCanonicalSourceKey(actorSlug, url) : null
@@ -715,22 +715,22 @@ export const createActorImportPreview = async (input: ImportPreviewInput) => {
     const priceMax = parseNumber(pickRowValue(row, "price_max"))
     const etaDays = parseNumber(pickRowValue(row, "eta_days"))
 
-    if (!actorSlug) validationErrors.push("actor_slug er pakrevd.")
+    if (!actorSlug) validationErrors.push("actor_slug er påkrevd.")
     if (!problemTypes.has(problemType)) validationErrors.push("problem_type er ugyldig.")
     if (sortedItemTypes.length === 0 || sortedItemTypes.some((item) => !itemTypes.has(item))) {
-      validationErrors.push("item_types er pakrevd og ma vaere gyldige.")
+      validationErrors.push("item_types er påkrevd og må være gyldige.")
     }
-    if (priceMin === null || priceMax === null) validationErrors.push("price_min og price_max er pakrevd.")
+    if (priceMin === null || priceMax === null) validationErrors.push("price_min og price_max er påkrevd.")
 
     const actorTarget = actorSlug ? actorTargets.get(actorSlug) : null
     const matchedActor = actorTarget?.existingActor ?? (actorSlug ? actorsBySlug.get(actorSlug) ?? null : null)
     const category = actorTarget?.category ?? matchedActor?.category
 
     if (!actorTarget && !matchedActor && actorSlug) {
-      validationErrors.push("actor_slug matcher ingen importert eller eksisterende aktor.")
+      validationErrors.push("actor_slug matcher ingen importert eller eksisterende aktør.")
     }
     if (actorTarget?.action === "error") {
-      validationErrors.push("Tjenesten kan ikke importeres fordi aktorraden inneholder feil.")
+      validationErrors.push("Tjenesten kan ikke importeres fordi aktørraden inneholder feil.")
     }
     if (!category || !supportsRepairServices(category)) {
       validationErrors.push("Reparasjonsdata kan bare brukes for reparasjonskategorier.")
@@ -845,7 +845,7 @@ export const createActorImportPreview = async (input: ImportPreviewInput) => {
 
   const details = await getActorImportBatchDetails(batch.id)
   if (!details) {
-    throw new Error("Kunne ikke lese forhandsvisningen etter lagring.")
+    throw new Error("Kunne ikke lese forhåndsvisningen etter lagring.")
   }
 
   return details

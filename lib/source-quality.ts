@@ -132,7 +132,7 @@ export const summarizeSources = (sources: SourceLike[]): SourceQualitySummary[] 
   return summaries.map((summary) => {
     const warnings = [...summary.warnings]
     if (summary.canonicalUrl && (canonicalCounts.get(summary.canonicalUrl) ?? 0) > 1) {
-      warnings.push("Duplikatkilde basert pa kanonisk URL.")
+      warnings.push("Duplikatkilde basert på kanonisk URL.")
     }
     return {
       ...summary,

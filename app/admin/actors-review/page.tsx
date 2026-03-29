@@ -21,7 +21,7 @@ export default async function AdminActorsReviewPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Aktor review board</h1>
+        <h1 className="text-3xl font-bold">Aktør review board</h1>
         <p className="text-muted-foreground">
           Se pilotfylker, stale records, manglende kilder og pending public submissions i ett arbeidsbrett.
         </p>

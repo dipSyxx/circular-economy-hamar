@@ -117,7 +117,7 @@ export function CorrectionSuggestionsPanel({ initialSuggestions }: CorrectionsPa
         <CardHeader>
           <CardTitle>{selectedSuggestion?.actor?.name ?? "Velg et forslag"}</CardTitle>
           <CardDescription>
-            Sammenlign eksisterende data mot foreslatt patch, og velg om endringen skal aksepteres eller avvises.
+            Sammenlign eksisterende data mot foreslått patch, og velg om endringen skal aksepteres eller avvises.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -128,12 +128,12 @@ export function CorrectionSuggestionsPanel({ initialSuggestions }: CorrectionsPa
               <div className="flex flex-wrap items-center gap-2">
                 <Badge>{selectedSuggestion.status}</Badge>
                 <Badge variant="outline">
-                  {selectedSuggestion.actor?.county || selectedSuggestion.actor?.municipality || "Ukjent omrade"}
+                  {selectedSuggestion.actor?.county || selectedSuggestion.actor?.municipality || "Ukjent område"}
                 </Badge>
                 {selectedSuggestion.actor ? (
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/aktorer/${selectedSuggestion.actor.slug}`} target="_blank">
-                      Apen aktorside
+                      Åpne aktørside
                     </Link>
                   </Button>
                 ) : null}

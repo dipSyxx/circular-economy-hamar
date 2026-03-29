@@ -51,7 +51,7 @@ export function MyFavoritesPanel() {
         cache: "no-store",
       })
       if (!actorsResponse.ok) {
-        throw new Error("Kunne ikke hente favorittaktorer.")
+        throw new Error("Kunne ikke hente favorittaktører.")
       }
       const actorsData = (await actorsResponse.json()) as Actor[]
       const actorMap = new Map(actorsData.map((actor) => [actor.id, actor]))
@@ -107,7 +107,7 @@ export function MyFavoritesPanel() {
     <Card>
       <CardHeader>
         <CardTitle>Mine favoritter</CardTitle>
-        <CardDescription>Aktorer du har lagret som favoritt.</CardDescription>
+        <CardDescription>Aktører du har lagret som favoritt.</CardDescription>
       </CardHeader>
       <CardContent>
         {!isSignedIn ? (
@@ -115,7 +115,7 @@ export function MyFavoritesPanel() {
             <Link href="/auth/sign-in" className="text-primary hover:underline">
               Logg inn
             </Link>{" "}
-            for a se favorittene dine.
+            for å se favorittene dine.
           </p>
         ) : loading ? (
           <p className="text-sm text-muted-foreground">Laster...</p>

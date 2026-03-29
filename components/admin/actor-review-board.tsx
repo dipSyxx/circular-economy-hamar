@@ -95,14 +95,14 @@ export function ActorReviewBoard({ initialActors }: ActorReviewBoardProps) {
         | null
 
       if (!response.ok || !data?.actor) {
-        throw new Error(data?.error || "Kunne ikke reverifisere aktoren.")
+        throw new Error(data?.error || "Kunne ikke reverifisere aktøren.")
       }
 
       setActors((current) =>
         current.map((actor) => (actor.id === data.actor?.id ? data.actor : actor)),
       )
     } catch (error) {
-      setActionError(error instanceof Error ? error.message : "Kunne ikke reverifisere aktoren.")
+      setActionError(error instanceof Error ? error.message : "Kunne ikke reverifisere aktøren.")
     } finally {
       setReverifyingActorId(null)
     }
@@ -112,7 +112,7 @@ export function ActorReviewBoard({ initialActors }: ActorReviewBoardProps) {
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-5">
         <div className="rounded-lg border p-3">
-          <p className="text-xs text-muted-foreground">Aktorer</p>
+          <p className="text-xs text-muted-foreground">Aktører</p>
           <p className="text-2xl font-semibold">{stats.total}</p>
         </div>
         <div className="rounded-lg border p-3">
@@ -167,7 +167,7 @@ export function ActorReviewBoard({ initialActors }: ActorReviewBoardProps) {
                   <div>
                     <p className="font-medium">{summary.county}</p>
                     <p className="text-sm text-muted-foreground">
-                      {summary.approvedActorCount} godkjente aktorer i {summary.municipalityCount} kommuner/byer
+                      {summary.approvedActorCount} godkjente aktører i {summary.municipalityCount} kommuner/byer
                     </p>
                   </div>
                   <Badge variant={summary.isBrowseReady ? "default" : "secondary"}>
@@ -196,7 +196,7 @@ export function ActorReviewBoard({ initialActors }: ActorReviewBoardProps) {
           <CardHeader>
             <CardTitle>Fylkesdekning</CardTitle>
             <CardDescription>
-              Godkjente aktorer per fylke, manglende kilder, stale status og serviceklynger.
+              Godkjente aktører per fylke, manglende kilder, stale status og serviceklynger.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -246,7 +246,7 @@ export function ActorReviewBoard({ initialActors }: ActorReviewBoardProps) {
           <Card>
             <CardHeader>
               <CardTitle>Kommunedekning</CardTitle>
-              <CardDescription>Godkjente aktorer per kommune/by i fylkene som allerede har data.</CardDescription>
+              <CardDescription>Godkjente aktører per kommune/by i fylkene som allerede har data.</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -275,7 +275,7 @@ export function ActorReviewBoard({ initialActors }: ActorReviewBoardProps) {
           <Card>
             <CardHeader>
               <CardTitle>Kategoridekning</CardTitle>
-              <CardDescription>Godkjente aktorer per kategori i hele katalogen.</CardDescription>
+              <CardDescription>Godkjente aktører per kategori i hele katalogen.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               {categorySummaries.map((summary) => (
@@ -334,12 +334,12 @@ export function ActorReviewBoard({ initialActors }: ActorReviewBoardProps) {
         <CardContent>
           {actionError ? <p className="mb-3 text-sm text-destructive">{actionError}</p> : null}
           {filteredActors.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Ingen aktorer matcher filtrene.</p>
+            <p className="text-sm text-muted-foreground">Ingen aktører matcher filtrene.</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Aktor</TableHead>
+                  <TableHead>Aktør</TableHead>
                   <TableHead>Omrade</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Trust</TableHead>

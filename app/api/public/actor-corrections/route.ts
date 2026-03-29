@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   const sourceUrl = normalizeSourceUrl(body.sourceUrl)
 
   if (!actorId) {
-    return jsonError("actorId er pakrevd.", 400)
+    return jsonError("actorId er påkrevd.", 400)
   }
 
   const actor = await prisma.actor.findUnique({
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     select: { id: true },
   })
   if (!actor) {
-    return jsonError("Aktoren ble ikke funnet.", 404)
+    return jsonError("Aktøren ble ikke funnet.", 404)
   }
 
   if (!note && !hasCorrectionPayloadValues(payload) && !sourceUrl) {
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
   }
 
   if (body.sourceUrl && !sourceUrl) {
-    return jsonError("sourceUrl ma vaere en gyldig URL.", 400)
+    return jsonError("sourceUrl må være en gyldig URL.", 400)
   }
 
   const suggestion = await prisma.actorCorrectionSuggestion.create({

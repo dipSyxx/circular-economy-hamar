@@ -101,7 +101,7 @@ export default async function MunicipalityCategoryPage({ params }: MunicipalityC
         <h1 className="text-4xl font-bold">{categoryLabel} i {municipalityName}</h1>
         <p className="text-lg text-muted-foreground">
           Lokalt kategoribrowse for {municipalityName} med lokale treff først, deretter eksplisitte
-          dekningsomrader og landsdekkende alternativer.
+          dekningsområder og landsdekkende alternativer.
         </p>
         <Link href={`/${countyMeta.slug}/${municipality}`} className="text-sm text-primary hover:underline">
           Tilbake til {municipalityName}

@@ -21,7 +21,7 @@ export function PilotRolloutNote({ mode, countyName, municipalityName }: PilotRo
         <AlertDescription>
           {countyName
             ? `${countyName} er et prioritert pilotfylke i denne fasen.`
-            : "Dette omradet er prioritert i pilotfasen."}{" "}
+            : "Dette området er prioritert i pilotfasen."}{" "}
           Browse er klart, men vi fyller fortsatt ut enkelte tjenesteklynger. Bruk gjerne korrekturforslag hvis noe
           mangler.
         </AlertDescription>
@@ -38,8 +38,8 @@ export function PilotRolloutNote({ mode, countyName, municipalityName }: PilotRo
           ? `${municipalityName}${countyName ? ` i ${countyName}` : ""} er fortsatt under utrulling.`
           : countyName
             ? `${countyName} er fortsatt under utrulling.`
-            : "Dette omradet er fortsatt under utrulling."}{" "}
-        Browse fungerer allerede, men dekningen kan vaere tynn. Bruk innsendinger og korrekturforslag for a hjelpe oss
+            : "Dette området er fortsatt under utrulling."}{" "}
+        Browse fungerer allerede, men dekningen kan være tynn. Bruk innsendinger og korrekturforslag for å hjelpe oss
         fylle ut katalogen.
       </AlertDescription>
     </Alert>

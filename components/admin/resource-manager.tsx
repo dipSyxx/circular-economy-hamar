@@ -1333,7 +1333,7 @@ export function ResourceManager({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Sok etter felt, eller bruk felt:verdi"
+              placeholder="Søk etter felt, eller bruk felt:verdi"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               className="pl-9 pr-9"
@@ -1343,7 +1343,7 @@ export function ResourceManager({
                 type="button"
                 onClick={() => setQuery("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition hover:text-foreground"
-                aria-label="Fjern sok"
+                aria-label="Fjern søk"
               >
                 <XIcon className="size-3" />
               </button>
@@ -1483,12 +1483,12 @@ export function ResourceManager({
           <div className="mt-2 flex flex-wrap gap-2">
             {hasSearch && (
               <Badge variant="outline" className="gap-1">
-                Sok: {query}
+                Søk: {query}
                 <button
                   type="button"
                   onClick={() => setQuery("")}
                   className="text-muted-foreground hover:text-foreground"
-                  aria-label="Fjern sok"
+                  aria-label="Fjern søk"
                 >
                   <XIcon className="size-3" />
                 </button>

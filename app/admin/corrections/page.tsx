@@ -11,7 +11,7 @@ export default async function AdminCorrectionsPage() {
       <div>
         <h1 className="text-3xl font-bold">Korrekturforslag</h1>
         <p className="text-muted-foreground">
-          Gjennomga brukerforslag, sammenlign patcher og oppdater aktorene med redaksjonell verifisering.
+          Gjennomgå brukerforslag, sammenlign patcher og oppdater aktørene med redaksjonell verifisering.
         </p>
       </div>
       <CorrectionSuggestionsPanel initialSuggestions={suggestions} />

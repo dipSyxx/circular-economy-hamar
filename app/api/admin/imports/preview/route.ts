@@ -15,10 +15,10 @@ export async function POST(request: Request) {
 
   const body = (await request.json()) as PreviewRequestBody
   if (typeof body.filename !== "string" || !body.filename.trim()) {
-    return NextResponse.json({ error: "filename er pakrevd." }, { status: 400 })
+    return NextResponse.json({ error: "filename er påkrevd." }, { status: 400 })
   }
   if (typeof body.actorsCsv !== "string" || !body.actorsCsv.trim()) {
-    return NextResponse.json({ error: "actorsCsv er pakrevd." }, { status: 400 })
+    return NextResponse.json({ error: "actorsCsv er påkrevd." }, { status: 400 })
   }
 
   try {
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          requestError instanceof Error ? requestError.message : "Kunne ikke generere importforhandsvisning.",
+          requestError instanceof Error ? requestError.message : "Kunne ikke generere importforhåndsvisning.",
       },
       { status: 400 },
     )

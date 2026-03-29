@@ -55,11 +55,11 @@ const buildReasonSummary = (actor: AdminActorReviewItem) => {
   if (actor.dueState === "blocked") {
     reasons.push("Manglende eller utilstrekkelig kildegrunnlag blokkerer redaksjonell verifisering.")
   } else if (actor.dueState === "overdue") {
-    reasons.push("Aktoren er over ett år siden sist redaksjonelt verifisert.")
+    reasons.push("Aktøren er over ett år siden sist redaksjonelt verifisert.")
   } else if (actor.dueState === "due") {
-    reasons.push("Aktoren bør reverifiseres nå.")
+    reasons.push("Aktøren bør reverifiseres nå.")
   } else if (actor.dueState === "due_soon") {
-    reasons.push("Aktoren nærmer seg neste reverifisering.")
+    reasons.push("Aktøren nærmer seg neste reverifisering.")
   }
 
   if (actor.qualitySummary.hasWeakSourceSet) {
@@ -381,13 +381,13 @@ export const updateVerificationTaskStatus = async (
 
   if (input.action === "snooze") {
     if (!input.snoozeUntil) {
-      throw new Error("snoozeUntil er pakrevd for snoozing.")
+      throw new Error("snoozeUntil er påkrevd for snoozing.")
     }
     if (Number.isNaN(input.snoozeUntil.getTime())) {
-      throw new Error("snoozeUntil ma vaere en gyldig dato.")
+      throw new Error("snoozeUntil må være en gyldig dato.")
     }
     if (input.snoozeUntil.getTime() <= Date.now()) {
-      throw new Error("snoozeUntil ma vaere i fremtiden.")
+      throw new Error("snoozeUntil må være i fremtiden.")
     }
 
     const updated = await prisma.actorVerificationTask.update({

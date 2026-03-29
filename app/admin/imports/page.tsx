@@ -21,7 +21,7 @@ export default async function AdminImportsPage({
       <div>
         <h1 className="text-3xl font-bold">CSV imports</h1>
         <p className="text-muted-foreground">
-          Preview, valider og bruk batch-importer for a skalere katalogen pa tvers av fylker og kommuner.
+          Preview, valider og bruk batch-importer for å skalere katalogen på tvers av fylker og kommuner.
         </p>
       </div>
       <ImportsPanel initialBatches={batches} countyWorkflow={countyWorkflow} />

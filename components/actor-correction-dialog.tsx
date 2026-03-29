@@ -130,7 +130,7 @@ export function ActorCorrectionDialog({ actor }: ActorCorrectionDialogProps) {
       <Button variant="outline" asChild>
         <Link href="/auth/sign-in">
           <Flag className="mr-2 h-4 w-4" />
-          Logg inn for a foresla korrigering
+          Logg inn for å foreslå korrigering
         </Link>
       </Button>
     )
@@ -147,14 +147,14 @@ export function ActorCorrectionDialog({ actor }: ActorCorrectionDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline">
           <Flag className="mr-2 h-4 w-4" />
-          Foresla korrigering
+          Foreslå korrigering
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Foresla korrigering for {actor.name}</DialogTitle>
+          <DialogTitle>Foreslå korrigering for {actor.name}</DialogTitle>
           <DialogDescription>
-            Send inn endringer du har oppdaget. Forslaget blir gjennomgatt av redaksjonen før det publiseres.
+            Send inn endringer du har oppdaget. Forslaget blir gjennomgått av redaksjonen før det publiseres.
           </DialogDescription>
         </DialogHeader>
 
@@ -165,7 +165,7 @@ export function ActorCorrectionDialog({ actor }: ActorCorrectionDialogProps) {
               id="correction-note"
               value={form.note}
               onChange={(event) => updateField("note", event.target.value)}
-              placeholder="Beskriv hva som bor oppdateres."
+              placeholder="Beskriv hva som bør oppdateres."
               rows={4}
             />
           </div>

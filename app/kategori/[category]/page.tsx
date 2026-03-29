@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const label = actorCopy.categoryLongLabels[category as keyof typeof actorCopy.categoryLongLabels] ?? category
   return {
     title: `${label} | Norge`,
-    description: `Utforsk aktorer i kategorien ${label.toLowerCase()} pa tvers av Norge.`,
+    description: `Utforsk aktører i kategorien ${label.toLowerCase()} på tvers av Norge.`,
     alternates: { canonical: `${getSiteUrl()}/kategori/${category}` },
   }
 }
@@ -47,7 +47,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         <Badge variant="secondary">Kategori</Badge>
         <h1 className="text-4xl font-bold">{label} i Norge</h1>
         <p className="text-lg text-muted-foreground">
-          En nasjonal kategoriside for browse, sammenligning og indeksering pa tvers av fylker og kommuner.
+          En nasjonal kategoriside for browse, sammenligning og indeksering på tvers av fylker og kommuner.
         </p>
         <PilotRolloutNote mode="non-pilot" />
       </section>

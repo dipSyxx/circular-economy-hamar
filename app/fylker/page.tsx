@@ -11,7 +11,7 @@ import { PilotRolloutNote } from "@/components/pilot-rollout-note"
 
 export const metadata: Metadata = {
   title: "Fylker i Norge",
-  description: "Utforsk sirkulaere tilbud per fylke i Norge.",
+  description: "Utforsk sirkulære tilbud per fylke i Norge.",
   alternates: { canonical: `${getSiteUrl()}/fylker` },
 }
 
@@ -49,9 +49,9 @@ export default async function CountiesIndexPage() {
     <div className="container mx-auto px-4 py-10">
       <div className="max-w-3xl space-y-4">
         <Badge variant="secondary">Nationwide browse</Badge>
-        <h1 className="text-4xl font-bold">Finn sirkulaere tilbud i alle fylker</h1>
+        <h1 className="text-4xl font-bold">Finn sirkulære tilbud i alle fylker</h1>
         <p className="text-lg text-muted-foreground">
-          Start med fylke, ga videre til kommune eller kategori, og finn relevante aktorer i Norge.
+          Start med fylke, gå videre til kommune eller kategori, og finn relevante aktører i Norge.
         </p>
         <PilotRolloutNote mode="non-pilot" />
       </div>
@@ -64,12 +64,12 @@ export default async function CountiesIndexPage() {
                 <CardTitle>{county.name}</CardTitle>
                 <CardDescription>
                   {county.actorCount > 0
-                    ? `${county.actorCount} aktorer klare for browse.`
-                    : "Ingen publiserte aktorer ennå. Fylket er klart for utrulling."}
+                    ? `${county.actorCount} aktører klare for browse.`
+                    : "Ingen publiserte aktører ennå. Fylket er klart for utrulling."}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                <Badge variant="outline">{county.actorCount} aktorer</Badge>
+                <Badge variant="outline">{county.actorCount} aktører</Badge>
                 <Badge variant="outline">{county.municipalityCount} kommuner</Badge>
                 <Badge variant="outline">{county.categoryCount} kategorier</Badge>
                 {isPilotCounty(county.slug) ? <Badge variant="secondary">pilot</Badge> : null}

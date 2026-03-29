@@ -14,7 +14,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const body = (await request.json().catch(() => ({}))) as TaskUpdateBody
   if (body.action !== "snooze" && body.action !== "resolve") {
-    return NextResponse.json({ error: "action ma vaere snooze eller resolve." }, { status: 400 })
+    return NextResponse.json({ error: "action må være snooze eller resolve." }, { status: 400 })
   }
 
   const { id } = await params

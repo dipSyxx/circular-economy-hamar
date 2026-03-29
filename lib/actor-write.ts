@@ -100,7 +100,7 @@ export const assertActorCanAcceptRepairServices = async (db: GeoDbClient, actorI
   })
 
   if (!actor) {
-    throw new Error("Aktor ble ikke funnet.")
+    throw new Error("Aktør ble ikke funnet.")
   }
 
   assertRepairServicesAllowed(actor.category, 1)

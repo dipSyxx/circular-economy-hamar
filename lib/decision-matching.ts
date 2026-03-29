@@ -306,23 +306,23 @@ const getWhyThisActor = (
 
   switch (candidate.coverageReason) {
     case "base_location":
-      why.push(`Lokal aktor i ${buildCoverageReason(candidate)}.`)
+      why.push(`Lokal aktør i ${buildCoverageReason(candidate)}.`)
       break
     case "service_area_municipality":
-      why.push(`Dekker kommunen din via serviceomrade.`)
+      why.push(`Dekker kommunen din via serviceområde.`)
       break
     case "service_area_county":
-      why.push(`Dekker fylket ditt via serviceomrade.`)
+      why.push(`Dekker fylket ditt via serviceområde.`)
       break
     case "nationwide_fallback":
-      why.push(`Tilbyr landsdekkende hjelp nar lokale treff er fa.`)
+      why.push(`Tilbyr landsdekkende hjelp når lokale treff er få.`)
       break
   }
 
   if (recommendation === "repair" && candidate.serviceMatch) {
     const itemLabel = formatItemTypeLabel(input.itemType).toLowerCase()
     const problemLabel = formatProblemTypeLabel(input.problemType).toLowerCase()
-    why.push(`Kan hjelpe med ${problemLabel} pa ${itemLabel}.`)
+    why.push(`Kan hjelpe med ${problemLabel} på ${itemLabel}.`)
     if (candidate.serviceMatch.priceMax <= input.budgetNok) {
       why.push(`Estimert reparasjon passer innenfor budsjettet ditt.`)
     }
@@ -333,7 +333,7 @@ const getWhyThisActor = (
   }
 
   if (openState === "open") {
-    why.push("Ser ut til a vaere apen na.")
+    why.push("Ser ut til å være åpen nå.")
   }
 
   if (travelMinutes !== null) {

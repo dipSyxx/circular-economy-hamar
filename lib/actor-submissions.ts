@@ -81,7 +81,7 @@ const toBoolean = (value: unknown) => {
 
 export const validateActorSubmission = (payload: SubmissionPayload) => {
   if (!payload.actor || typeof payload.actor !== "object") {
-    return { ok: false as const, error: "Aktor-data mangler." }
+    return { ok: false as const, error: "Aktør-data mangler." }
   }
 
   const actor = payload.actor
@@ -103,7 +103,7 @@ export const validateActorSubmission = (payload: SubmissionPayload) => {
   const nationwide = toBoolean(actor.nationwide)
 
   if (!name || !slug || !description || !longDescription || !address || !category) {
-    return { ok: false as const, error: "Obligatoriske felt for aktoren mangler." }
+    return { ok: false as const, error: "Obligatoriske felt for aktøren mangler." }
   }
 
   if (!county || !municipality) {
@@ -116,7 +116,7 @@ export const validateActorSubmission = (payload: SubmissionPayload) => {
   }
 
   if (!openingHours.length || !tags.length || !benefits.length || !howToUse.length) {
-    return { ok: false as const, error: "Lister for aktoren kan ikke vare tomme." }
+    return { ok: false as const, error: "Lister for aktøren kan ikke være tomme." }
   }
 
   if (lat === null || lng === null) {
@@ -139,10 +139,10 @@ export const validateActorSubmission = (payload: SubmissionPayload) => {
         throw new Error(`Tjeneste #${index + 1} ma ha minst en varetype.`)
       }
       if (priceMin === null || priceMax === null) {
-        throw new Error(`Tjeneste #${index + 1} ma ha prisomrade.`)
+        throw new Error(`Tjeneste #${index + 1} må ha prisområde.`)
       }
       if (priceMin > priceMax) {
-        throw new Error(`Tjeneste #${index + 1} har ugyldig prisomrade.`)
+        throw new Error(`Tjeneste #${index + 1} har ugyldig prisområde.`)
       }
 
       return {

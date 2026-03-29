@@ -38,8 +38,8 @@ type ActorsExplorerProps = {
 
 const sortOptions: Array<{ value: SortKey; label: string }> = [
   { value: "default", label: "Standard" },
-  { value: "favorite", label: "Favoritter forst" },
-  { value: "distance", label: "Naermest meg" },
+  { value: "favorite", label: "Favoritter først" },
+  { value: "distance", label: "Nærmest meg" },
   { value: "name_asc", label: "Navn A-Z" },
   { value: "name_desc", label: "Navn Z-A" },
   { value: "category", label: "Kategori" },
@@ -123,7 +123,7 @@ export function ActorsExplorer({
   }, [actors, favoriteIds, favoriteOnly])
 
   const geographyScopedActors = useMemo(() => {
-    if (!enableGeographyFilters) return baseActors
+    if (!enableGeographyFilters || !safeCountyFilter) return baseActors
     return baseActors.filter(
       (actor) => getActorGeographyMatchPriority(actor, safeCountyFilter, safeMunicipalityFilter) !== null,
     )
@@ -179,7 +179,9 @@ export function ActorsExplorer({
   const sortedActors = useMemo(() => {
     const sorted = [...filteredActors]
     const geographyPriority = (actor: Actor) =>
-      getActorGeographyMatchPriority(actor, safeCountyFilter, safeMunicipalityFilter) ?? 99
+      safeCountyFilter
+        ? (getActorGeographyMatchPriority(actor, safeCountyFilter, safeMunicipalityFilter) ?? 99)
+        : 0
     if (sortKey === "favorite") {
       sorted.sort((a, b) => {
         const geographyDelta = geographyPriority(a) - geographyPriority(b)
@@ -465,7 +467,7 @@ export function ActorsExplorer({
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Sok etter aktorer, tagger eller adresse"
+            placeholder="Søk etter aktører, tagger eller adresse"
             className="pl-9 pr-10"
           />
           {query && (
@@ -473,7 +475,7 @@ export function ActorsExplorer({
               type="button"
               onClick={() => setQuery("")}
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition hover:text-foreground"
-              aria-label="Fjern sok"
+              aria-label="Fjern søk"
             >
               <X className="size-3" />
             </button>
@@ -582,7 +584,7 @@ export function ActorsExplorer({
                   <span>Vis bare favoritter</span>
                 </label>
                 {!isSignedIn ? (
-                  <p className="mt-2 text-xs text-muted-foreground">Logg inn for a bruke favoritter.</p>
+                  <p className="mt-2 text-xs text-muted-foreground">Logg inn for å bruke favoritter.</p>
                 ) : null}
               </div>
 
@@ -618,7 +620,7 @@ export function ActorsExplorer({
                 <Input
                   value={tagQuery}
                   onChange={(event) => setTagQuery(event.target.value)}
-                  placeholder="Sok tagger"
+                  placeholder="Søk tagger"
                   className="mt-2"
                 />
                 <ScrollArea className="mt-2 h-40 pr-3">
@@ -655,7 +657,7 @@ export function ActorsExplorer({
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
         <span>
-          Viser {sortedActors.length} av {actors.length} aktorer
+          Viser {sortedActors.length} av {actors.length} aktører
         </span>
         {hasAnyFilter ? (
           <Button variant="ghost" size="sm" onClick={clearAllFilters}>
@@ -754,7 +756,7 @@ export function ActorsExplorer({
             exit={{ opacity: 0, y: -6 }}
             className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground"
           >
-            Ingen aktorer matcher valgene dine.
+            Ingen aktører matcher valgene dine.
           </motion.div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

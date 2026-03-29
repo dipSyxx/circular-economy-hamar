@@ -34,7 +34,7 @@ export default async function AdminCountyRolloutWorkflowPage({
             <Link href="/admin/rollout">Tilbake til rollout board</Link>
           </Button>
           <Button asChild>
-            <Link href={`/admin/imports?county=${workflow.status.countySlug}`}>Apen county-import</Link>
+            <Link href={`/admin/imports?county=${workflow.status.countySlug}`}>Åpne county-import</Link>
           </Button>
         </div>
       </div>
@@ -44,7 +44,7 @@ export default async function AdminCountyRolloutWorkflowPage({
         <StatCard label="Priority" value={String(workflow.status.priority)} />
         <StatCard
           label="Coverage target"
-          value={`${workflow.status.target.approvedActors} aktorer / ${workflow.status.target.municipalities} kommuner`}
+          value={`${workflow.status.target.approvedActors} aktører / ${workflow.status.target.municipalities} kommuner`}
         />
         <StatCard label="Progress" value={workflow.status.targetProgressLabel} />
       </div>
@@ -53,7 +53,7 @@ export default async function AdminCountyRolloutWorkflowPage({
         <Card>
           <CardHeader>
             <CardTitle>Operational checklist</CardTitle>
-            <CardDescription>Bruk denne rekkefolgen nar du bygger ut et nytt fylke.</CardDescription>
+            <CardDescription>Bruk denne rekkefølgen når du bygger ut et nytt fylke.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border p-3">

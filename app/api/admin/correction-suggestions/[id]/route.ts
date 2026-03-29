@@ -27,7 +27,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const body = (await request.json()) as ReviewRequestBody
   if (body.status !== "accepted" && body.status !== "rejected") {
-    return NextResponse.json({ error: "status ma vaere accepted eller rejected." }, { status: 400 })
+    return NextResponse.json({ error: "status må være accepted eller rejected." }, { status: 400 })
   }
 
   const { id } = await params

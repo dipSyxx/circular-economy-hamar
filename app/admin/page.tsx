@@ -148,7 +148,7 @@ export default async function AdminPage() {
             <CardDescription>Forhandsvis, valider og bruk batch-importer med dedupe og audit trail.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ButtonLink href="/admin/imports" label="Apen importsentral" />
+            <ButtonLink href="/admin/imports" label="Åpne importsentral" />
           </CardContent>
         </Card>
         <Card>
@@ -157,16 +157,16 @@ export default async function AdminPage() {
             <CardDescription>Review brukerforslag, sammenlign diff og oppdater katalogen redaksjonelt.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ButtonLink href="/admin/corrections" label="Apen korrekturko" />
+            <ButtonLink href="/admin/corrections" label="Åpne korrekturkø" />
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Aktor review board</CardTitle>
+            <CardTitle className="text-lg">Aktør review board</CardTitle>
             <CardDescription>Filtrer pilotfylker, stale poster, manglende kilder og pending public submissions.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ButtonLink href="/admin/actors-review" label="Apen review board" />
+            <ButtonLink href="/admin/actors-review" label="Åpne review board" />
           </CardContent>
         </Card>
         <Card>
@@ -175,7 +175,7 @@ export default async function AdminPage() {
             <CardDescription>Operasjonell fylkesoversikt for stage, prioritet, klynger og importpåvirkning.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ButtonLink href="/admin/rollout" label="Apen rollout board" />
+            <ButtonLink href="/admin/rollout" label="Åpne rollout board" />
           </CardContent>
         </Card>
       </div>

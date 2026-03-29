@@ -32,8 +32,8 @@ export async function generateMetadata({ params }: CountyPageProps): Promise<Met
   }
 
   return {
-    title: `${countyMeta.name} | Sirkulaere aktorer`,
-    description: `Utforsk sirkulaere aktorer, kategorier og kommuner i ${countyMeta.name}.`,
+    title: `${countyMeta.name} | Sirkulære aktører`,
+    description: `Utforsk sirkulære aktører, kategorier og kommuner i ${countyMeta.name}.`,
     alternates: { canonical: `${getSiteUrl()}/${countyMeta.slug}` },
   }
 }
@@ -78,9 +78,9 @@ export default async function CountyPage({ params }: CountyPageProps) {
     <div className="container mx-auto px-4 py-10 space-y-10">
       <section className="max-w-4xl space-y-4">
         <Badge variant="secondary">{countyMeta.name}</Badge>
-        <h1 className="text-4xl font-bold">Sirkulaere tilbud i {countyMeta.name}</h1>
+        <h1 className="text-4xl font-bold">Sirkulære tilbud i {countyMeta.name}</h1>
         <p className="text-lg text-muted-foreground">
-          Browse kommuner, kategorier og publiserte aktorer i {countyMeta.name}. Denne siden fungerer som SEO- og
+          Browse kommuner, kategorier og publiserte aktører i {countyMeta.name}. Denne siden fungerer som SEO- og
           navigasjonsinngang for fylket.
         </p>
         <PilotRolloutNote mode={rolloutMode} countyName={countyMeta.name} />
@@ -90,7 +90,7 @@ export default async function CountyPage({ params }: CountyPageProps) {
         <Card>
           <CardHeader>
             <CardTitle>Kommuner og byer</CardTitle>
-            <CardDescription>Ga videre til en lokal oversikt for kommune eller by.</CardDescription>
+            <CardDescription>Gå videre til en lokal oversikt for kommune eller by.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             {municipalities.length === 0 ? (
@@ -103,7 +103,7 @@ export default async function CountyPage({ params }: CountyPageProps) {
                   className="rounded-lg border p-3 transition-colors hover:border-primary/40 hover:bg-primary/5"
                 >
                   <p className="font-medium">{municipality.name}</p>
-                  <p className="text-sm text-muted-foreground">{municipality.count} aktorer</p>
+                  <p className="text-sm text-muted-foreground">{municipality.count} aktører</p>
                 </Link>
               ))
             )}
@@ -143,8 +143,8 @@ export default async function CountyPage({ params }: CountyPageProps) {
 
       <section className="space-y-4">
         <div>
-          <h2 className="text-2xl font-semibold">Aktorer i {countyMeta.name}</h2>
-          <p className="text-muted-foreground">Filtrer pa kategori, tagger og sok direkte i fylkets katalog.</p>
+          <h2 className="text-2xl font-semibold">Aktører i {countyMeta.name}</h2>
+          <p className="text-muted-foreground">Filtrer på kategori, tagger og søk direkte i fylkets katalog.</p>
         </div>
         <ActorsExplorer actors={actors} />
       </section>

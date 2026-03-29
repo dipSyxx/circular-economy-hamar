@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: MunicipalityPageProps): Promi
 
   return {
     title: `${municipalityName} | ${countyMeta.name}`,
-    description: `Utforsk sirkulaere aktorer i ${municipalityName}, ${countyMeta.name}.`,
+    description: `Utforsk sirkulære aktører i ${municipalityName}, ${countyMeta.name}.`,
     alternates: { canonical: `${getSiteUrl()}/${county}/${municipality}` },
   }
 }
@@ -101,9 +101,9 @@ export default async function MunicipalityPage({ params }: MunicipalityPageProps
           <Badge variant="secondary">{countyMeta.name}</Badge>
           <Badge variant="outline">{municipalityName}</Badge>
         </div>
-        <h1 className="text-4xl font-bold">Sirkulaere tilbud i {municipalityName}</h1>
+        <h1 className="text-4xl font-bold">Sirkulære tilbud i {municipalityName}</h1>
         <p className="text-lg text-muted-foreground">
-          Denne siden samler lokale aktorer i {municipalityName} og fungerer som landing page for local-intent browse
+          Denne siden samler lokale aktører i {municipalityName} og fungerer som landing page for local-intent browse
           og SEO.
         </p>
         <PilotRolloutNote mode={rolloutMode} countyName={countyMeta.name} municipalityName={municipalityName} />
