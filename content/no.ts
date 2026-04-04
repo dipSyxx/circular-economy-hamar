@@ -20,6 +20,7 @@ export const site = {
 export const navigation = [
   { href: "/", label: "Hjem" },
   { href: "/aktorer", label: "Aktører" },
+  { href: "/fylker", label: "Fylker" },
   { href: "/guider", label: "Guider" },
   { href: "/artikler", label: "Artikler" },
   { href: "/decide", label: "Beslutning" },

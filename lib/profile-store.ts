@@ -353,3 +353,49 @@ export const resetProfile = () => {
   remoteProfileId = undefined
   window.localStorage.removeItem(STORAGE_KEY)
 }
+
+export const mergeRemoteProfile = (remote: ProfileData) => {
+  const local = loadProfile()
+
+  const mergedDecisionIds = new Set<string>()
+  const mergedDecisions: DecisionEntry[] = []
+  for (const entry of [...local.decisionHistory, ...remote.decisionHistory]) {
+    if (!mergedDecisionIds.has(entry.id)) {
+      mergedDecisionIds.add(entry.id)
+      mergedDecisions.push(entry)
+    }
+  }
+
+  const mergedActionIds = new Set<string>()
+  const mergedActions: UserAction[] = []
+  for (const action of [...local.actions, ...remote.actions]) {
+    if (!mergedActionIds.has(action.id)) {
+      mergedActionIds.add(action.id)
+      mergedActions.push(action)
+    }
+  }
+
+  const mergedChallenges = Array.from(
+    new Set([...local.completedChallenges, ...remote.completedChallenges]),
+  )
+
+  const remoteLastDate = remote.lastActionDate ?? null
+  const localLastDate = local.lastActionDate ?? null
+  const lastActionDate =
+    remoteLastDate && localLastDate
+      ? remoteLastDate >= localLastDate
+        ? remoteLastDate
+        : localLastDate
+      : remoteLastDate ?? localLastDate ?? undefined
+
+  const merged: ProfileData = {
+    score: Math.max(local.score, remote.score),
+    streakDays: remote.streakDays,
+    lastActionDate,
+    completedChallenges: mergedChallenges,
+    decisionHistory: mergedDecisions.slice(0, maxDecisions),
+    actions: mergedActions.slice(0, maxActions),
+  }
+
+  saveProfile(merged)
+}

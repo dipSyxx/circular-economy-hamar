@@ -58,10 +58,34 @@ export function Navigation() {
         if (active) setIsAdmin(false)
         return
       }
+
+      const userId = data?.user?.id
+      const cacheKey = userId ? `admin_check_${userId}` : null
+
+      if (cacheKey) {
+        try {
+          const cached = sessionStorage.getItem(cacheKey)
+          if (cached !== null) {
+            if (active) setIsAdmin(cached === "1")
+            return
+          }
+        } catch {
+          // ignore sessionStorage errors (private mode, etc.)
+        }
+      }
+
       try {
         const response = await fetch("/api/admin/me")
         if (!active) return
-        setIsAdmin(response.ok)
+        const isAdminResult = response.ok
+        setIsAdmin(isAdminResult)
+        if (cacheKey) {
+          try {
+            sessionStorage.setItem(cacheKey, isAdminResult ? "1" : "0")
+          } catch {
+            // ignore sessionStorage errors
+          }
+        }
       } catch {
         if (active) setIsAdmin(false)
       }
@@ -70,7 +94,7 @@ export function Navigation() {
     return () => {
       active = false
     }
-  }, [hasSession])
+  }, [hasSession, data?.user?.id])
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

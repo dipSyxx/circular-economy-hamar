@@ -360,8 +360,11 @@ export const getLatestActors = async (limit = 6): Promise<Actor[]> => {
 }
 
 export const getActorBySlug = async (slug: string): Promise<Actor | null> => {
-  const actors = await getActorsCached()
-  return actors.find((actor) => actor.slug === slug) ?? null
+  const actor = await prisma.actor.findFirst({
+    where: { slug, status: "approved" },
+    include: actorPublicInclude,
+  })
+  return actor ? mapActorRecord(actor) : null
 }
 
 export const getChallenges = async (): Promise<Challenge[]> => {

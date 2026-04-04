@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,27 +11,36 @@ import {
   Instagram,
   Clock,
   CheckCircle2,
-  ArrowLeft,
   Mail,
   ExternalLink,
 } from "lucide-react"
-import Link from "next/link"
 import { actorCopy, actorPageCopy } from "@/content/no"
 import type { SourceType } from "@/lib/data"
 import { ActorCorrectionDialog } from "@/components/actor-correction-dialog"
 import { RelatedArticlesSection } from "@/components/editorial/related-articles-section"
 import { RelatedGuidesSection } from "@/components/guides/related-guides-section"
 import { ActorTrustBadges } from "@/components/actor-trust-badges"
+import { ActorImage } from "@/components/actor-image"
+import { BackButton } from "@/components/back-button"
 import { categoryConfig } from "@/lib/categories"
 import { getArticlesForActor } from "@/lib/editorial"
 import { getGuidesForActor } from "@/lib/guides"
 import { getActorBySlug } from "@/lib/public-data"
+import { prisma } from "@/lib/prisma"
 import { FavoriteButton } from "@/components/favorite-button"
 import { formatActorGeoLabel } from "@/lib/geo"
 import { getSiteUrl } from "@/lib/seo"
 
 interface ActorPageProps {
   params: Promise<{ slug: string }>
+}
+
+export async function generateStaticParams() {
+  const actors = await prisma.actor.findMany({
+    where: { status: "approved" },
+    select: { slug: true },
+  })
+  return actors.map((actor) => ({ slug: actor.slug }))
 }
 
 export async function generateMetadata({ params }: ActorPageProps): Promise<Metadata> {
@@ -68,6 +78,12 @@ export default async function ActorPage({ params }: ActorPageProps) {
     borderColor: categoryColor,
     color: categoryColor,
   }
+  const backFallback =
+    actor.countySlug && actor.municipalitySlug
+      ? `/${actor.countySlug}/${actor.municipalitySlug}`
+      : actor.countySlug
+        ? `/${actor.countySlug}`
+        : "/aktorer"
 
   const sourceLabels: Record<SourceType, string> = {
     website: "Nettside",
@@ -108,17 +124,12 @@ export default async function ActorPage({ params }: ActorPageProps) {
   return (
     <div className="container mx-auto px-4 py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
-      <Button variant="ghost" asChild className="mb-6">
-        <Link href="/aktorer">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          {actorPageCopy.backLabel}
-        </Link>
-      </Button>
+      <BackButton fallbackHref={backFallback} label={actorPageCopy.backLabel} className="mb-6" />
 
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
-          <div className="aspect-video rounded-xl overflow-hidden">
-            <img src={actor.image || "/placeholder.svg"} alt={actor.name} className="w-full h-full object-cover" />
+          <div className="relative aspect-video rounded-xl overflow-hidden">
+            <ActorImage src={actor.image} alt={actor.name} />
           </div>
 
           <div>

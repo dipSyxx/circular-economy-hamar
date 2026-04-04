@@ -97,6 +97,7 @@ export function ActorsExplorer({
   const [locationError, setLocationError] = useState<string | null>(null)
   const [locationUpdatedAt, setLocationUpdatedAt] = useState<number | null>(null)
   const [hasRestoredState, setHasRestoredState] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(24)
 
   const categoryIndex = useMemo(() => new Map(categoryOrder.map((category, index) => [category, index])), [])
 
@@ -235,6 +236,13 @@ export function ActorsExplorer({
       return getDistanceKm(userLocation, [a.lat, a.lng]) - getDistanceKm(userLocation, [b.lat, b.lng])
     })
   }, [categoryIndex, favoriteIds, filteredActors, safeCountyFilter, safeMunicipalityFilter, sortKey, userLocation])
+
+  useEffect(() => {
+    setVisibleCount(24)
+  }, [sortedActors.length, query, categoryFilters, tagFilters, safeCountyFilter, safeMunicipalityFilter, favoriteOnly])
+
+  const visibleActors = sortedActors.slice(0, visibleCount)
+  const hiddenCount = sortedActors.length - visibleCount
 
   const activeFilterCount =
     categoryFilters.length +
@@ -657,7 +665,7 @@ export function ActorsExplorer({
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
         <span>
-          Viser {sortedActors.length} av {actors.length} aktører
+          Viser {Math.min(visibleCount, sortedActors.length)} av {actors.length} aktører
         </span>
         {hasAnyFilter ? (
           <Button variant="ghost" size="sm" onClick={clearAllFilters}>
@@ -759,32 +767,44 @@ export function ActorsExplorer({
             Ingen aktører matcher valgene dine.
           </motion.div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <AnimatePresence mode="popLayout">
-              {sortedActors.map((actor) => {
-                const distanceLabel =
-                  userLocation &&
-                  `${getDistanceKm(userLocation, [actor.lat, actor.lng]).toFixed(1)} ${mapCopy.distanceUnit}`
-                return (
-                  <motion.div
-                    key={actor.id}
-                    layout
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <ActorCard
-                      actor={actor}
-                      showFavorite={favoritesLoaded}
-                      isFavorite={favoriteIds.has(actor.id)}
-                      onToggleFavorite={toggleFavorite}
-                      distanceLabel={distanceLabel || undefined}
-                    />
-                  </motion.div>
-                )
-              })}
-            </AnimatePresence>
+          <div className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <AnimatePresence mode="popLayout">
+                {visibleActors.map((actor) => {
+                  const distanceLabel =
+                    userLocation &&
+                    `${getDistanceKm(userLocation, [actor.lat, actor.lng]).toFixed(1)} ${mapCopy.distanceUnit}`
+                  return (
+                    <motion.div
+                      key={actor.id}
+                      layout
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ActorCard
+                        actor={actor}
+                        showFavorite={favoritesLoaded}
+                        isFavorite={favoriteIds.has(actor.id)}
+                        onToggleFavorite={toggleFavorite}
+                        distanceLabel={distanceLabel || undefined}
+                      />
+                    </motion.div>
+                  )
+                })}
+              </AnimatePresence>
+            </div>
+            {hiddenCount > 0 ? (
+              <div className="flex justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setVisibleCount((prev) => prev + 24)}
+                >
+                  Vis {Math.min(24, hiddenCount)} til
+                </Button>
+              </div>
+            ) : null}
           </div>
         )}
       </AnimatePresence>
