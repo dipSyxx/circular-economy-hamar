@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AddressSearchInput } from "@/components/address-search-input"
 import { ImageUploadField } from "@/components/image-upload"
+import { ActorDialogContent } from "@/components/admin/actor-dialog"
 import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { getCountyByName, getMunicipalitiesForCounty, norwayCounties } from "@/lib/geo"
@@ -67,6 +68,103 @@ type ArticleBodySectionDraft = {
 
 const READ_ONLY_FIELDS = new Set(["id", "createdAt", "updatedAt"])
 const NONE_VALUE = "__none__"
+
+const fieldLabelNO: Record<string, string> = {
+  // Actor – grunninfo
+  name: "Navn",
+  slug: "Slug (URL-navn)",
+  category: "Kategori",
+  description: "Kort beskrivelse",
+  longDescription: "Lang beskrivelse",
+  // Actor – kontakt og plassering
+  address: "Adresse",
+  postalCode: "Postnummer",
+  country: "Land",
+  county: "Fylke",
+  countySlug: "Fylke-slug",
+  municipality: "Kommune",
+  municipalitySlug: "Kommune-slug",
+  city: "By/sted",
+  area: "Område",
+  lat: "Breddegrad",
+  lng: "Lengdegrad",
+  phone: "Telefon",
+  email: "E-post",
+  website: "Nettside",
+  instagram: "Instagram",
+  nationwide: "Landsdekkende",
+  // Actor – detaljer
+  openingHours: "Åpningstider",
+  openingHoursOsm: "Åpningstider (OSM)",
+  tags: "Tagger",
+  benefits: "Fordeler",
+  howToUse: "Slik bruker du",
+  image: "Bilde",
+  // Actor – administrasjon
+  status: "Status",
+  reviewNote: "Revisjonsnotat",
+  reviewedAt: "Vurdert dato",
+  verificationStatus: "Verifiseringsstatus",
+  verifiedAt: "Verifisert dato",
+  // Actor – system
+  id: "ID",
+  createdAt: "Opprettet",
+  updatedAt: "Oppdatert",
+  // Lookup-felt
+  actorId: "Aktør",
+  createdById: "Opprettet av",
+  reviewedById: "Vurdert av",
+  userId: "Bruker",
+  challengeId: "Oppdrag",
+  questionId: "Spørsmål",
+  detailedFactId: "Detaljfakta",
+  sourceId: "Kilde",
+  // Repair service
+  problemType: "Problemtype",
+  itemTypes: "Gjenstandstyper",
+  priceMin: "Minstepris (kr)",
+  priceMax: "Makspris (kr)",
+  etaDays: "Ledetid (dager)",
+  // Actor source
+  type: "Type",
+  title: "Tittel",
+  url: "Nettadresse",
+  capturedAt: "Hentet dato",
+  note: "Merknad",
+  // Articles
+  summary: "Sammendrag",
+  seoTitle: "SEO-tittel",
+  seoDescription: "SEO-beskrivelse",
+  publishedAt: "Publisert dato",
+  readingMinutes: "Lesetid (min)",
+  theme: "Tema",
+  relatedCategories: "Relaterte kategorier",
+  relatedCounties: "Relaterte fylker",
+  bodySections: "Innholdsseksjoner",
+  // Quiz
+  question: "Spørsmål",
+  sortOrder: "Rekkefølge",
+  level: "Nivå",
+  options: "Alternativer",
+  answers: "Svar",
+  maxScore: "Maks poeng",
+  score: "Poeng",
+  // Facts
+  key: "Nøkkel",
+  stat: "Statistikk",
+  icon: "Ikon",
+  content: "Innhold",
+  tips: "Tips",
+  // Misc
+  badge: "Merke",
+  points: "Poeng",
+  role: "Rolle",
+  imageUrl: "Bildelenke",
+  streakDays: "Streak-dager",
+  lastActionDate: "Siste handlingsdato",
+}
+
+const getFieldLabel = (key: string) => fieldLabelNO[key] ?? key
 
 const actorCategory = categoryOrder
 
@@ -1396,12 +1494,16 @@ export function ResourceManager({
       disabled: isReadOnly,
     }
 
+    const isNationwideField = isActorResource && key === "nationwide"
+
     return (
       <div key={key} className={isMultiline ? "sm:col-span-2 lg:col-span-3" : ""}>
-        <Label htmlFor={key} className="text-sm">
-          {key}
-        </Label>
-        <div className="mt-2">
+        {!isNationwideField && (
+          <Label htmlFor={key} className="text-sm">
+            {getFieldLabel(key)}
+          </Label>
+        )}
+        <div className={isNationwideField ? "" : "mt-2"}>
           {lookupConfig ? (
             <SearchSelect
               value={typeof value === "string" ? value : null}
@@ -1564,6 +1666,21 @@ export function ResourceManager({
               onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
               disabled={isReadOnly}
             />
+          ) : isActorResource && key === "nationwide" ? (
+            <label className={`flex items-center gap-3 rounded-md border border-input px-3 py-3 text-sm ${isReadOnly ? "opacity-70 cursor-not-allowed" : "cursor-pointer"}`}>
+              <Checkbox
+                checked={Boolean(value)}
+                onCheckedChange={(checked) => {
+                  if (isReadOnly) return
+                  setDraft((prev) => ({ ...prev, [key]: Boolean(checked) }))
+                }}
+                disabled={isReadOnly}
+              />
+              <div>
+                <p className="font-medium">Landsdekkende tilbud</p>
+                <p className="text-xs text-muted-foreground">Kryss av hvis aktøren leverer utover ett lokalt nedslagsfelt.</p>
+              </div>
+            </label>
           ) : meta.kind === "boolean" ? (
             <div className="flex items-center gap-2">
               <Switch
@@ -1574,7 +1691,7 @@ export function ResourceManager({
                 }}
                 disabled={isReadOnly}
               />
-              <span className="text-xs text-muted-foreground">{Boolean(value) ? "true" : "false"}</span>
+              <span className="text-xs text-muted-foreground">{Boolean(value) ? "ja" : "nei"}</span>
             </div>
           ) : meta.kind === "array" && meta.arrayItemKind === "string" ? (
             <TagInput
@@ -1937,30 +2054,14 @@ export function ResourceManager({
             <DialogDescription>Oppdater feltene og lagre endringer.</DialogDescription>
           </DialogHeader>
           {isActorResource ? (
-            <div className="grid max-h-[70vh] gap-6 overflow-y-auto p-1 pr-1">
-              {actorFormSections.map((section) => {
-                const keys = section.keys.filter((key) => formKeys.includes(key))
-                if (!keys.length) return null
-                const gridClassName =
-                  section.layout === "stack"
-                    ? "mt-3 grid gap-4"
-                    : "mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-                return (
-                  <div key={section.title}>
-                    <p className="text-sm font-semibold">{section.title}</p>
-                    <div className={gridClassName}>{keys.map((key) => renderField(key))}</div>
-                  </div>
-                )
-              })}
-              {actorExtraKeys.length > 0 && (
-                <div>
-                  <p className="text-sm font-semibold">Andre felt</p>
-                  <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {actorExtraKeys.map((key) => renderField(key))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <ActorDialogContent
+              mode={mode}
+              actorId={selectedId}
+              actorFormSections={actorFormSections}
+              actorExtraKeys={actorExtraKeys}
+              formKeys={formKeys}
+              renderField={renderField}
+            />
           ) : (
             <div className="grid max-h-[70vh] p-1 gap-4 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
               {formKeys.map((key) => renderField(key))}

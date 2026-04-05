@@ -1,4 +1,5 @@
-﻿import { HeroSection } from "@/components/hero-section"
+import { HeroSection } from "@/components/hero-section"
+import { FylkerSection } from "@/components/fylker-section"
 import { ActorCard } from "@/components/actor-card"
 import { RelatedArticlesSection } from "@/components/editorial/related-articles-section"
 import { FactCards } from "@/components/fact-cards"
@@ -17,6 +18,7 @@ export default async function HomePage() {
   return (
     <div>
       <HeroSection />
+      <FylkerSection />
 
       <section className="py-16">
         <div className="container mx-auto px-4">

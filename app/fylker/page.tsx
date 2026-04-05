@@ -59,7 +59,16 @@ export default async function CountiesIndexPage() {
       <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {counties.map((county) => (
           <Link key={county.slug} href={`/${county.slug}`} className="block">
-            <Card className="h-full transition-shadow hover:shadow-md">
+            <Card className="h-full transition-shadow hover:shadow-md overflow-hidden pt-0">
+              <div className="flex items-center justify-center h-36 bg-muted/20 px-4 py-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/counties/${county.slug}.svg`}
+                  alt={`Kart over ${county.name}`}
+                  className="max-h-full max-w-full object-contain"
+                  loading="lazy"
+                />
+              </div>
               <CardHeader>
                 <CardTitle>{county.name}</CardTitle>
                 <CardDescription>
