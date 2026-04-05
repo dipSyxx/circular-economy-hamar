@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Heart, MapPin } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import type { Actor } from "@/lib/data";
 import { actorCopy } from "@/content/no";
@@ -45,10 +46,12 @@ export function ActorCard({
   return (
     <Card className="overflow-hidden pt-0 hover:shadow-lg transition-shadow">
       <div className="aspect-video relative overflow-hidden">
-        <img
+        <Image
           src={actor.image || "/placeholder.svg"}
           alt={actor.name}
-          className="object-cover w-full h-full"
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         <div className="absolute h-[21px] top-4 left-4 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full">
           <Badge variant="outline" className="border" style={badgeStyle}>
@@ -60,6 +63,7 @@ export function ActorCard({
             type="button"
             size="icon"
             variant="secondary"
+            aria-label={isFavorite ? "Fjern fra favoritter" : "Legg til i favoritter"}
             className="absolute right-3 top-3 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
             onClick={(event) => {
               event.preventDefault();

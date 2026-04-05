@@ -15,8 +15,6 @@ export function AuthSync() {
     const userId = session.data?.user?.id ?? null
     if (!userId || lastSyncedUserId.current === userId) return
 
-    lastSyncedUserId.current = userId
-
     const run = async () => {
       try {
         await Promise.all([
@@ -33,8 +31,10 @@ export function AuthSync() {
           const remote = (await summaryRes.json()) as ProfileData
           mergeRemoteProfile(remote)
         }
+
+        lastSyncedUserId.current = userId
       } catch {
-        lastSyncedUserId.current = null
+        // leave lastSyncedUserId unchanged so it retries on next render
       }
     }
 

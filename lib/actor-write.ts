@@ -53,6 +53,12 @@ type PrepareActorPersistOptions = {
 const uniqueStrings = (values?: Array<string | null | undefined>) =>
   Array.from(new Set((values ?? []).map((value) => value?.trim()).filter(Boolean) as string[]))
 
+const toFiniteNumber = (v: unknown): number => {
+  const n = Number(v)
+  if (!Number.isFinite(n)) throw new Error("Nedre koordinat er ugyldig.")
+  return n
+}
+
 const toNullableString = (value?: string | null) => {
   const trimmed = value?.trim()
   return trimmed ? trimmed : null
@@ -153,8 +159,8 @@ export const prepareActorPersistData = async (
       municipalitySlug: normalizedGeo.municipalitySlug,
       city: normalizedGeo.city,
       area: normalizedGeo.area,
-      lat: Number(input.lat),
-      lng: Number(input.lng),
+      lat: toFiniteNumber(input.lat),
+      lng: toFiniteNumber(input.lng),
       phone: toNullableString(input.phone),
       email: toNullableString(input.email),
       website: toNullableString(input.website),

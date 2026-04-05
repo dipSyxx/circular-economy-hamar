@@ -61,12 +61,13 @@ export function Navigation() {
 
       const userId = data?.user?.id
       const cacheKey = userId ? `admin_check_${userId}` : null
+      const ADMIN_CACHE_TTL = 5 * 60 * 1000
 
       if (cacheKey) {
         try {
-          const cached = sessionStorage.getItem(cacheKey)
-          if (cached !== null) {
-            if (active) setIsAdmin(cached === "1")
+          const cached = JSON.parse(sessionStorage.getItem(cacheKey) ?? "null") as { value: string; ts: number } | null
+          if (cached !== null && Date.now() - cached.ts < ADMIN_CACHE_TTL) {
+            if (active) setIsAdmin(cached.value === "1")
             return
           }
         } catch {
@@ -81,7 +82,7 @@ export function Navigation() {
         setIsAdmin(isAdminResult)
         if (cacheKey) {
           try {
-            sessionStorage.setItem(cacheKey, isAdminResult ? "1" : "0")
+            sessionStorage.setItem(cacheKey, JSON.stringify({ value: isAdminResult ? "1" : "0", ts: Date.now() }))
           } catch {
             // ignore sessionStorage errors
           }

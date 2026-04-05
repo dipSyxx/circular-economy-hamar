@@ -662,10 +662,14 @@ export function ActorsExplorer({
       </div>
 
       {locationError ? <p className="text-sm text-destructive">{locationError}</p> : null}
+      {sortKey === "distance" && !userLocation && !locationError ? (
+        <p className="text-sm text-muted-foreground">Aktivér posisjon i nettleseren for å sortere etter avstand.</p>
+      ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
         <span>
-          Viser {Math.min(visibleCount, sortedActors.length)} av {actors.length} aktører
+          Viser {Math.min(visibleCount, sortedActors.length)} av {sortedActors.length} aktører
+          {hasAnyFilter ? ` (filtrert fra ${actors.length})` : ""}
         </span>
         {hasAnyFilter ? (
           <Button variant="ghost" size="sm" onClick={clearAllFilters}>

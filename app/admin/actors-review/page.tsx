@@ -8,10 +8,12 @@ import { prisma } from "@/lib/prisma"
 export default async function AdminActorsReviewPage() {
   await requireAdmin()
 
+  const LIMIT = 500
   const [actors, verificationTasks] = await Promise.all([
     prisma.actor.findMany({
       select: adminActorReviewSelect,
       orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
+      take: LIMIT,
     }),
     listAdminVerificationTasks(),
   ])
@@ -25,6 +27,11 @@ export default async function AdminActorsReviewPage() {
         <p className="text-muted-foreground">
           Se pilotfylker, stale records, manglende kilder og pending public submissions i ett arbeidsbrett.
         </p>
+        {actors.length === LIMIT && (
+          <p className="text-sm text-amber-600 mt-1">
+            Viser de første {LIMIT} aktørene. Bruk filtre for å innsnevre resultatene.
+          </p>
+        )}
       </div>
       <VerificationQueuePanel initialTasks={verificationTasks} />
       <ActorReviewBoard

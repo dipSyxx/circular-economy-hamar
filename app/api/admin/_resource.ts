@@ -184,9 +184,7 @@ export const updateAdminResource = async (resource: string, id: string, request:
       }
       await assertActorCanAcceptRepairServices(prisma, existingRepairService.actorId)
       affectedActorIds.add(existingRepairService.actorId)
-      if (typeof data.actorId === "string") {
-        affectedActorIds.add(data.actorId)
-      }
+      delete data.actorId
     }
 
     if (resource === "actor-sources") {
@@ -198,9 +196,7 @@ export const updateAdminResource = async (resource: string, id: string, request:
         return NextResponse.json({ error: "Not found" }, { status: 404 })
       }
       affectedActorIds.add(existingSource.actorId)
-      if (typeof data.actorId === "string") {
-        affectedActorIds.add(data.actorId)
-      }
+      delete data.actorId
     }
 
     const model = (prisma as Record<string, any>)[config.model]

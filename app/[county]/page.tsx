@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getArticlesForCounty } from "@/lib/editorial"
 import { getActorGeographyMatchPriority, getAvailableMunicipalityOptions } from "@/lib/actor-scope"
 import { categoryOrder } from "@/lib/categories"
+import { formatCategoryLabel } from "@/lib/enum-labels"
 import { getGuidesForCounty } from "@/lib/guides"
 import { getCountyBySlug, norwayCounties } from "@/lib/geo"
 import { getPilotRolloutMode } from "@/lib/pilot-coverage"
@@ -58,18 +59,28 @@ export default async function CountyPage({ params }: CountyPageProps) {
       status: "approved" as const,
     })),
   )
+  const municipalityCountMap = new Map<string, number>()
+  const categoryCountMap = new Map<string, number>()
+  for (const actor of actors) {
+    if (actor.municipalitySlug) {
+      municipalityCountMap.set(
+        actor.municipalitySlug,
+        (municipalityCountMap.get(actor.municipalitySlug) ?? 0) + 1,
+      )
+    }
+    categoryCountMap.set(actor.category, (categoryCountMap.get(actor.category) ?? 0) + 1)
+  }
+
   const municipalities = getAvailableMunicipalityOptions(actors, countyMeta.slug).map((municipality) => ({
     ...municipality,
-    count: actors.filter(
-      (actor) => getActorGeographyMatchPriority(actor, countyMeta.slug, municipality.slug) !== null,
-    ).length,
+    count: municipalityCountMap.get(municipality.slug) ?? 0,
   }))
 
   const categories = categoryOrder
-    .filter((category) => actors.some((actor) => actor.category === category))
+    .filter((category) => categoryCountMap.has(category))
     .map((category) => ({
       category,
-      count: actors.filter((actor) => actor.category === category).length,
+      count: categoryCountMap.get(category) ?? 0,
     }))
   const relatedGuides = getGuidesForCounty(countyMeta.slug)
   const relatedArticles = await getArticlesForCounty(countyMeta.slug)
@@ -121,7 +132,7 @@ export default async function CountyPage({ params }: CountyPageProps) {
             ) : (
               categories.map((entry) => (
                 <Link key={entry.category} href={`/${countyMeta.slug}/kategori/${entry.category}`}>
-                  <Badge variant="outline">{entry.category} · {entry.count}</Badge>
+                  <Badge variant="outline">{formatCategoryLabel(entry.category)} · {entry.count}</Badge>
                 </Link>
               ))
             )}

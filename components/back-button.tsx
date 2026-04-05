@@ -15,7 +15,11 @@ export function BackButton({ fallbackHref, label = "Tilbake", className }: BackB
   const router = useRouter()
 
   const handleClick = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
+    if (
+      typeof window !== "undefined" &&
+      window.history.length > 1 &&
+      document.referrer.includes(window.location.origin)
+    ) {
       router.back()
     } else {
       router.push(fallbackHref)
