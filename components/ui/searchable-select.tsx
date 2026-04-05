@@ -1,11 +1,11 @@
-"use client"
+'use client'
 
-import { useState, type WheelEvent } from "react"
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from '@/components/ui/button'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
+import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
+import { useRef, useState } from 'react'
 
 export type SearchableSelectOption = {
   value: string
@@ -19,6 +19,7 @@ type SearchableSelectProps = {
   placeholder?: string
   disabled?: boolean
   emptyLabel?: string
+  container?: HTMLElement | null
   onChange: (value: string) => void
 }
 
@@ -27,40 +28,42 @@ export function SearchableSelect({
   options,
   placeholder,
   disabled,
-  emptyLabel = "Ingen treff.",
+  emptyLabel = 'Ingen treff.',
+  container,
   onChange,
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const selected = options.find((option) => option.value === value)
-  const displayLabel = selected?.label ?? ""
-  const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
-    const target = event.currentTarget
-    if (target.scrollHeight <= target.clientHeight) return
-    target.scrollTop += event.deltaY
-    event.preventDefault()
-    event.stopPropagation()
-  }
+  const displayLabel = selected?.label ?? ''
+  const portalContainer =
+    container ??
+    triggerRef.current?.closest<HTMLElement>(
+      '[data-slot="dialog-content"], [data-slot="sheet-content"], [data-slot="drawer-content"]',
+    ) ??
+    null
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          role="combobox"
+          ref={triggerRef}
+          variant='outline'
+          role='combobox'
           aria-expanded={open}
           disabled={disabled}
-          className="w-full justify-between"
+          className='w-full justify-between'
         >
-          <span className={cn("truncate text-left", !displayLabel && "text-muted-foreground")}>
-            {displayLabel || placeholder || "Velg"}
+          <span className={cn('truncate text-left', !displayLabel && 'text-muted-foreground')}>
+            {displayLabel || placeholder || 'Velg'}
           </span>
-          <ChevronsUpDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          <ChevronsUpDownIcon className='ml-2 size-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+      <PopoverContent className='w-[--radix-popover-trigger-width] p-0' align='start' container={portalContainer}>
         <Command>
-          <CommandInput placeholder="Søk..." />
-          <CommandList className="max-h-64 overflow-y-auto overscroll-contain" onWheel={handleWheel}>
+          <CommandInput placeholder='Søk...' />
+          <CommandList className='max-h-64 overflow-y-auto overscroll-contain touch-pan-y'>
             <CommandEmpty>{emptyLabel}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => {
@@ -75,8 +78,8 @@ export function SearchableSelect({
                       setOpen(false)
                     }}
                   >
-                    <CheckIcon className={cn("size-4", isSelected ? "opacity-100" : "opacity-0")} />
-                    <span className="truncate">{option.label}</span>
+                    <CheckIcon className={cn('size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
+                    <span className='truncate'>{option.label}</span>
                   </CommandItem>
                 )
               })}

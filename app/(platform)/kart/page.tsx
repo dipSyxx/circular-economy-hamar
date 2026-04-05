@@ -1,16 +1,43 @@
+import { ListChecks, MapPin, Route } from "lucide-react"
 import { pageCopy } from "@/content/no"
 import { MapClient } from "@/components/map-client"
+import { Badge } from "@/components/ui/badge"
 import { getActors } from "@/lib/public-data"
 
 export default async function MapPage() {
   const actors = await getActors()
+  const plottedCount = actors.filter(
+    (a) => Number.isFinite(a.lat) && Number.isFinite(a.lng),
+  ).length
+  const statsText = pageCopy.map.statsTemplate.replace("{count}", String(plottedCount))
 
   return (
     <div>
-      <section className="py-8 bg-muted/30">
+      <section className="relative overflow-hidden border-b bg-gradient-to-b from-muted/40 via-muted/25 to-background py-12">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-2">{pageCopy.map.title}</h1>
-          <p className="text-muted-foreground">{pageCopy.map.description}</p>
+          <div className="max-w-3xl space-y-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className="font-medium">
+                {statsText}
+              </Badge>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{pageCopy.map.title}</h1>
+            <p className="text-lg text-muted-foreground">{pageCopy.map.description}</p>
+            <ul className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
+              <li className="flex gap-2 rounded-lg border border-border/60 bg-card/50 px-3 py-2.5">
+                <ListChecks className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                <span>{pageCopy.map.hintFilters}</span>
+              </li>
+              <li className="flex gap-2 rounded-lg border border-border/60 bg-card/50 px-3 py-2.5">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                <span>{pageCopy.map.hintMarkers}</span>
+              </li>
+              <li className="flex gap-2 rounded-lg border border-border/60 bg-card/50 px-3 py-2.5">
+                <Route className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                <span>{pageCopy.map.hintRoute}</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </section>
 

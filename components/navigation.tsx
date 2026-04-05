@@ -4,16 +4,35 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { UserButton } from "@neondatabase/auth/react"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, Shield, User } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { navigation, navigationCopy } from "@/content/no"
+import { ActorSubmissionDialog } from "@/components/actor-submission-dialog"
+import { BrandLogo } from "@/components/brand-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { authClient } from "@/lib/auth/client"
 import { accountLocalization } from "@/content/auth-localization"
-import { BrandLogo } from "@/components/brand-logo"
-import { ActorSubmissionDialog } from "@/components/actor-submission-dialog"
+import { navigation, navigationCopy } from "@/content/no"
+import { cn } from "@/lib/utils"
+import {
+  BookOpen,
+  ChevronRight,
+  House,
+  Info,
+  LogIn,
+  Map,
+  MapPinned,
+  Menu,
+  Newspaper,
+  Settings,
+  Shield,
+  Sparkles,
+  Store,
+  Trophy,
+  User,
+  UserPlus,
+  type LucideIcon,
+} from "lucide-react"
 
 const authRoutes = {
   signIn: "/auth/sign-in",
@@ -21,6 +40,45 @@ const authRoutes = {
   signOut: "/auth/sign-out",
   accountProfile: "/account/profile",
   accountSettings: "/account/settings",
+}
+
+const mobileNavigationMeta: Record<string, { description: string; icon: LucideIcon }> = {
+  "/": {
+    description: "Startside og siste høydepunkter",
+    icon: House,
+  },
+  "/aktorer": {
+    description: "Utforsk lokale tilbud og tjenester",
+    icon: Store,
+  },
+  "/fylker": {
+    description: "Se oversikten fylke for fylke",
+    icon: MapPinned,
+  },
+  "/guider": {
+    description: "Lær hva du kan gjøre videre",
+    icon: BookOpen,
+  },
+  "/artikler": {
+    description: "Les innsikt, tips og oppdateringer",
+    icon: Newspaper,
+  },
+  "/decide": {
+    description: "Få hjelp til å ta neste valg",
+    icon: Sparkles,
+  },
+  "/kart": {
+    description: "Finn steder nær deg på kartet",
+    icon: Map,
+  },
+  "/quiz": {
+    description: "Test deg selv og lær underveis",
+    icon: Trophy,
+  },
+  "/fakta": {
+    description: "Tall, kilder og forklaringer",
+    icon: Info,
+  },
 }
 
 export function Navigation() {
@@ -97,6 +155,8 @@ export function Navigation() {
     }
   }, [hasSession, data?.user?.id])
 
+  const getIsActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href))
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -146,62 +206,135 @@ export function Navigation() {
           <ThemeToggle />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button variant="outline" size="icon" className="size-10 rounded-xl border-border/60 bg-background/90 shadow-sm">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">{navigationCopy.openMenuLabel}</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px]">
-              <div className="flex flex-col gap-4 mt-8">
-                <ActorSubmissionDialog triggerVariant="outline" triggerClassName="w-full" />
-                {navigation.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "px-4 py-3 text-base font-medium rounded-lg transition-colors",
-                      (item.href === "/" ? pathname === "/" : pathname.startsWith(item.href))
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted",
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                {isAdmin && (
-                  <Link
-                    href="/admin"
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "px-4 py-3 text-base font-medium rounded-lg transition-colors",
-                      pathname.startsWith("/admin")
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted",
-                    )}
-                  >
-                    Admin
-                  </Link>
-                )}
-                {hasSession ? (
-                  <div className="grid gap-2 pt-2">
-                    <Button variant="outline" asChild>
-                      <Link href={authRoutes.accountSettings}>Innstillinger</Link>
-                    </Button>
-                    <Button variant="destructive" asChild>
-                      <Link href={authRoutes.signOut}>Logg ut</Link>
-                    </Button>
+            <SheetContent side="right" className="h-dvh max-h-dvh w-[min(92vw,360px)] gap-0 overflow-hidden p-0">
+              <SheetHeader className="shrink-0 border-b px-5 pb-4 pt-6 text-left">
+                <BrandLogo imageClassName="h-10" className="pr-10" />
+                <SheetTitle className="pt-3 text-left text-base">Meny</SheetTitle>
+                <SheetDescription className="text-left text-pretty">
+                  Gå raskt til kart, guider, aktører og kontoen din.
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden !p-0">
+                <div className="overflow-y-auto px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-4">
+                  <div className="rounded-2xl border border-border/60 bg-muted/30 p-3">
+                    <p className="text-sm font-semibold">Tips oss om en aktør</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Hjelp oss utvide kartet med reparasjon, ombruk og gjenvinning i ditt område.
+                    </p>
+                    <ActorSubmissionDialog triggerVariant="outline" triggerClassName="mt-3 w-full rounded-xl bg-background" />
                   </div>
-                ) : (
-                  <div className="grid gap-2 pt-2">
-                    <Button variant="outline" asChild>
-                      <Link href={authRoutes.signIn}>Logg inn</Link>
-                    </Button>
-                    <Button asChild>
-                      <Link href={authRoutes.signUp}>Registrer deg</Link>
-                    </Button>
+
+                  <div className="mt-5">
+                    <p className="px-1 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Utforsk</p>
+                    <nav className="mt-3 flex flex-col gap-2">
+                      {navigation.map((item) => {
+                        const meta = mobileNavigationMeta[item.href]
+                        const Icon = meta?.icon ?? House
+                        const active = getIsActive(item.href)
+
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            aria-current={active ? "page" : undefined}
+                            onClick={() => setOpen(false)}
+                            className={cn(
+                              "group flex items-center justify-between rounded-2xl border border-transparent px-3 py-3 transition-all",
+                              active ? "border-primary/15 bg-primary/5 shadow-sm" : "hover:border-border/60 hover:bg-muted/70",
+                            )}
+                          >
+                            <div className="flex min-w-0 items-center gap-3">
+                              <span
+                                className={cn(
+                                  "flex size-10 shrink-0 items-center justify-center rounded-xl border transition-colors",
+                                  active
+                                    ? "border-primary/20 bg-primary/10 text-primary"
+                                    : "border-border/60 bg-background text-muted-foreground group-hover:text-foreground",
+                                )}
+                              >
+                                <Icon className="size-4" />
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block truncate text-sm font-semibold text-foreground">{item.label}</span>
+                                <span className="block truncate text-xs text-muted-foreground">{meta?.description}</span>
+                              </span>
+                            </div>
+                            <ChevronRight
+                              className={cn(
+                                "size-4 shrink-0 transition-transform group-hover:translate-x-0.5",
+                                active ? "text-primary" : "text-muted-foreground/70",
+                              )}
+                            />
+                          </Link>
+                        )
+                      })}
+                    </nav>
                   </div>
-                )}
+
+                  <Separator className="my-5" />
+
+                  <div className="grid gap-3">
+                    <div className="rounded-2xl border border-border/60 bg-background p-3">
+                      <p className="text-sm font-semibold">{hasSession ? "Konto" : "Logg inn for mer"}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {hasSession
+                          ? "Administrer profilen din, favoritter og innsendinger."
+                          : "Lagrede favoritter og innsendinger følger kontoen din."}
+                      </p>
+                    </div>
+
+                    {hasSession ? (
+                      <div className="grid gap-2">
+                        <Button variant="secondary" asChild>
+                          <Link href={authRoutes.accountProfile} onClick={() => setOpen(false)}>
+                            <User data-icon="inline-start" />
+                            Profil
+                          </Link>
+                        </Button>
+                        <Button variant="outline" asChild>
+                          <Link href={authRoutes.accountSettings} onClick={() => setOpen(false)}>
+                            <Settings data-icon="inline-start" />
+                            Innstillinger
+                          </Link>
+                        </Button>
+                        {isAdmin && (
+                          <Button variant="outline" asChild>
+                            <Link href="/admin" onClick={() => setOpen(false)}>
+                              <Shield data-icon="inline-start" />
+                              Admin
+                            </Link>
+                          </Button>
+                        )}
+                        <Button variant="destructive" asChild>
+                          <Link href={authRoutes.signOut} onClick={() => setOpen(false)}>
+                            Logg ut
+                          </Link>
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="grid gap-2">
+                        <Button variant="outline" asChild>
+                          <Link href={authRoutes.signIn} onClick={() => setOpen(false)}>
+                            <LogIn data-icon="inline-start" />
+                            Logg inn
+                          </Link>
+                        </Button>
+                        <Button asChild>
+                          <Link href={authRoutes.signUp} onClick={() => setOpen(false)}>
+                            <UserPlus data-icon="inline-start" />
+                            Registrer deg
+                          </Link>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </SheetContent>
           </Sheet>
