@@ -122,18 +122,18 @@ export default async function ActorPage({ params }: ActorPageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 sm:py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <BackButton fallbackHref={backFallback} label={actorPageCopy.backLabel} className="mb-6" />
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-8">
-          <div className="relative aspect-video rounded-xl overflow-hidden">
+      <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
+        <div className="min-w-0 space-y-6 sm:space-y-8 lg:col-span-2">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted sm:aspect-[16/10] lg:aspect-video">
             <ActorImage src={actor.image} alt={actor.name} />
           </div>
 
-          <div>
-            <div className="flex items-center gap-3 mb-4">
+          <div className="min-w-0">
+            <div className="mb-4 flex flex-wrap items-center gap-2.5">
               <Badge variant="outline" className="border" style={badgeStyle}>
                 {actorCopy.categoryLongLabels[actor.category]}
               </Badge>
@@ -144,20 +144,24 @@ export default async function ActorPage({ params }: ActorPageProps) {
               ))}
             </div>
 
-            <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
-              <div className="space-y-2">
-                <h1 className="text-4xl font-bold">{actor.name}</h1>
-                {geoLabel && <p className="text-sm text-muted-foreground">{geoLabel}</p>}
-                <ActorTrustBadges actor={actor} />
+            <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 space-y-2">
+                <h1 className="max-w-[16ch] break-words text-3xl font-bold leading-tight text-balance sm:max-w-none sm:text-4xl">
+                  {actor.name}
+                </h1>
+                {geoLabel && <p className="break-words text-sm text-muted-foreground">{geoLabel}</p>}
+                <ActorTrustBadges actor={actor} className="min-w-0" />
                 {actor.verifiedAt ? (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="break-words text-xs text-muted-foreground">
                     Sist verifisert {new Date(actor.verifiedAt).toLocaleDateString("no-NO")}
                   </p>
                 ) : null}
               </div>
-              <FavoriteButton actorId={actor.id} />
+              <FavoriteButton actorId={actor.id} className="w-fit shrink-0 self-start" />
             </div>
-            <p className="text-lg text-muted-foreground">{actor.longDescription}</p>
+            <p className="max-w-prose break-words text-base leading-7 text-muted-foreground sm:text-lg">
+              {actor.longDescription}
+            </p>
           </div>
 
           <Card>
@@ -243,7 +247,7 @@ export default async function ActorPage({ params }: ActorPageProps) {
           />
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Tillit og datakvalitet</CardTitle>
@@ -267,18 +271,18 @@ export default async function ActorPage({ params }: ActorPageProps) {
             <CardContent className="space-y-4">
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
+                <div className="min-w-0">
                   <p className="font-medium">{actorPageCopy.addressLabel}</p>
-                  <p className="text-sm text-muted-foreground">{actor.address}</p>
+                  <p className="break-words text-sm text-muted-foreground">{actor.address}</p>
                 </div>
               </div>
 
               {actor.phone && (
                 <div className="flex items-start gap-3">
                   <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-medium">{actorPageCopy.phoneLabel}</p>
-                    <a href={`tel:${actor.phone}`} className="text-sm text-primary hover:underline">
+                    <a href={`tel:${actor.phone}`} className="break-words text-sm text-primary hover:underline">
                       {actor.phone}
                     </a>
                   </div>
@@ -288,9 +292,9 @@ export default async function ActorPage({ params }: ActorPageProps) {
               {actor.email && (
                 <div className="flex items-start gap-3">
                   <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-medium">{actorPageCopy.emailLabel}</p>
-                    <a href={`mailto:${actor.email}`} className="text-sm text-primary hover:underline">
+                    <a href={`mailto:${actor.email}`} className="break-all text-sm text-primary hover:underline">
                       {actor.email}
                     </a>
                   </div>
@@ -300,13 +304,13 @@ export default async function ActorPage({ params }: ActorPageProps) {
               {actor.website && (
                 <div className="flex items-start gap-3">
                   <Globe className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-medium">{actorPageCopy.websiteLabel}</p>
                     <a
                       href={actor.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline"
+                      className="break-all text-sm text-primary hover:underline"
                     >
                       {actor.website}
                     </a>
@@ -317,13 +321,13 @@ export default async function ActorPage({ params }: ActorPageProps) {
               {actor.instagram && (
                 <div className="flex items-start gap-3">
                   <Instagram className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-medium">{actorPageCopy.instagramLabel}</p>
                     <a
                       href={actor.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline"
+                      className="break-all text-sm text-primary hover:underline"
                     >
                       {actor.instagram}
                     </a>
@@ -360,14 +364,14 @@ export default async function ActorPage({ params }: ActorPageProps) {
                 <p className="text-sm text-muted-foreground">Ingen kilder er registrert ennå.</p>
               ) : (
                 actor.sources.map((source) => (
-                  <div key={source.url} className="space-y-1">
-                    <div className="flex items-center gap-2 text-sm">
+                  <div key={source.url} className="min-w-0 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2 text-sm">
                       <Badge variant="secondary">{sourceLabels[source.type]}</Badge>
                       <a
                         href={source.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-primary hover:underline"
+                        className="inline-flex min-w-0 items-center gap-1 break-all text-primary hover:underline"
                       >
                         {source.title}
                         <ExternalLink className="h-3 w-3" />

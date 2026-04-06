@@ -16,7 +16,7 @@ export function ActorImage({ src, alt }: ActorImageProps) {
       <img
         src="/placeholder.svg"
         alt={alt}
-        className="w-full h-full object-cover"
+        className="h-full w-full object-contain sm:object-cover"
       />
     )
   }
@@ -26,7 +26,7 @@ export function ActorImage({ src, alt }: ActorImageProps) {
       src={src}
       alt={alt}
       fill
-      className="object-cover"
+      className="object-contain sm:object-cover"
       onError={() => setHasError(true)}
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
       priority

@@ -215,7 +215,8 @@ export function Navigation() {
 
           <ThemeToggle />
 
-          <Sheet open={open} onOpenChange={setOpen}>
+          {authUiReady ? (
+            <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="outline" size="icon" className="size-10 rounded-xl border-border/60 bg-background/90 shadow-sm">
                 <Menu className="h-5 w-5" />
@@ -356,7 +357,12 @@ export function Navigation() {
                 </div>
               </div>
             </SheetContent>
-          </Sheet>
+            </Sheet>
+          ) : (
+            <div className="md:hidden" aria-hidden="true">
+              <div className="size-10 rounded-xl border border-border/60 bg-background/90 shadow-sm" />
+            </div>
+          )}
         </div>
       </div>
     </header>
