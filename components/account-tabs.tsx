@@ -92,17 +92,24 @@ export function AccountTabs({ className, showTeams = true }: AccountTabsProps) {
   ])
 
   return (
-    <div className={cn("flex gap-2 overflow-x-auto md:flex-col md:gap-1 md:overflow-visible", className)}>
+    <div
+      className={cn(
+        "flex snap-x gap-2 overflow-x-auto pb-1 md:flex-col md:gap-1 md:overflow-visible md:pb-0",
+        className,
+      )}
+    >
       {items.map((item) => {
         const isActive = activePath === item.path
         return (
           <Button
             key={item.key}
             asChild
-            variant="ghost"
+            variant={isActive ? "secondary" : "ghost"}
             className={cn(
-              "justify-start whitespace-nowrap px-4 transition-none",
-              isActive ? "font-semibold text-foreground" : "text-foreground/70",
+              "h-10 snap-start justify-start whitespace-nowrap rounded-full border border-transparent px-4 transition-colors md:h-11 md:rounded-2xl",
+              isActive
+                ? "border-primary/15 bg-primary/10 font-semibold text-foreground"
+                : "text-foreground/70 hover:border-border/60 hover:bg-muted/70",
             )}
           >
             <Link href={`${basePath}/${item.path}`}>{item.label}</Link>

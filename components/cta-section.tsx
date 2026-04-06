@@ -9,7 +9,7 @@ import { ctaContent } from "@/content/no"
 
 export function CTASection() {
   return (
-    <section className="py-16">
+    <section className="py-12 md:py-16">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <motion.div
@@ -18,15 +18,15 @@ export function CTASection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <Card className="p-8 md:p-12 bg-primary text-primary-foreground">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">{ctaContent.title}</h2>
-                <p className="text-primary-foreground/80 max-w-xl mx-auto">
+            <Card className="bg-primary p-5 text-primary-foreground sm:p-8 md:p-12">
+              <div className="mb-8 text-center">
+                <h2 className="mb-3 text-2xl font-bold sm:text-3xl md:mb-4 md:text-4xl">{ctaContent.title}</h2>
+                <p className="mx-auto max-w-xl text-sm text-primary-foreground/80 sm:text-base">
                   {ctaContent.description}
                 </p>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2 mb-8">
+              <div className="mb-8 grid gap-3 md:grid-cols-2 md:gap-4">
                 {ctaContent.actions.map((action, index) => (
                   <motion.div
                     key={action}
@@ -34,7 +34,7 @@ export function CTASection() {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
-                    className="flex items-center gap-3 p-4 rounded-lg bg-primary-foreground/10"
+                    className="flex items-center gap-3 rounded-xl bg-primary-foreground/10 p-4"
                   >
                     <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
                     <span className="font-medium">{action}</span>
@@ -42,15 +42,15 @@ export function CTASection() {
                 ))}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild size="lg" variant="secondary">
+              <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
+                <Button asChild size="lg" variant="secondary" className="sm:min-w-[220px]">
                   <Link href={ctaContent.primaryCta.href}>{ctaContent.primaryCta.label}</Link>
                 </Button>
                 <Button
                   asChild
                   size="lg"
                   variant="outline"
-                  className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 bg-transparent"
+                  className="border-primary-foreground/20 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 sm:min-w-[220px]"
                 >
                   <Link href={ctaContent.secondaryCta.href}>{ctaContent.secondaryCta.label}</Link>
                 </Button>

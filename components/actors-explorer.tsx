@@ -22,6 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 
 type SortKey = "default" | "favorite" | "distance" | "name_asc" | "name_desc" | "category"
@@ -98,6 +99,7 @@ export function ActorsExplorer({
   const [locationUpdatedAt, setLocationUpdatedAt] = useState<number | null>(null)
   const [hasRestoredState, setHasRestoredState] = useState(false)
   const [visibleCount, setVisibleCount] = useState(24)
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const categoryIndex = useMemo(() => new Map(categoryOrder.map((category, index) => [category, index])), [])
 
@@ -463,13 +465,230 @@ export function ActorsExplorer({
     }
   }
 
-  const rootGridClassName = enableGeographyFilters
-    ? "grid gap-3 xl:grid-cols-[minmax(0,1fr)_180px_180px_180px_auto_auto] xl:items-center"
-    : "grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_auto_auto] lg:items-center"
+  const desktopGridClassName = enableGeographyFilters
+    ? "hidden gap-3 md:grid xl:grid-cols-[minmax(0,1fr)_180px_180px_180px_auto_auto] xl:items-center"
+    : "hidden gap-3 md:grid lg:grid-cols-[minmax(0,1fr)_180px_auto_auto] lg:items-center"
+
+  const searchField = (
+    <div className="relative">
+      <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="SГёk etter aktГёrer, tagger eller adresse"
+        className="h-11 rounded-xl border-border/70 bg-background pl-9 pr-10 shadow-none"
+      />
+      {query && (
+        <button
+          type="button"
+          onClick={() => setQuery("")}
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition hover:text-foreground"
+          aria-label="Fjern sГёk"
+        >
+          <X className="size-3" />
+        </button>
+      )}
+    </div>
+  )
+
+  const filterSections = (showGeographyInPanel: boolean) => (
+    <div className="space-y-4">
+      {showGeographyInPanel && enableGeographyFilters ? (
+        <>
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Geografi</p>
+              <Select
+                value={safeCountyFilter || ALL_COUNTIES}
+                onValueChange={(value) => {
+                  setCountyFilter(value === ALL_COUNTIES ? "" : value)
+                  setMunicipalityFilter("")
+                }}
+              >
+                <SelectTrigger className="mt-2 h-11 w-full rounded-xl">
+                  <SelectValue placeholder="Fylke" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_COUNTIES}>Alle fylker</SelectItem>
+                  {countyOptions.map((option) => (
+                    <SelectItem key={option.slug} value={option.slug}>
+                      {option.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Select
+                value={safeMunicipalityFilter || ALL_MUNICIPALITIES}
+                onValueChange={(value) => setMunicipalityFilter(value === ALL_MUNICIPALITIES ? "" : value)}
+                disabled={!safeCountyFilter || municipalityOptions.length === 0}
+              >
+                <SelectTrigger className="h-11 w-full rounded-xl">
+                  <SelectValue placeholder="Kommune/by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_MUNICIPALITIES}>Alle kommuner/byer</SelectItem>
+                  {municipalityOptions.map((option) => (
+                    <SelectItem key={option.slug} value={option.slug}>
+                      {option.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <Separator />
+        </>
+      ) : null}
+
+      <div>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Favoritter</p>
+        <label
+          className={cn(
+            "mt-2 flex items-center gap-2 rounded-xl border px-3 py-3 text-sm transition",
+            favoriteOnly && "border-primary/40 bg-primary/5",
+            !isSignedIn && "opacity-60",
+          )}
+        >
+          <Checkbox
+            checked={favoriteOnly}
+            onCheckedChange={(next) => setFavoriteOnly(Boolean(next))}
+            disabled={!isSignedIn}
+          />
+          <span>Vis bare favoritter</span>
+        </label>
+        {!isSignedIn ? (
+          <p className="mt-2 text-xs text-muted-foreground">Logg inn for ГҐ bruke favoritter.</p>
+        ) : null}
+      </div>
+
+      <Separator />
+
+      <div>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Kategori</p>
+        <div className="mt-2 grid gap-2">
+          {availableCategories.map((category) => {
+            const isChecked = categoryFilters.includes(category)
+            const color = categoryConfig[category]?.color ?? "#64748b"
+            return (
+              <label
+                key={category}
+                className={cn(
+                  "flex items-center gap-2 rounded-xl border px-3 py-3 text-sm transition",
+                  isChecked && "border-primary/40 bg-primary/5",
+                )}
+              >
+                <Checkbox checked={isChecked} onCheckedChange={() => toggleCategory(category)} />
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+                <span className="truncate">{formatCategoryLabel(category)}</span>
+              </label>
+            )
+          })}
+        </div>
+      </div>
+
+      <Separator />
+
+      <div>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Tagger</p>
+        <Input
+          value={tagQuery}
+          onChange={(event) => setTagQuery(event.target.value)}
+          placeholder="SГёk tagger"
+          className="mt-2 h-11 rounded-xl"
+        />
+        <ScrollArea className="mt-2 h-48 pr-3">
+          <div className="grid gap-2">
+            {filteredTagOptions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Ingen tagger.</p>
+            ) : (
+              filteredTagOptions.map((option) => {
+                const isChecked = tagFilters.includes(option.tag)
+                return (
+                  <label
+                    key={option.tag}
+                    className={cn(
+                      "flex items-center gap-2 rounded-xl border px-3 py-3 text-sm transition",
+                      isChecked && "border-primary/40 bg-primary/5",
+                    )}
+                  >
+                    <Checkbox checked={isChecked} onCheckedChange={() => toggleTag(option.tag)} />
+                    <span className="truncate">{option.tag}</span>
+                    <span className="ml-auto text-xs text-muted-foreground">{option.count}</span>
+                  </label>
+                )
+              })
+            )}
+          </div>
+        </ScrollArea>
+      </div>
+    </div>
+  )
 
   return (
     <div className="space-y-6">
-      <div className={rootGridClassName}>
+      <div className="rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm md:hidden">
+        <div className="space-y-3">
+          {searchField}
+          <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
+            <SelectTrigger className="h-11 w-full rounded-xl">
+              <SelectValue placeholder="Sorter" />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" className="h-11 gap-2 rounded-xl" onClick={requestLocation}>
+              <Crosshair className="size-4" />
+              {mapCopy.nearMeLabel}
+            </Button>
+
+            <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="h-11 justify-between gap-2 rounded-xl">
+                  <span className="inline-flex items-center gap-2">
+                    <SlidersHorizontal className="size-4" />
+                    Filtre
+                  </span>
+                  {activeFilterCount > 0 ? (
+                    <Badge variant="secondary" className="rounded-full px-2 py-0 text-xs">
+                      {activeFilterCount}
+                    </Badge>
+                  ) : null}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="max-h-[88dvh] rounded-t-[28px] border-x-0 border-b-0 p-0">
+                <SheetHeader className="border-b px-5 pb-4 pt-5 text-left">
+                  <SheetTitle>Filtrer aktГёrer</SheetTitle>
+                  <SheetDescription>
+                    Bruk geografi, kategorier, tagger og favoritter for ГҐ snevre inn resultatene.
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] pt-4">
+                  <div className="mb-4 flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">{activeFilterCount} aktive filtre</span>
+                    {activeFilterCount > 0 ? (
+                      <Button variant="ghost" size="sm" onClick={clearFilterSelections}>
+                        Nullstill
+                      </Button>
+                    ) : null}
+                  </div>
+                  {filterSections(true)}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </div>
+
+      <div className={desktopGridClassName}>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -666,7 +885,7 @@ export function ActorsExplorer({
         <p className="text-sm text-muted-foreground">Aktivér posisjon i nettleseren for å sortere etter avstand.</p>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
+      <div className="flex flex-col gap-2 rounded-2xl border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <span>
           Viser {Math.min(visibleCount, sortedActors.length)} av {sortedActors.length} aktører
           {hasAnyFilter ? ` (filtrert fra ${actors.length})` : ""}
@@ -766,13 +985,13 @@ export function ActorsExplorer({
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground"
+            className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground"
           >
             Ingen aktører matcher valgene dine.
           </motion.div>
         ) : (
           <div className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AnimatePresence mode="popLayout">
                 {visibleActors.map((actor) => {
                   const distanceLabel =
@@ -803,6 +1022,7 @@ export function ActorsExplorer({
               <div className="flex justify-center">
                 <Button
                   variant="outline"
+                  className="w-full sm:w-auto"
                   onClick={() => setVisibleCount((prev) => prev + 24)}
                 >
                   Vis {Math.min(24, hiddenCount)} til

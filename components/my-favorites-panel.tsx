@@ -124,7 +124,7 @@ export function MyFavoritesPanel() {
         ) : actors.length === 0 ? (
           <p className="text-sm text-muted-foreground">Du har ingen favoritter ennå.</p>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             {actors.map((actor) => (
               <ActorCard
                 key={actor.id}

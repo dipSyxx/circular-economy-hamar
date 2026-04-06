@@ -213,7 +213,7 @@ export function MyActorsPanel() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle>Mine aktører</CardTitle>
             <CardDescription>Administrer dine innsendte aktører.</CardDescription>
@@ -240,8 +240,42 @@ export function MyActorsPanel() {
         ) : actors.length === 0 ? (
           <p className="text-sm text-muted-foreground">Du har ikke sendt inn noen aktører ennå.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
+          <>
+            <div className="grid gap-3 md:hidden">
+              {actors.map((actor) => (
+                <div key={actor.id} className="rounded-2xl border p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium">{actor.name}</p>
+                      <p className="text-xs text-muted-foreground">/{actor.slug}</p>
+                    </div>
+                    <Badge variant={actor.status === "approved" ? "default" : "secondary"}>
+                      {statusLabels[actor.status]}
+                    </Badge>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Badge variant="outline">{categoryLabels[actor.category] ?? actor.category}</Badge>
+                    <Badge variant="outline">{formatter.format(new Date(actor.updatedAt))}</Badge>
+                  </div>
+                  {actor.reviewNote ? <p className="mt-3 text-xs text-amber-600">{actor.reviewNote}</p> : null}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {actor.status === "approved" && (
+                      <Button asChild size="sm" variant="ghost">
+                        <Link href={`/aktorer/${actor.slug}`}>Vis</Link>
+                      </Button>
+                    )}
+                    <Button size="sm" variant="outline" onClick={() => openEditDialog(actor)}>
+                      Rediger
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(actor)}>
+                      Slett
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto md:block">
+              <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Aktør</TableHead>
@@ -294,13 +328,14 @@ export function MyActorsPanel() {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          </div>
+              </Table>
+            </div>
+          </>
         )}
       </CardContent>
 
       <Dialog open={editOpen} onOpenChange={(open) => (open ? setEditOpen(true) : closeEditDialog())}>
-        <DialogContent className="max-w-7xl w-[98vw] sm:max-w-7xl">
+        <DialogContent className="h-dvh max-h-dvh w-screen max-w-none rounded-none border-0 px-4 py-5 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[98vw] sm:max-w-7xl sm:rounded-lg sm:border sm:px-6 sm:py-6">
           <DialogHeader>
             <DialogTitle>Rediger aktør</DialogTitle>
             <DialogDescription>Oppdater detaljer og send inn på nytt.</DialogDescription>

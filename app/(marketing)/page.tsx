@@ -20,15 +20,15 @@ export default async function HomePage() {
       <HeroSection />
       <FylkerSection />
 
-      <section className="py-16">
+      <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">{homeContent.actorsTitle}</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">{homeContent.actorsDescription}</p>
+          <div className="mb-10 text-center md:mb-12">
+            <h2 className="mb-3 text-2xl font-bold sm:text-3xl">{homeContent.actorsTitle}</h2>
+            <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">{homeContent.actorsDescription}</p>
             <p className="mt-3 text-sm text-muted-foreground">Nylig lagt til i katalogen.</p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {actors.map((actor) => (
               <ActorCard key={actor.id} actor={actor} />
             ))}

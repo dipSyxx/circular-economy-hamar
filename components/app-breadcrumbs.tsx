@@ -124,8 +124,8 @@ export function AppBreadcrumbs({
   if (items.length === 0) return null
 
   const content = (
-    <Breadcrumb className={className}>
-      <BreadcrumbList>
+    <Breadcrumb className={cn("overflow-hidden", className)}>
+      <BreadcrumbList className="gap-x-1.5 gap-y-1 text-xs sm:text-sm">
         {items.map((item, index) => {
           const isLast = index === items.length - 1
           return (

@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --mobile-bottom-nav-height: 5.5rem;
   --background: oklch(0.98 0.005 150);
   --foreground: oklch(0.15 0.02 150);
   --card: oklch(1 0 0);
@@ -117,10 +118,21 @@
 }
 
 @layer base {
+  html {
+    overflow-x: clip;
+  }
   * {
     @apply border-border outline-ring/50;
   }
   body {
+    min-height: 100dvh;
+    overflow-x: clip;
+    -webkit-tap-highlight-color: transparent;
     @apply bg-background text-foreground;
+  }
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content'],
+  [data-slot='popover-content'] {
+    overscroll-behavior: contain;
   }
 }

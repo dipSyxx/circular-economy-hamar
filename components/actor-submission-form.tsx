@@ -212,7 +212,7 @@ function TagInput({ value, onChange, placeholder }: TagInputProps) {
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           placeholder={placeholder}
-          className="h-7 w-[180px] border-none bg-transparent px-1 py-0 text-sm shadow-none focus-visible:ring-0"
+          className="h-8 min-w-[10rem] flex-1 border-none bg-transparent px-1 py-0 text-sm shadow-none focus-visible:ring-0"
         />
       </div>
     </div>
@@ -246,12 +246,12 @@ function MultiSelect({ value, options, getLabel, onChange }: MultiSelectProps) {
           <label
             key={option}
             className={cn(
-              "flex items-center gap-2 rounded-md border border-input px-3 py-2 text-sm",
+              "flex items-center gap-2 rounded-md border border-input px-3 py-3 text-sm",
               checked && "border-primary/40 bg-primary/5",
             )}
           >
             <Checkbox checked={checked} onCheckedChange={(next) => toggle(option, Boolean(next))} />
-            <span>{label}</span>
+            <span className="min-w-0">{label}</span>
           </label>
         )
       })}
@@ -521,11 +521,17 @@ export function ActorSubmissionForm({
   )
 
   const formBody = (
-    <div className={cn("grid gap-8", isDialog && "max-h-[70vh] overflow-y-auto p-1 pr-1")}>
+    <div
+      className={cn(
+        "grid gap-8",
+        isDialog &&
+          "max-h-[calc(100dvh-14rem)] overflow-y-auto overscroll-contain pr-1 sm:max-h-[70vh]",
+      )}
+    >
       <div className="grid gap-6">
         <div>
           <p className="text-sm font-semibold">Grunninfo</p>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div>
               <Label htmlFor="name">Navn</Label>
               <Input
@@ -577,7 +583,7 @@ export function ActorSubmissionForm({
                 </SelectContent>
               </Select>
             </div>
-            <div className="sm:col-span-2 lg:col-span-3">
+            <div className="md:col-span-2 xl:col-span-3">
               <Label htmlFor="description">Kort beskrivelse</Label>
               <Textarea
                 id="description"
@@ -586,7 +592,7 @@ export function ActorSubmissionForm({
                 className="min-h-[120px]"
               />
             </div>
-            <div className="sm:col-span-2 lg:col-span-3">
+            <div className="md:col-span-2 xl:col-span-3">
               <Label htmlFor="longDescription">Lang beskrivelse</Label>
               <Textarea
                 id="longDescription"
@@ -600,8 +606,8 @@ export function ActorSubmissionForm({
 
         <div>
           <p className="text-sm font-semibold">Kontakt og geografi</p>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="sm:col-span-2">
+          <div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="md:col-span-2">
               <Label htmlFor="address">Adresse</Label>
               <AddressSearchInput
                 id="address"
@@ -752,7 +758,7 @@ export function ActorSubmissionForm({
                 placeholder="https://"
               />
             </div>
-            <div className="sm:col-span-2 lg:col-span-3">
+            <div className="md:col-span-2 xl:col-span-3">
               <label className="flex items-center gap-3 rounded-md border border-input px-3 py-3 text-sm">
                 <Checkbox checked={actor.nationwide} onCheckedChange={(value) => updateActor("nationwide", Boolean(value))} />
                 <div>
@@ -772,8 +778,8 @@ export function ActorSubmissionForm({
 
         <div>
           <p className="text-sm font-semibold">Detaljer og innhold</p>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="sm:col-span-2">
+          <div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="md:col-span-2">
               <Label>Åpningstider</Label>
               <TagInput value={actor.openingHours} onChange={(value) => updateActor("openingHours", value)} placeholder="Legg til og trykk Enter" />
             </div>
@@ -786,15 +792,15 @@ export function ActorSubmissionForm({
                 placeholder="Mo-Fr 10:00-17:00"
               />
             </div>
-            <div className="sm:col-span-2 lg:col-span-3">
+            <div className="md:col-span-2 xl:col-span-3">
               <Label>Tags</Label>
               <TagInput value={actor.tags} onChange={(value) => updateActor("tags", value)} placeholder="Legg til og trykk Enter" />
             </div>
-            <div className="sm:col-span-2 lg:col-span-3">
+            <div className="md:col-span-2 xl:col-span-3">
               <Label>Fordeler</Label>
               <TagInput value={actor.benefits} onChange={(value) => updateActor("benefits", value)} placeholder="Legg til og trykk Enter" />
             </div>
-            <div className="sm:col-span-2 lg:col-span-3">
+            <div className="md:col-span-2 xl:col-span-3">
               <Label>Hvordan bruke</Label>
               <TagInput value={actor.howToUse} onChange={(value) => updateActor("howToUse", value)} placeholder="Legg til og trykk Enter" />
             </div>
@@ -802,7 +808,7 @@ export function ActorSubmissionForm({
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-2">
         <div>
           <div className="flex items-center justify-between gap-3">
             <Label>Reparasjonstjenester</Label>
@@ -1006,7 +1012,7 @@ export function ActorSubmissionForm({
 
       {isDialog ? (
         <>
-          <DialogFooter>
+          <DialogFooter className="pt-2">
             <Button type="submit" disabled={submitting}>
               {submitting ? "Sender..." : submitLabel ?? (mode === "edit" ? "Oppdater aktør" : "Send inn aktør")}
             </Button>
@@ -1016,7 +1022,7 @@ export function ActorSubmissionForm({
           </span>
         </>
       ) : (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
           <Button type="submit" disabled={submitting}>
             {submitting ? "Sender..." : submitLabel ?? (mode === "edit" ? "Oppdater aktør" : "Send inn aktør")}
           </Button>
@@ -1029,7 +1035,10 @@ export function ActorSubmissionForm({
   )
 
   const formContent = (
-    <form onSubmit={handleSubmit} className={cn("grid gap-8 [&_label+*]:mt-2", isDialog && "gap-4")}>
+    <form
+      onSubmit={handleSubmit}
+      className={cn("grid min-w-0 gap-8 [&_label+*]:mt-2", isDialog && "gap-4")}
+    >
       {formBody}
       {formFooter}
     </form>

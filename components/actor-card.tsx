@@ -44,16 +44,16 @@ export function ActorCard({
   };
 
   return (
-    <Card className="overflow-hidden pt-0 hover:shadow-lg transition-shadow">
-      <div className="aspect-video relative overflow-hidden">
+    <Card className="group flex h-full flex-col gap-0 overflow-hidden pb-4 pt-0 transition-shadow hover:shadow-lg">
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted md:aspect-[16/10]">
         <Image
           src={actor.image || "/placeholder.svg"}
           alt={actor.name}
           fill
-          className="object-cover"
+          className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        <div className="absolute h-[21px] top-4 left-4 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full">
+        <div className="absolute left-3 top-3 flex items-center justify-center rounded-full bg-white/85 backdrop-blur-sm md:left-4 md:top-4">
           <Badge variant="outline" className="border" style={badgeStyle}>
             {actorCopy.categoryLabels[actor.category]}
           </Badge>
@@ -64,7 +64,7 @@ export function ActorCard({
             size="icon"
             variant="secondary"
             aria-label={isFavorite ? "Fjern fra favoritter" : "Legg til i favoritter"}
-            className="absolute right-3 top-3 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
+            className="absolute right-3 top-3 rounded-full bg-white/85 backdrop-blur-sm hover:bg-white md:right-4 md:top-4"
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -80,27 +80,27 @@ export function ActorCard({
           </Button>
         )}
       </div>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+      <CardHeader className="gap-1.5 px-4 pb-2 pt-3.5">
+        <CardTitle className="flex items-start justify-between gap-3 text-base leading-tight sm:text-lg">
           {actor.name}
         </CardTitle>
-        <CardDescription className="flex items-center gap-1">
-          <MapPin className="h-3 w-3" />
-          {actor.address}
+        <CardDescription className="flex min-w-0 items-start gap-1.5 text-sm">
+          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span className="line-clamp-2">{actor.address}</span>
         </CardDescription>
-        {locationLabel && (
-          <p className="text-xs text-muted-foreground mt-1">{locationLabel}</p>
-        )}
-        {distanceLabel && (
-          <p className="text-xs text-muted-foreground mt-1">{distanceLabel}</p>
+        {(locationLabel || distanceLabel) && (
+          <div className="space-y-0.5 text-xs text-muted-foreground">
+            {locationLabel ? <p>{locationLabel}</p> : null}
+            {distanceLabel ? <p>{distanceLabel}</p> : null}
+          </div>
         )}
       </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">{actor.description}</p>
+      <CardContent className="flex flex-1 flex-col gap-2.5 px-4 pt-0">
+        <p className="text-sm text-muted-foreground line-clamp-3">{actor.description}</p>
 
         <ActorTrustBadges actor={actor} />
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {actor.tags.slice(0, 3).map((tag) => (
             <Badge key={tag} variant="secondary" className="text-xs">
               {tag}
@@ -108,8 +108,8 @@ export function ActorCard({
           ))}
         </div>
 
-        <div className="flex gap-2">
-          <Button asChild className="flex-1">
+        <div className="mt-auto flex items-stretch gap-2 pt-1">
+          <Button asChild className="min-w-0 flex-1">
             <Link
               href={`/aktorer/${actor.slug}`}
               onClick={() => recordAction("open_actor", { actorId: actor.id })}
@@ -118,7 +118,12 @@ export function ActorCard({
             </Link>
           </Button>
           {actor.website && (
-            <Button variant="outline" size="icon" asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              asChild
+              className="size-11 shrink-0"
+            >
               <a
                 href={actor.website}
                 target="_blank"

@@ -55,15 +55,15 @@ export function ProfileDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card>
-          <CardHeader>
+          <CardHeader className="space-y-1 p-4">
             <CardDescription>{profileCopy.stats.scoreLabel}</CardDescription>
             <CardTitle>{stats.score}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
-          <CardHeader>
+          <CardHeader className="space-y-1 p-4">
             <CardDescription>{profileCopy.stats.streakLabel}</CardDescription>
             <CardTitle>
               {stats.streakDays} {profileCopy.stats.daysLabel}
@@ -71,13 +71,13 @@ export function ProfileDashboard() {
           </CardHeader>
         </Card>
         <Card>
-          <CardHeader>
+          <CardHeader className="space-y-1 p-4">
             <CardDescription>{profileCopy.stats.decisionsLabel}</CardDescription>
             <CardTitle>{stats.decisionsCount}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
-          <CardHeader>
+          <CardHeader className="space-y-1 p-4">
             <CardDescription>{profileCopy.stats.challengesLabel}</CardDescription>
             <CardTitle>{stats.challengesCount}</CardTitle>
           </CardHeader>
@@ -95,8 +95,8 @@ export function ProfileDashboard() {
               <p className="text-sm text-muted-foreground">{profileCopy.sections.emptyDecisions}</p>
             )}
             {decisions.map((decision) => (
-              <div key={decision.id} className="rounded-lg border p-3 space-y-2">
-                <div className="flex items-center justify-between gap-2">
+              <div key={decision.id} className="space-y-2 rounded-lg border p-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="font-semibold">
                     {profileCopy.itemLabels[decision.itemType] ?? decision.itemType} -{" "}
                     {profileCopy.problemLabels[decision.problemType] ?? decision.problemType}
@@ -127,7 +127,7 @@ export function ProfileDashboard() {
               <p className="text-sm text-muted-foreground">{profileCopy.sections.emptyActions}</p>
             )}
             {actions.map((action) => (
-              <div key={action.id} className="flex items-center justify-between gap-2 rounded-lg border p-3">
+              <div key={action.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
                 <div>
                   <p className="text-sm font-medium">{profileCopy.actionLabels[action.type] ?? action.type}</p>
                   <p className="text-xs text-muted-foreground">{new Date(action.createdAt).toLocaleString()}</p>

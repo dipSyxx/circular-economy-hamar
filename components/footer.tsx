@@ -5,9 +5,9 @@ import { footerContent, navigation } from "@/content/no"
 export function Footer() {
   return (
     <footer className="border-t bg-muted/50">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid gap-8 md:grid-cols-4">
-          <div className="space-y-4">
+      <div className="container mx-auto px-4 py-10 md:py-12">
+        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
+          <div className="space-y-4 sm:col-span-2 md:col-span-1">
             <BrandLogo variant="full" imageClassName="h-10" textClassName="text-base md:text-lg" />
             <p className="text-sm text-muted-foreground">{footerContent.about}</p>
           </div>
@@ -52,7 +52,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
+        <div className="mt-8 border-t pt-6 text-center text-sm text-muted-foreground md:pt-8">
           <p>{footerContent.copyright}</p>
         </div>
       </div>

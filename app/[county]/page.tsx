@@ -86,7 +86,7 @@ export default async function CountyPage({ params }: CountyPageProps) {
   const relatedArticles = await getArticlesForCounty(countyMeta.slug)
 
   return (
-    <div className="container mx-auto px-4 py-10 space-y-10">
+    <div className="container mx-auto space-y-8 px-4 py-8 md:space-y-10 md:py-10">
       <section className="max-w-4xl space-y-4">
         <Badge variant="secondary">{countyMeta.name}</Badge>
         <h1 className="text-4xl font-bold">Sirkulære tilbud i {countyMeta.name}</h1>

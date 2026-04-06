@@ -1154,7 +1154,7 @@ export function MapComponent({ actors }: MapComponentProps) {
           <Button
             type='button'
             size='lg'
-            className='fixed right-4 z-[1001] gap-2 rounded-full shadow-lg max-md:bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] md:bottom-5 lg:hidden'
+            className='fixed right-4 z-[1001] gap-2 rounded-full shadow-lg max-md:bottom-[calc(var(--mobile-bottom-nav-height)+env(safe-area-inset-bottom,0px)+0.875rem)] md:bottom-5 lg:hidden'
             onClick={() => setListSheetOpen(true)}
             aria-label={`${mapCopy.openListFab} (${filteredActors.length})`}
           >

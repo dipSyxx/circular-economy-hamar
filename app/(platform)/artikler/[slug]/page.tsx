@@ -61,8 +61,8 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   const categoryLinks = getArticleCategoryLinks(article)
 
   return (
-    <div className="container mx-auto space-y-10 px-4 py-10">
-      <section className="max-w-4xl space-y-5">
+    <div className="container mx-auto space-y-8 px-4 py-8 md:space-y-10 md:py-10">
+      <section className="max-w-4xl space-y-4 md:space-y-5">
         <Button variant="ghost" asChild className="px-0">
           <Link href="/artikler">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -79,8 +79,8 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
           ))}
         </div>
         <div className="space-y-3">
-          <h1 className="text-4xl font-bold">{article.title}</h1>
-          <p className="text-lg text-muted-foreground">{article.summary}</p>
+          <h1 className="text-3xl font-bold sm:text-4xl">{article.title}</h1>
+          <p className="text-base text-muted-foreground sm:text-lg">{article.summary}</p>
         </div>
         <div className="flex flex-wrap gap-2 text-sm">
           {countyLinks.map((countyLink) => (
@@ -91,7 +91,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <section className="grid gap-5 md:gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-6">
           {article.bodySections.map((section) => (
             <Card key={section.title}>
@@ -130,7 +130,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
           ))}
         </div>
 
-        <aside className="space-y-6">
+        <aside className="space-y-5 md:space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Gå videre</CardTitle>
@@ -177,7 +177,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
       </section>
 
       <section className="space-y-4">
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold">Relevante aktører</h2>
             <p className="text-muted-foreground">
@@ -189,7 +189,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {relatedActors.map((actor) => (
             <ActorCard key={actor.id} actor={actor} />
           ))}

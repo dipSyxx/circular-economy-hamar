@@ -37,7 +37,7 @@ export function ActorSubmissionDialog({
           {triggerLabel}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-7xl w-[98vw] sm:max-w-7xl">
+      <DialogContent className="h-dvh max-h-dvh w-screen max-w-none rounded-none border-0 px-4 py-5 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[98vw] sm:max-w-7xl sm:rounded-lg sm:border sm:px-6 sm:py-6">
         <DialogHeader>
           <DialogTitle>Registrer ny aktør</DialogTitle>
           <DialogDescription>
