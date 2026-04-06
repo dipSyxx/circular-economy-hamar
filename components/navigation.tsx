@@ -84,6 +84,7 @@ const mobileNavigationMeta: Record<string, { description: string; icon: LucideIc
 export function Navigation() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [authUiReady, setAuthUiReady] = useState(false)
   const { data } = authClient.useSession()
   const hasSession = Boolean(data?.session)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -110,7 +111,12 @@ export function Navigation() {
     : undefined
 
   useEffect(() => {
+    setAuthUiReady(true)
+  }, [])
+
+  useEffect(() => {
     let active = true
+
     const checkAdmin = async () => {
       if (!hasSession) {
         if (active) setIsAdmin(false)
@@ -119,12 +125,12 @@ export function Navigation() {
 
       const userId = data?.user?.id
       const cacheKey = userId ? `admin_check_${userId}` : null
-      const ADMIN_CACHE_TTL = 5 * 60 * 1000
+      const adminCacheTtl = 5 * 60 * 1000
 
       if (cacheKey) {
         try {
           const cached = JSON.parse(sessionStorage.getItem(cacheKey) ?? "null") as { value: string; ts: number } | null
-          if (cached !== null && Date.now() - cached.ts < ADMIN_CACHE_TTL) {
+          if (cached !== null && Date.now() - cached.ts < adminCacheTtl) {
             if (active) setIsAdmin(cached.value === "1")
             return
           }
@@ -149,6 +155,7 @@ export function Navigation() {
         if (active) setIsAdmin(false)
       }
     }
+
     void checkAdmin()
     return () => {
       active = false
@@ -162,17 +169,16 @@ export function Navigation() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <BrandLogo priority imageClassName="h-9 md:h-10" className="shrink-0" />
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden items-center gap-1 md:flex">
           {navigation.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                "rounded-md px-4 py-2 text-sm font-medium transition-colors",
                 (item.href === "/" ? pathname === "/" : pathname.startsWith(item.href))
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
               {item.label}
@@ -180,30 +186,35 @@ export function Navigation() {
           ))}
         </nav>
 
-        {/* Mobile Navigation */}
         <div className="flex items-center gap-2">
           <ActorSubmissionDialog
             triggerVariant="outline"
             triggerSize="sm"
             triggerClassName="hidden md:inline-flex"
           />
-          {hasSession ? (
-            <UserButton
-              size="icon"
-              localization={accountLocalization}
-              additionalLinks={additionalLinks}
-            />
+
+          {authUiReady ? (
+            hasSession ? (
+              <UserButton size="icon" localization={accountLocalization} additionalLinks={additionalLinks} />
+            ) : (
+              <div className="hidden items-center gap-2 md:flex">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href={authRoutes.signIn}>Logg inn</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href={authRoutes.signUp}>Registrer deg</Link>
+                </Button>
+              </div>
+            )
           ) : (
-            <div className="hidden md:flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href={authRoutes.signIn}>Logg inn</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href={authRoutes.signUp}>Registrer deg</Link>
-              </Button>
+            <div className="hidden items-center gap-2 md:flex" aria-hidden="true">
+              <div className="h-9 w-24 rounded-md border bg-background/80" />
+              <div className="h-9 w-28 rounded-md bg-primary/12" />
             </div>
           )}
+
           <ThemeToggle />
+
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="outline" size="icon" className="size-10 rounded-xl border-border/60 bg-background/90 shadow-sm">
@@ -211,6 +222,7 @@ export function Navigation() {
                 <span className="sr-only">{navigationCopy.openMenuLabel}</span>
               </Button>
             </SheetTrigger>
+
             <SheetContent side="right" className="h-dvh max-h-dvh w-[min(92vw,360px)] gap-0 overflow-hidden p-0">
               <SheetHeader className="shrink-0 border-b px-5 pb-4 pt-6 text-left">
                 <BrandLogo imageClassName="h-10" className="pr-10" />
@@ -281,56 +293,63 @@ export function Navigation() {
 
                   <div className="grid gap-3">
                     <div className="rounded-2xl border border-border/60 bg-background p-3">
-                      <p className="text-sm font-semibold">{hasSession ? "Konto" : "Logg inn for mer"}</p>
+                      <p className="text-sm font-semibold">{authUiReady && hasSession ? "Konto" : "Logg inn for mer"}</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {hasSession
+                        {authUiReady && hasSession
                           ? "Administrer profilen din, favoritter og innsendinger."
                           : "Lagrede favoritter og innsendinger følger kontoen din."}
                       </p>
                     </div>
 
-                    {hasSession ? (
-                      <div className="grid gap-2">
-                        <Button variant="secondary" asChild>
-                          <Link href={authRoutes.accountProfile} onClick={() => setOpen(false)}>
-                            <User data-icon="inline-start" />
-                            Profil
-                          </Link>
-                        </Button>
-                        <Button variant="outline" asChild>
-                          <Link href={authRoutes.accountSettings} onClick={() => setOpen(false)}>
-                            <Settings data-icon="inline-start" />
-                            Innstillinger
-                          </Link>
-                        </Button>
-                        {isAdmin && (
-                          <Button variant="outline" asChild>
-                            <Link href="/admin" onClick={() => setOpen(false)}>
-                              <Shield data-icon="inline-start" />
-                              Admin
+                    {authUiReady ? (
+                      hasSession ? (
+                        <div className="grid gap-2">
+                          <Button variant="secondary" asChild>
+                            <Link href={authRoutes.accountProfile} onClick={() => setOpen(false)}>
+                              <User data-icon="inline-start" />
+                              Profil
                             </Link>
                           </Button>
-                        )}
-                        <Button variant="destructive" asChild>
-                          <Link href={authRoutes.signOut} onClick={() => setOpen(false)}>
-                            Logg ut
-                          </Link>
-                        </Button>
-                      </div>
+                          <Button variant="outline" asChild>
+                            <Link href={authRoutes.accountSettings} onClick={() => setOpen(false)}>
+                              <Settings data-icon="inline-start" />
+                              Innstillinger
+                            </Link>
+                          </Button>
+                          {isAdmin && (
+                            <Button variant="outline" asChild>
+                              <Link href="/admin" onClick={() => setOpen(false)}>
+                                <Shield data-icon="inline-start" />
+                                Admin
+                              </Link>
+                            </Button>
+                          )}
+                          <Button variant="destructive" asChild>
+                            <Link href={authRoutes.signOut} onClick={() => setOpen(false)}>
+                              Logg ut
+                            </Link>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="grid gap-2">
+                          <Button variant="outline" asChild>
+                            <Link href={authRoutes.signIn} onClick={() => setOpen(false)}>
+                              <LogIn data-icon="inline-start" />
+                              Logg inn
+                            </Link>
+                          </Button>
+                          <Button asChild>
+                            <Link href={authRoutes.signUp} onClick={() => setOpen(false)}>
+                              <UserPlus data-icon="inline-start" />
+                              Registrer deg
+                            </Link>
+                          </Button>
+                        </div>
+                      )
                     ) : (
-                      <div className="grid gap-2">
-                        <Button variant="outline" asChild>
-                          <Link href={authRoutes.signIn} onClick={() => setOpen(false)}>
-                            <LogIn data-icon="inline-start" />
-                            Logg inn
-                          </Link>
-                        </Button>
-                        <Button asChild>
-                          <Link href={authRoutes.signUp} onClick={() => setOpen(false)}>
-                            <UserPlus data-icon="inline-start" />
-                            Registrer deg
-                          </Link>
-                        </Button>
+                      <div className="grid gap-2" aria-hidden="true">
+                        <div className="h-10 rounded-md border bg-background/80" />
+                        <div className="h-10 rounded-md bg-primary/12" />
                       </div>
                     )}
                   </div>

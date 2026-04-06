@@ -94,7 +94,7 @@ export function AccountTabs({ className, showTeams = true }: AccountTabsProps) {
   return (
     <div
       className={cn(
-        "flex snap-x gap-2 overflow-x-auto pb-1 md:flex-col md:gap-1 md:overflow-visible md:pb-0",
+        "-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 touch-pan-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:flex-col md:gap-1 md:overflow-visible md:px-0 md:pb-0",
         className,
       )}
     >
@@ -106,9 +106,9 @@ export function AccountTabs({ className, showTeams = true }: AccountTabsProps) {
             asChild
             variant={isActive ? "secondary" : "ghost"}
             className={cn(
-              "h-10 snap-start justify-start whitespace-nowrap rounded-full border border-transparent px-4 transition-colors md:h-11 md:rounded-2xl",
+              "h-9 snap-start justify-start whitespace-nowrap rounded-full border border-transparent bg-background/80 px-3.5 text-sm transition-colors md:h-11 md:rounded-2xl md:px-4",
               isActive
-                ? "border-primary/15 bg-primary/10 font-semibold text-foreground"
+                ? "border-primary/20 bg-primary/10 font-semibold text-foreground shadow-sm"
                 : "text-foreground/70 hover:border-border/60 hover:bg-muted/70",
             )}
           >

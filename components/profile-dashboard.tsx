@@ -54,50 +54,50 @@ export function ProfileDashboard() {
   )
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="space-y-4 md:space-y-6">
+      <div className="grid grid-cols-2 gap-2.5 md:gap-3 lg:grid-cols-4">
         <Card>
-          <CardHeader className="space-y-1 p-4">
+          <CardHeader className="space-y-1 p-3.5 md:p-4">
             <CardDescription>{profileCopy.stats.scoreLabel}</CardDescription>
-            <CardTitle>{stats.score}</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">{stats.score}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
-          <CardHeader className="space-y-1 p-4">
+          <CardHeader className="space-y-1 p-3.5 md:p-4">
             <CardDescription>{profileCopy.stats.streakLabel}</CardDescription>
-            <CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">
               {stats.streakDays} {profileCopy.stats.daysLabel}
             </CardTitle>
           </CardHeader>
         </Card>
         <Card>
-          <CardHeader className="space-y-1 p-4">
+          <CardHeader className="space-y-1 p-3.5 md:p-4">
             <CardDescription>{profileCopy.stats.decisionsLabel}</CardDescription>
-            <CardTitle>{stats.decisionsCount}</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">{stats.decisionsCount}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
-          <CardHeader className="space-y-1 p-4">
+          <CardHeader className="space-y-1 p-3.5 md:p-4">
             <CardDescription>{profileCopy.stats.challengesLabel}</CardDescription>
-            <CardTitle>{stats.challengesCount}</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">{stats.challengesCount}</CardTitle>
           </CardHeader>
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader>
+          <CardHeader className="space-y-1 p-4 md:p-6">
             <CardTitle>{profileCopy.sections.recentDecisionsTitle}</CardTitle>
             <CardDescription>{profileCopy.sections.recentDecisionsDescription}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-3 p-4 pt-0 md:p-6 md:pt-0">
             {decisions.length === 0 && (
               <p className="text-sm text-muted-foreground">{profileCopy.sections.emptyDecisions}</p>
             )}
             {decisions.map((decision) => (
-              <div key={decision.id} className="space-y-2 rounded-lg border p-3">
+              <div key={decision.id} className="space-y-2 rounded-xl border p-3">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="font-semibold">
+                  <div className="min-w-0 font-semibold">
                     {profileCopy.itemLabels[decision.itemType] ?? decision.itemType} -{" "}
                     {profileCopy.problemLabels[decision.problemType] ?? decision.problemType}
                   </div>
@@ -105,9 +105,9 @@ export function ProfileDashboard() {
                     {profileCopy.recommendationLabels[decision.recommendation] ?? decision.recommendation}
                   </Badge>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {profileCopy.metaLabels.impactLabel}: {decision.impactScore} | {profileCopy.metaLabels.savingsLabel}:{" "}
-                  {decision.savingsMin}-{decision.savingsMax} kr
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                  <span>{profileCopy.metaLabels.impactLabel}: {decision.impactScore}</span>
+                  <span>{profileCopy.metaLabels.savingsLabel}: {decision.savingsMin}-{decision.savingsMax} kr</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {new Date(decision.createdAt).toLocaleString()}
@@ -118,17 +118,17 @@ export function ProfileDashboard() {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="space-y-1 p-4 md:p-6">
             <CardTitle>{profileCopy.sections.recentActionsTitle}</CardTitle>
             <CardDescription>{profileCopy.sections.recentActionsDescription}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-3 p-4 pt-0 md:p-6 md:pt-0">
             {actions.length === 0 && (
               <p className="text-sm text-muted-foreground">{profileCopy.sections.emptyActions}</p>
             )}
             {actions.map((action) => (
-              <div key={action.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
-                <div>
+              <div key={action.id} className="flex flex-wrap items-start justify-between gap-3 rounded-xl border p-3">
+                <div className="min-w-0">
                   <p className="text-sm font-medium">{profileCopy.actionLabels[action.type] ?? action.type}</p>
                   <p className="text-xs text-muted-foreground">{new Date(action.createdAt).toLocaleString()}</p>
                 </div>

@@ -475,15 +475,15 @@ export function ActorsExplorer({
       <Input
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="SГёk etter aktГёrer, tagger eller adresse"
-        className="h-11 rounded-xl border-border/70 bg-background pl-9 pr-10 shadow-none"
+        placeholder="Søk etter aktører, tagger eller adresse"
+        className="h-10 rounded-[18px] border-border/70 bg-background pl-9 pr-10 shadow-none md:h-11 md:rounded-xl"
       />
       {query && (
         <button
           type="button"
           onClick={() => setQuery("")}
           className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition hover:text-foreground"
-          aria-label="Fjern sГёk"
+          aria-label="Fjern søk"
         >
           <X className="size-3" />
         </button>
@@ -559,7 +559,7 @@ export function ActorsExplorer({
           <span>Vis bare favoritter</span>
         </label>
         {!isSignedIn ? (
-          <p className="mt-2 text-xs text-muted-foreground">Logg inn for ГҐ bruke favoritter.</p>
+          <p className="mt-2 text-xs text-muted-foreground">Logg inn for å bruke favoritter.</p>
         ) : null}
       </div>
 
@@ -595,7 +595,7 @@ export function ActorsExplorer({
         <Input
           value={tagQuery}
           onChange={(event) => setTagQuery(event.target.value)}
-          placeholder="SГёk tagger"
+          placeholder="Søk tagger"
           className="mt-2 h-11 rounded-xl"
         />
         <ScrollArea className="mt-2 h-48 pr-3">
@@ -627,12 +627,12 @@ export function ActorsExplorer({
   )
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm md:hidden">
-        <div className="space-y-3">
+    <div className="space-y-5 md:space-y-6">
+      <div className="rounded-[26px] border border-border/60 bg-card/80 p-2.5 shadow-sm md:hidden">
+        <div className="space-y-2.5">
           {searchField}
           <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
-            <SelectTrigger className="h-11 w-full rounded-xl">
+            <SelectTrigger className="h-10 w-full rounded-[18px]">
               <SelectValue placeholder="Sorter" />
             </SelectTrigger>
             <SelectContent>
@@ -645,14 +645,14 @@ export function ActorsExplorer({
           </Select>
 
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" className="h-11 gap-2 rounded-xl" onClick={requestLocation}>
+            <Button variant="outline" className="h-10 gap-2 rounded-[18px] text-sm" onClick={requestLocation}>
               <Crosshair className="size-4" />
               {mapCopy.nearMeLabel}
             </Button>
 
             <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" className="h-11 justify-between gap-2 rounded-xl">
+                <Button variant="outline" className="h-10 justify-between gap-2 rounded-[18px] text-sm">
                   <span className="inline-flex items-center gap-2">
                     <SlidersHorizontal className="size-4" />
                     Filtre
@@ -664,11 +664,11 @@ export function ActorsExplorer({
                   ) : null}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[88dvh] rounded-t-[28px] border-x-0 border-b-0 p-0">
+              <SheetContent side="bottom" className="max-h-[86dvh] rounded-t-[28px] border-x-0 border-b-0 p-0">
                 <SheetHeader className="border-b px-5 pb-4 pt-5 text-left">
-                  <SheetTitle>Filtrer aktГёrer</SheetTitle>
+                  <SheetTitle>Filtrer aktører</SheetTitle>
                   <SheetDescription>
-                    Bruk geografi, kategorier, tagger og favoritter for ГҐ snevre inn resultatene.
+                    Bruk geografi, kategorier, tagger og favoritter for å snevre inn resultatene.
                   </SheetDescription>
                 </SheetHeader>
                 <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] pt-4">
@@ -885,7 +885,7 @@ export function ActorsExplorer({
         <p className="text-sm text-muted-foreground">Aktivér posisjon i nettleseren for å sortere etter avstand.</p>
       ) : null}
 
-      <div className="flex flex-col gap-2 rounded-2xl border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-1.5 rounded-2xl border border-border/60 bg-muted/20 px-3.5 py-2.5 text-[13px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:py-3 sm:text-sm">
         <span>
           Viser {Math.min(visibleCount, sortedActors.length)} av {sortedActors.length} aktører
           {hasAnyFilter ? ` (filtrert fra ${actors.length})` : ""}
@@ -903,7 +903,7 @@ export function ActorsExplorer({
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="flex flex-wrap gap-2"
+            className="flex flex-wrap gap-1.5"
           >
             {favoriteOnly ? (
               <Badge variant="outline" className="gap-1">
@@ -990,8 +990,8 @@ export function ActorsExplorer({
             Ingen aktører matcher valgene dine.
           </motion.div>
         ) : (
-          <div className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="space-y-5 md:space-y-6">
+            <div className="grid gap-3.5 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
               <AnimatePresence mode="popLayout">
                 {visibleActors.map((actor) => {
                   const distanceLabel =

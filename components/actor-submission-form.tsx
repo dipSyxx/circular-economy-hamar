@@ -4,28 +4,27 @@ import { useEffect, useMemo, useState, type FormEvent, type KeyboardEvent } from
 import Link from "next/link"
 import { XIcon } from "lucide-react"
 import { authClient } from "@/lib/auth/client"
-import { cn } from "@/lib/utils"
+import { AddressSearchInput } from "@/components/address-search-input"
+import { ImageUploadField } from "@/components/image-upload"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { AddressSearchInput } from "@/components/address-search-input"
-import { ImageUploadField } from "@/components/image-upload"
-import { SearchableSelect } from "@/components/ui/searchable-select"
-import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { categoryOrder, supportsRepairServices } from "@/lib/categories"
-import { getCountyByName, getMunicipalitiesForCounty, norwayCounties } from "@/lib/geo"
 import {
   formatCategoryLabel,
   formatEnumLabel,
   formatItemTypeLabel,
   formatProblemTypeLabel,
 } from "@/lib/enum-labels"
+import { getCountyByName, getMunicipalitiesForCounty, norwayCounties } from "@/lib/geo"
+import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
+import { cn } from "@/lib/utils"
 
 export type ActorDraft = {
   name: string
@@ -191,10 +190,10 @@ function TagInput({ value, onChange, placeholder }: TagInputProps) {
   }
 
   return (
-    <div className="rounded-md border border-input bg-background px-2 py-2">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="rounded-xl border border-input bg-background px-2.5 py-2.5">
+      <div className="flex flex-wrap items-center gap-1.5">
         {tags.map((tag) => (
-          <Badge key={tag} variant="secondary" className="gap-1">
+          <Badge key={tag} variant="secondary" className="gap-1 rounded-full">
             <span className="truncate">{tag}</span>
             <button
               type="button"
@@ -212,7 +211,7 @@ function TagInput({ value, onChange, placeholder }: TagInputProps) {
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           placeholder={placeholder}
-          className="h-8 min-w-[10rem] flex-1 border-none bg-transparent px-1 py-0 text-sm shadow-none focus-visible:ring-0"
+          className="h-9 min-w-[8rem] flex-1 border-none bg-transparent px-1 py-0 text-sm shadow-none focus-visible:ring-0"
         />
       </div>
     </div>
@@ -246,7 +245,7 @@ function MultiSelect({ value, options, getLabel, onChange }: MultiSelectProps) {
           <label
             key={option}
             className={cn(
-              "flex items-center gap-2 rounded-md border border-input px-3 py-3 text-sm",
+              "flex items-start gap-2.5 rounded-xl border border-input px-3 py-3 text-sm leading-snug",
               checked && "border-primary/40 bg-primary/5",
             )}
           >
@@ -288,7 +287,8 @@ export function ActorSubmissionForm({
     mode === "edit"
       ? "Oppdater feltene og send inn på nytt for godkjenning."
       : "Fyll inn feltene. Innsendingen blir gjennomgått av en administrator for publisering."
-
+  const actionLabel = submitting ? "Sender..." : submitLabel ?? (mode === "edit" ? "Oppdater aktør" : "Send inn aktør")
+  const statusNote = 'Aktøren får status "pending" til den er godkjent av administrator.'
   const slugPreview = useMemo(
     () => (slugTouched ? actor.slug : slugify(actor.name)),
     [actor.name, actor.slug, slugTouched],
@@ -383,6 +383,7 @@ export function ActorSubmissionForm({
         errors.push(`Tjeneste #${index + 1}: pris må fylles ut.`)
         return
       }
+
       const min = Number(service.priceMin)
       const max = Number(service.priceMax)
       if (!Number.isFinite(min) || !Number.isFinite(max)) {
@@ -503,35 +504,38 @@ export function ActorSubmissionForm({
   }
 
   const loginActions = (
-    <div className="flex flex-wrap gap-3">
-      <Button asChild>
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+      <Button className="w-full sm:w-auto" asChild>
         <Link href="/auth/sign-in">Logg inn</Link>
       </Button>
-      <Button variant="outline" asChild>
+      <Button className="w-full sm:w-auto" variant="outline" asChild>
         <Link href="/auth/sign-up">Registrer deg</Link>
       </Button>
     </div>
   )
 
   const loginPrompt = (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">Logg inn for å sende inn en aktør til vurdering.</p>
-      {loginActions}
+    <div className={cn("space-y-4", isDialog && "px-4 py-4 sm:px-6 sm:py-6")}>
+      <div className={cn("space-y-3", isDialog && "rounded-2xl border bg-muted/20 p-4")}>
+        <p className="text-sm text-muted-foreground">Logg inn for å sende inn en aktør til vurdering.</p>
+        {loginActions}
+      </div>
     </div>
   )
+
+  const sectionGridClassName = "mt-2.5 grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3"
 
   const formBody = (
     <div
       className={cn(
-        "grid gap-8",
-        isDialog &&
-          "max-h-[calc(100dvh-14rem)] overflow-y-auto overscroll-contain pr-1 sm:max-h-[70vh]",
+        "grid gap-6 md:gap-8",
+        isDialog && "min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 touch-pan-y sm:px-6 sm:py-5",
       )}
     >
-      <div className="grid gap-6">
-        <div>
-          <p className="text-sm font-semibold">Grunninfo</p>
-          <div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-5 md:gap-6">
+        <div className="space-y-2.5">
+          <p className="text-sm font-semibold tracking-tight">Grunninfo</p>
+          <div className={sectionGridClassName}>
             <div>
               <Label htmlFor="name">Navn</Label>
               <Input
@@ -547,6 +551,7 @@ export function ActorSubmissionForm({
                 placeholder="Navn på aktør"
               />
             </div>
+
             <div>
               <Label htmlFor="slug">Slug</Label>
               <Input
@@ -560,6 +565,7 @@ export function ActorSubmissionForm({
               />
               <p className="mt-1 text-xs text-muted-foreground">URL: /aktorer/{slugPreview || "slug"}</p>
             </div>
+
             <div>
               <Label>Kategori</Label>
               <Select
@@ -583,30 +589,32 @@ export function ActorSubmissionForm({
                 </SelectContent>
               </Select>
             </div>
+
             <div className="md:col-span-2 xl:col-span-3">
               <Label htmlFor="description">Kort beskrivelse</Label>
               <Textarea
                 id="description"
                 value={actor.description}
                 onChange={(event) => updateActor("description", event.target.value)}
-                className="min-h-[120px]"
+                className="min-h-[104px] md:min-h-[120px]"
               />
             </div>
+
             <div className="md:col-span-2 xl:col-span-3">
               <Label htmlFor="longDescription">Lang beskrivelse</Label>
               <Textarea
                 id="longDescription"
                 value={actor.longDescription}
                 onChange={(event) => updateActor("longDescription", event.target.value)}
-                className="min-h-[160px]"
+                className="min-h-[140px] md:min-h-[160px]"
               />
             </div>
           </div>
         </div>
 
-        <div>
-          <p className="text-sm font-semibold">Kontakt og geografi</p>
-          <div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="space-y-2.5">
+          <p className="text-sm font-semibold tracking-tight">Kontakt og geografi</p>
+          <div className={sectionGridClassName}>
             <div className="md:col-span-2">
               <Label htmlFor="address">Adresse</Label>
               <AddressSearchInput
@@ -623,6 +631,7 @@ export function ActorSubmissionForm({
                 placeholder="Gate, postnummer, sted"
               />
             </div>
+
             <div>
               <Label>Fylke</Label>
               <Select
@@ -651,6 +660,7 @@ export function ActorSubmissionForm({
                 </SelectContent>
               </Select>
             </div>
+
             <div>
               <Label>Kommune</Label>
               <Select
@@ -667,13 +677,13 @@ export function ActorSubmissionForm({
                       {municipality.name}
                     </SelectItem>
                   ))}
-                  {!municipalityOptions.some((municipality) => municipality.name === actor.municipality) &&
-                  actor.municipality ? (
+                  {!municipalityOptions.some((municipality) => municipality.name === actor.municipality) && actor.municipality ? (
                     <SelectItem value={actor.municipality}>{actor.municipality}</SelectItem>
                   ) : null}
                 </SelectContent>
               </Select>
             </div>
+
             <div>
               <Label htmlFor="city">By / sted</Label>
               <Input
@@ -689,6 +699,7 @@ export function ActorSubmissionForm({
                 </p>
               ) : null}
             </div>
+
             <div>
               <Label htmlFor="postalCode">Postnummer</Label>
               <Input
@@ -699,8 +710,9 @@ export function ActorSubmissionForm({
                 placeholder="2318"
               />
             </div>
+
             <div>
-              <Label htmlFor="area">Omrade (valgfritt)</Label>
+              <Label htmlFor="area">Område (valgfritt)</Label>
               <Input
                 id="area"
                 value={actor.area}
@@ -708,6 +720,7 @@ export function ActorSubmissionForm({
                 placeholder="Sentrum"
               />
             </div>
+
             <div>
               <Label htmlFor="lat">Breddegrad</Label>
               <Input
@@ -719,6 +732,7 @@ export function ActorSubmissionForm({
                 placeholder="60.79"
               />
             </div>
+
             <div>
               <Label htmlFor="lng">Lengdegrad</Label>
               <Input
@@ -730,14 +744,17 @@ export function ActorSubmissionForm({
                 placeholder="11.07"
               />
             </div>
+
             <div>
               <Label htmlFor="phone">Telefon</Label>
               <Input id="phone" type="tel" value={actor.phone} onChange={(event) => updateActor("phone", event.target.value)} />
             </div>
+
             <div>
               <Label htmlFor="email">E-post</Label>
               <Input id="email" type="email" value={actor.email} onChange={(event) => updateActor("email", event.target.value)} />
             </div>
+
             <div>
               <Label htmlFor="website">Nettside</Label>
               <Input
@@ -748,6 +765,7 @@ export function ActorSubmissionForm({
                 placeholder="https://"
               />
             </div>
+
             <div>
               <Label htmlFor="instagram">Instagram</Label>
               <Input
@@ -758,31 +776,33 @@ export function ActorSubmissionForm({
                 placeholder="https://"
               />
             </div>
+
             <div className="md:col-span-2 xl:col-span-3">
-              <label className="flex items-center gap-3 rounded-md border border-input px-3 py-3 text-sm">
+              <label className="flex items-start gap-3 rounded-xl border border-input px-3 py-3.5 text-sm">
                 <Checkbox checked={actor.nationwide} onCheckedChange={(value) => updateActor("nationwide", Boolean(value))} />
                 <div>
                   <p className="font-medium">Landsdekkende tilbud</p>
-                  <p className="text-xs text-muted-foreground">Kryss av hvis aktøren leverer utover ett lokalt nedslagsfelt.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Kryss av hvis aktøren leverer utover ett lokalt nedslagsfelt.
+                  </p>
                 </div>
               </label>
             </div>
           </div>
         </div>
-        <div>
-          <p className="text-sm font-semibold">Bilde</p>
-          <div className="mt-3">
-            <ImageUploadField id="image" value={actor.image} onChange={(value) => updateActor("image", value)} folder="actors" />
-          </div>
-        </div>
 
-        <div>
-          <p className="text-sm font-semibold">Detaljer og innhold</p>
-          <div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="space-y-2.5">
+          <p className="text-sm font-semibold tracking-tight">Bilde</p>
+          <ImageUploadField id="image" value={actor.image} onChange={(value) => updateActor("image", value)} folder="actors" />
+        </div>
+        <div className="space-y-2.5">
+          <p className="text-sm font-semibold tracking-tight">Detaljer og innhold</p>
+          <div className={sectionGridClassName}>
             <div className="md:col-span-2">
               <Label>Åpningstider</Label>
               <TagInput value={actor.openingHours} onChange={(value) => updateActor("openingHours", value)} placeholder="Legg til og trykk Enter" />
             </div>
+
             <div>
               <Label htmlFor="openingHoursOsm">OSM-format (valgfritt)</Label>
               <Input
@@ -792,14 +812,17 @@ export function ActorSubmissionForm({
                 placeholder="Mo-Fr 10:00-17:00"
               />
             </div>
+
             <div className="md:col-span-2 xl:col-span-3">
               <Label>Tags</Label>
               <TagInput value={actor.tags} onChange={(value) => updateActor("tags", value)} placeholder="Legg til og trykk Enter" />
             </div>
+
             <div className="md:col-span-2 xl:col-span-3">
               <Label>Fordeler</Label>
               <TagInput value={actor.benefits} onChange={(value) => updateActor("benefits", value)} placeholder="Legg til og trykk Enter" />
             </div>
+
             <div className="md:col-span-2 xl:col-span-3">
               <Label>Hvordan bruke</Label>
               <TagInput value={actor.howToUse} onChange={(value) => updateActor("howToUse", value)} placeholder="Legg til og trykk Enter" />
@@ -808,7 +831,7 @@ export function ActorSubmissionForm({
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-5 xl:grid-cols-2">
         <div>
           <div className="flex items-center justify-between gap-3">
             <Label>Reparasjonstjenester</Label>
@@ -817,18 +840,19 @@ export function ActorSubmissionForm({
           {!repairCategory && (
             <p className="mt-2 text-xs text-muted-foreground">Denne kategorien kan sendes inn uten reparasjonstjenester.</p>
           )}
-          <div className="mt-2 grid gap-4">
+          <div className="mt-2 grid gap-3 md:gap-4">
             {repairServices.map((service, index) => (
-              <Card key={`repair-${index}`} className="border border-dashed">
-                <CardContent className="grid gap-4 pt-6">
-                  <div className="flex items-center justify-between">
+              <Card key={`repair-${index}`} className="rounded-xl border border-dashed">
+                <CardContent className="grid gap-3 p-4 md:gap-4 md:p-5">
+                  <div className="flex items-center justify-between gap-3">
                     <p className="text-sm font-medium">Tjeneste {index + 1}</p>
                     {repairServices.length > 1 && (
-                      <Button type="button" variant="ghost" size="sm" onClick={() => removeRepairService(index)}>
+                      <Button type="button" variant="ghost" size="sm" className="h-8 px-2" onClick={() => removeRepairService(index)}>
                         Fjern
                       </Button>
                     )}
                   </div>
+
                   <div>
                     <Label>Problemtype</Label>
                     <div className="mt-1">
@@ -848,6 +872,7 @@ export function ActorSubmissionForm({
                       />
                     </div>
                   </div>
+
                   <div>
                     <Label>Produktkategorier</Label>
                     <div className="mt-2">
@@ -863,6 +888,7 @@ export function ActorSubmissionForm({
                       />
                     </div>
                   </div>
+
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
                       <Label>Pris fra (NOK)</Label>
@@ -878,6 +904,7 @@ export function ActorSubmissionForm({
                         }
                       />
                     </div>
+
                     <div>
                       <Label>Pris til (NOK)</Label>
                       <Input
@@ -893,6 +920,7 @@ export function ActorSubmissionForm({
                       />
                     </div>
                   </div>
+
                   <div>
                     <Label>Estimert tid (dager)</Label>
                     <Input
@@ -911,25 +939,26 @@ export function ActorSubmissionForm({
               </Card>
             ))}
           </div>
-          <Button type="button" variant="outline" className="mt-3" onClick={addRepairService}>
+          <Button type="button" variant="outline" className="mt-3 w-full sm:w-auto" onClick={addRepairService}>
             Legg til tjeneste
           </Button>
         </div>
 
         <div>
           <Label>Kilder og dokumentasjon</Label>
-          <div className="mt-2 grid gap-4">
+          <div className="mt-2 grid gap-3 md:gap-4">
             {sources.map((source, index) => (
-              <Card key={`source-${index}`} className="border border-dashed">
-                <CardContent className="grid gap-4 pt-6">
-                  <div className="flex items-center justify-between">
+              <Card key={`source-${index}`} className="rounded-xl border border-dashed">
+                <CardContent className="grid gap-3 p-4 md:gap-4 md:p-5">
+                  <div className="flex items-center justify-between gap-3">
                     <p className="text-sm font-medium">Kilde {index + 1}</p>
                     {sources.length > 1 && (
-                      <Button type="button" variant="ghost" size="sm" onClick={() => removeSource(index)}>
+                      <Button type="button" variant="ghost" size="sm" className="h-8 px-2" onClick={() => removeSource(index)}>
                         Fjern
                       </Button>
                     )}
                   </div>
+
                   <div>
                     <Label>Type</Label>
                     <Select
@@ -950,6 +979,7 @@ export function ActorSubmissionForm({
                       </SelectContent>
                     </Select>
                   </div>
+
                   <div>
                     <Label>Tittel</Label>
                     <Input
@@ -959,6 +989,7 @@ export function ActorSubmissionForm({
                       }
                     />
                   </div>
+
                   <div>
                     <Label>URL</Label>
                     <Input
@@ -970,6 +1001,7 @@ export function ActorSubmissionForm({
                       placeholder="https://"
                     />
                   </div>
+
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
                       <Label>Dato (valgfritt)</Label>
@@ -983,6 +1015,7 @@ export function ActorSubmissionForm({
                         }
                       />
                     </div>
+
                     <div>
                       <Label>Notat</Label>
                       <Input
@@ -997,7 +1030,8 @@ export function ActorSubmissionForm({
               </Card>
             ))}
           </div>
-          <Button type="button" variant="outline" className="mt-3" onClick={addSource}>
+
+          <Button type="button" variant="outline" className="mt-3 w-full sm:w-auto" onClick={addSource}>
             Legg til kilde
           </Button>
         </div>
@@ -1005,39 +1039,44 @@ export function ActorSubmissionForm({
     </div>
   )
 
-  const formFooter = (
-    <div className="grid gap-3">
+  const feedbackMessages = (
+    <>
       {error && <p className="text-sm text-destructive">{error}</p>}
       {success && <p className="text-sm text-emerald-600">{success}</p>}
+    </>
+  )
 
-      {isDialog ? (
-        <>
-          <DialogFooter className="pt-2">
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Sender..." : submitLabel ?? (mode === "edit" ? "Oppdater aktør" : "Send inn aktør")}
-            </Button>
-          </DialogFooter>
-          <span className="text-xs text-muted-foreground">
-            Aktøren får status "pending" til den er godkjent av administrator.
-          </span>
-        </>
-      ) : (
-        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-          <Button type="submit" disabled={submitting}>
-            {submitting ? "Sender..." : submitLabel ?? (mode === "edit" ? "Oppdater aktør" : "Send inn aktør")}
+  const formFooter = isDialog ? (
+    <div className="border-t bg-background/95 px-4 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))] pt-3 backdrop-blur sm:px-6 sm:pb-4 sm:pt-4">
+      <div className="grid gap-3">
+        {feedbackMessages}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <Button type="submit" disabled={submitting} className="w-full sm:order-2 sm:w-auto">
+            {actionLabel}
           </Button>
-          <span className="text-xs text-muted-foreground">
-            Aktøren får status "pending" til den er godkjent av administrator.
-          </span>
+          <span className="text-xs text-muted-foreground sm:order-1">{statusNote}</span>
         </div>
-      )}
+      </div>
+    </div>
+  ) : (
+    <div className="grid gap-3 border-t pt-4 md:pt-5">
+      {feedbackMessages}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <Button type="submit" disabled={submitting} className="w-full sm:w-auto">
+          {actionLabel}
+        </Button>
+        <span className="text-xs text-muted-foreground">{statusNote}</span>
+      </div>
     </div>
   )
 
   const formContent = (
     <form
       onSubmit={handleSubmit}
-      className={cn("grid min-w-0 gap-8 [&_label+*]:mt-2", isDialog && "gap-4")}
+      className={cn(
+        "grid min-w-0 gap-6 [&_label+*]:mt-2",
+        isDialog && "flex min-h-0 flex-1 flex-col gap-0",
+      )}
     >
       {formBody}
       {formFooter}
@@ -1051,22 +1090,22 @@ export function ActorSubmissionForm({
   if (!isSignedIn) {
     return (
       <Card>
-        <CardHeader>
+        <CardHeader className="p-4 md:p-6">
           <CardTitle>{headingTitle}</CardTitle>
           <CardDescription>Logg inn for å sende inn en aktør til vurdering.</CardDescription>
         </CardHeader>
-        <CardContent>{loginActions}</CardContent>
+        <CardContent className="p-4 pt-0 md:p-6 md:pt-0">{loginActions}</CardContent>
       </Card>
     )
   }
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-4 md:p-6">
         <CardTitle>{headingTitle}</CardTitle>
         <CardDescription>{headingDescription}</CardDescription>
       </CardHeader>
-      <CardContent>{formContent}</CardContent>
+      <CardContent className="p-4 pt-0 md:p-6 md:pt-0">{formContent}</CardContent>
     </Card>
   )
 }

@@ -105,11 +105,11 @@ export function MyFavoritesPanel() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="gap-1 p-4 md:p-6">
         <CardTitle>Mine favoritter</CardTitle>
         <CardDescription>Aktører du har lagret som favoritt.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
         {!isSignedIn ? (
           <p className="text-sm text-muted-foreground">
             <Link href="/auth/sign-in" className="text-primary hover:underline">
@@ -124,7 +124,7 @@ export function MyFavoritesPanel() {
         ) : actors.length === 0 ? (
           <p className="text-sm text-muted-foreground">Du har ingen favoritter ennå.</p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {actors.map((actor) => (
               <ActorCard
                 key={actor.id}

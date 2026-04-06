@@ -53,6 +53,18 @@ const adminResourceLabels = new Map(
 const guideLabels = new Map(guideDocs.map((guide) => [guide.slug, guide.title]))
 
 const hiddenSegments = new Set(["account"])
+const mobileHiddenTopLevelSegments = new Set([
+  "aktorer",
+  "artikler",
+  "guider",
+  "kart",
+  "fylker",
+  "decide",
+  "quiz",
+  "fakta",
+  "kalkulator",
+  "challenges",
+])
 
 const decodeSegment = (segment: string) => {
   try {
@@ -96,10 +108,9 @@ export function AppBreadcrumbs({
   withContainer = true,
 }: AppBreadcrumbsProps) {
   const pathname = usePathname()
+  const segments = useMemo(() => (pathname ? pathname.split("/").filter(Boolean) : []), [pathname])
 
   const items = useMemo<Crumb[]>(() => {
-    if (!pathname) return []
-    const segments = pathname.split("/").filter(Boolean)
     if (segments.length === 0) return []
 
     const crumbs: Crumb[] = []
@@ -119,7 +130,10 @@ export function AppBreadcrumbs({
     })
 
     return crumbs
-  }, [hideHome, pathname])
+  }, [hideHome, segments])
+
+  const hideOnMobile =
+    segments.length === 1 && mobileHiddenTopLevelSegments.has(segments[0] ?? "")
 
   if (items.length === 0) return null
 
@@ -148,8 +162,12 @@ export function AppBreadcrumbs({
   )
 
   if (!withContainer) {
-    return content
+    return <div className={cn(hideOnMobile && "hidden md:block")}>{content}</div>
   }
 
-  return <div className={cn("container mx-auto px-4", containerClassName)}>{content}</div>
+  return (
+    <div className={cn("container mx-auto px-4", hideOnMobile && "hidden md:block", containerClassName)}>
+      {content}
+    </div>
+  )
 }

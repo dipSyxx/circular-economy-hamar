@@ -212,20 +212,22 @@ export function MyActorsPanel() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="gap-3 p-4 md:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle>Mine aktører</CardTitle>
             <CardDescription>Administrer dine innsendte aktører.</CardDescription>
           </div>
           <ActorSubmissionDialog
+            triggerClassName="w-full sm:w-auto"
             onSuccess={async () => {
               await loadActors()
             }}
           />
         </div>
       </CardHeader>
-      <CardContent>
+
+      <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
         {!isSignedIn ? (
           <p className="text-sm text-muted-foreground">
             <Link href="/auth/sign-in" className="text-primary hover:underline">
@@ -243,91 +245,89 @@ export function MyActorsPanel() {
           <>
             <div className="grid gap-3 md:hidden">
               {actors.map((actor) => (
-                <div key={actor.id} className="rounded-2xl border p-4">
+                <div key={actor.id} className="rounded-xl border p-3.5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="font-medium">{actor.name}</p>
-                      <p className="text-xs text-muted-foreground">/{actor.slug}</p>
+                      <p className="truncate font-medium">{actor.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">/{actor.slug}</p>
                     </div>
-                    <Badge variant={actor.status === "approved" ? "default" : "secondary"}>
+                    <Badge className="shrink-0" variant={actor.status === "approved" ? "default" : "secondary"}>
                       {statusLabels[actor.status]}
                     </Badge>
                   </div>
+
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Badge variant="outline">{categoryLabels[actor.category] ?? actor.category}</Badge>
                     <Badge variant="outline">{formatter.format(new Date(actor.updatedAt))}</Badge>
                   </div>
+
                   {actor.reviewNote ? <p className="mt-3 text-xs text-amber-600">{actor.reviewNote}</p> : null}
-                  <div className="mt-4 flex flex-wrap gap-2">
+
+                  <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                     {actor.status === "approved" && (
-                      <Button asChild size="sm" variant="ghost">
+                      <Button asChild size="sm" variant="ghost" className="w-full sm:w-auto">
                         <Link href={`/aktorer/${actor.slug}`}>Vis</Link>
                       </Button>
                     )}
-                    <Button size="sm" variant="outline" onClick={() => openEditDialog(actor)}>
+                    <Button className="w-full sm:w-auto" size="sm" variant="outline" onClick={() => openEditDialog(actor)}>
                       Rediger
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(actor)}>
+                    <Button className="w-full sm:w-auto" size="sm" variant="destructive" onClick={() => handleDelete(actor)}>
                       Slett
                     </Button>
                   </div>
                 </div>
               ))}
             </div>
+
             <div className="hidden overflow-x-auto md:block">
               <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Aktør</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Kategori</TableHead>
-                  <TableHead>Oppdatert</TableHead>
-                  <TableHead className="text-right">Handling</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {actors.map((actor) => (
-                  <TableRow key={actor.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex flex-col">
-                        <span>{actor.name}</span>
-                        <span className="text-xs text-muted-foreground">/{actor.slug}</span>
-                        {actor.reviewNote && (
-                          <span className="text-xs text-amber-600 mt-1">
-                            {actor.reviewNote}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={actor.status === "approved" ? "default" : "secondary"}>
-                        {statusLabels[actor.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {categoryLabels[actor.category] ?? actor.category}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{formatter.format(new Date(actor.updatedAt))}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex flex-wrap justify-end gap-2">
-                        {actor.status === "approved" && (
-                          <Button asChild size="sm" variant="ghost">
-                            <Link href={`/aktorer/${actor.slug}`}>Vis</Link>
-                          </Button>
-                        )}
-                        <Button size="sm" variant="outline" onClick={() => openEditDialog(actor)}>
-                          Rediger
-                        </Button>
-                        <Button size="sm" variant="destructive" onClick={() => handleDelete(actor)}>
-                          Slett
-                        </Button>
-                      </div>
-                    </TableCell>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Aktør</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Kategori</TableHead>
+                    <TableHead>Oppdatert</TableHead>
+                    <TableHead className="text-right">Handling</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
+                </TableHeader>
+                <TableBody>
+                  {actors.map((actor) => (
+                    <TableRow key={actor.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex flex-col">
+                          <span>{actor.name}</span>
+                          <span className="text-xs text-muted-foreground">/{actor.slug}</span>
+                          {actor.reviewNote && <span className="mt-1 text-xs text-amber-600">{actor.reviewNote}</span>}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={actor.status === "approved" ? "default" : "secondary"}>
+                          {statusLabels[actor.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{categoryLabels[actor.category] ?? actor.category}</Badge>
+                      </TableCell>
+                      <TableCell>{formatter.format(new Date(actor.updatedAt))}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex flex-wrap justify-end gap-2">
+                          {actor.status === "approved" && (
+                            <Button asChild size="sm" variant="ghost">
+                              <Link href={`/aktorer/${actor.slug}`}>Vis</Link>
+                            </Button>
+                          )}
+                          <Button size="sm" variant="outline" onClick={() => openEditDialog(actor)}>
+                            Rediger
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleDelete(actor)}>
+                            Slett
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
               </Table>
             </div>
           </>
@@ -335,8 +335,8 @@ export function MyActorsPanel() {
       </CardContent>
 
       <Dialog open={editOpen} onOpenChange={(open) => (open ? setEditOpen(true) : closeEditDialog())}>
-        <DialogContent className="h-dvh max-h-dvh w-screen max-w-none rounded-none border-0 px-4 py-5 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[98vw] sm:max-w-7xl sm:rounded-lg sm:border sm:px-6 sm:py-6">
-          <DialogHeader>
+        <DialogContent className="h-dvh max-h-dvh w-screen max-w-none gap-0 rounded-none border-0 px-0 py-0 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[98vw] sm:max-w-7xl sm:rounded-2xl sm:border sm:px-0 sm:py-0 [&>[data-slot=dialog-header]+:not([data-slot=dialog-footer]):not([data-slot=dialog-close])]:overflow-visible [&>[data-slot=dialog-header]+:not([data-slot=dialog-footer]):not([data-slot=dialog-close])]:p-0 [&>[data-slot=dialog-header]+:not([data-slot=dialog-footer]):not([data-slot=dialog-close])]:pr-0">
+          <DialogHeader className="border-b bg-background/95 px-4 pb-3 pt-[calc(1rem+env(safe-area-inset-top,0px))] text-left backdrop-blur sm:px-6 sm:pb-4 sm:pt-6">
             <DialogTitle>Rediger aktør</DialogTitle>
             <DialogDescription>Oppdater detaljer og send inn på nytt.</DialogDescription>
           </DialogHeader>

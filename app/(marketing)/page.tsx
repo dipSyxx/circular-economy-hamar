@@ -20,9 +20,9 @@ export default async function HomePage() {
       <HeroSection />
       <FylkerSection />
 
-      <section className="py-12 md:py-16">
+      <section className="py-10 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="mb-10 text-center md:mb-12">
+          <div className="mb-7 text-center md:mb-12">
             <h2 className="mb-3 text-2xl font-bold sm:text-3xl">{homeContent.actorsTitle}</h2>
             <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">{homeContent.actorsDescription}</p>
             <p className="mt-3 text-sm text-muted-foreground">Nylig lagt til i katalogen.</p>
@@ -36,7 +36,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="py-6">
+      <section className="py-4 md:py-6">
         <div className="container mx-auto px-4">
           <RelatedArticlesSection
             title="Redaksjonelle artikler"
