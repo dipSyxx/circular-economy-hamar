@@ -25,7 +25,7 @@ import shadowUrl from 'leaflet/dist/images/marker-shadow.png'
 import 'leaflet/dist/leaflet.css'
 import { Crosshair, Expand, ExternalLink, Layers, List, MapPin, Search, SlidersHorizontal, X } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from 'react-leaflet'
 
@@ -248,7 +248,13 @@ export function MapComponent({ actors }: MapComponentProps) {
   const [listSheetOpen, setListSheetOpen] = useState(false)
   const [listSheetContentNode, setListSheetContentNode] = useState<HTMLDivElement | null>(null)
   const [mapCategorySheetOpen, setMapCategorySheetOpen] = useState(false)
+  const listSheetContentRef = useRef<HTMLDivElement | null>(null)
   const filteredActorsRef = useRef<Actor[]>([])
+
+  const handleListSheetContentRef = useCallback((node: HTMLDivElement | null) => {
+    listSheetContentRef.current = node
+    setListSheetContentNode(node)
+  }, [])
 
   const categoryIndex = useMemo(() => new Map(categoryOrder.map((category, index) => [category, index])), [])
 
@@ -1171,9 +1177,14 @@ export function MapComponent({ actors }: MapComponentProps) {
 
         <Sheet open={listSheetOpen} onOpenChange={setListSheetOpen}>
           <SheetContent
-            ref={setListSheetContentNode}
+            ref={handleListSheetContentRef}
             side='bottom'
-            className='flex h-[88dvh] max-h-[90dvh] flex-col gap-0 overflow-hidden rounded-t-2xl border-t p-0 lg:hidden'
+            tabIndex={-1}
+            onOpenAutoFocus={(event) => {
+              event.preventDefault()
+              listSheetContentRef.current?.focus()
+            }}
+            className='flex h-[88dvh] max-h-[90dvh] flex-col gap-0 overflow-hidden rounded-t-2xl border-t p-0 focus:outline-none lg:hidden'
           >
             <SheetHeader className='shrink-0 border-b px-5 pb-4 pt-5 text-left'>
               <SheetTitle className='text-left'>{mapCopy.sheetListTitle}</SheetTitle>
