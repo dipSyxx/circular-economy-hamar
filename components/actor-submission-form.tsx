@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { categoryOrder, supportsRepairServices } from "@/lib/categories"
 import {
@@ -22,6 +23,7 @@ import {
   formatItemTypeLabel,
   formatProblemTypeLabel,
 } from "@/lib/enum-labels"
+import { ACTOR_FORM_SECTIONS } from "@/lib/actor-form-sections"
 import { getCountyByName, getMunicipalitiesForCounty, norwayCounties } from "@/lib/geo"
 import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { cn } from "@/lib/utils"
@@ -80,6 +82,8 @@ type ActorSubmissionFormProps = {
   onSuccess?: (actorId: string) => void | Promise<void>
 }
 
+type ActorSubmissionTab = "actor" | "sources" | "repair"
+
 const problemTypes = PROBLEM_TYPES
 const itemTypes = ITEM_TYPES
 const sourceTypes = ["website", "social", "google_reviews", "article", "map"]
@@ -91,6 +95,13 @@ const sourceTypeLabels: Record<string, string> = {
   article: "Artikkel",
   map: "Kart",
 }
+
+const [basicInfoTitle, contactTitle, imageTitle, detailsTitle] = ACTOR_FORM_SECTIONS.slice(0, 4).map(
+  (section) => section.title,
+)
+
+const dialogTabBodyClassName =
+  "min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 pt-4 touch-pan-y sm:px-6 sm:pb-5 sm:pt-5"
 
 const slugify = (value: string) =>
   value
@@ -223,12 +234,14 @@ type MultiSelectProps = {
   options: ReadonlyArray<string>
   getLabel?: (value: string) => string
   onChange: (value: string[]) => void
+  disabled?: boolean
 }
 
-function MultiSelect({ value, options, getLabel, onChange }: MultiSelectProps) {
+function MultiSelect({ value, options, getLabel, onChange, disabled = false }: MultiSelectProps) {
   const current = Array.isArray(value) ? value : []
 
   const toggle = (option: string, checked: boolean) => {
+    if (disabled) return
     if (checked) {
       onChange([...current, option])
     } else {
@@ -247,9 +260,10 @@ function MultiSelect({ value, options, getLabel, onChange }: MultiSelectProps) {
             className={cn(
               "flex items-start gap-2.5 rounded-xl border border-input px-3 py-3 text-sm leading-snug",
               checked && "border-primary/40 bg-primary/5",
+              disabled && "cursor-not-allowed opacity-60",
             )}
           >
-            <Checkbox checked={checked} onCheckedChange={(next) => toggle(option, Boolean(next))} />
+            <Checkbox checked={checked} onCheckedChange={(next) => toggle(option, Boolean(next))} disabled={disabled} />
             <span className="min-w-0">{label}</span>
           </label>
         )
@@ -278,6 +292,7 @@ export function ActorSubmissionForm({
     initialSources?.length ? initialSources : [emptySource()],
   )
   const [slugTouched, setSlugTouched] = useState(mode === "edit")
+  const [activeTab, setActiveTab] = useState<ActorSubmissionTab>("actor")
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -326,8 +341,22 @@ export function ActorSubmissionForm({
         service.etaDays.trim(),
     )
 
+  const hasAnyRepairInput = repairServices.some(hasRepairServiceInput)
+
   const updateActor = (field: keyof ActorDraft, value: string | string[] | boolean) => {
     setActor((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const updateRepairService = (index: number, nextValue: Partial<RepairServiceDraft>) => {
+    setRepairServices((prev) =>
+      prev.map((service, serviceIndex) => (serviceIndex === index ? { ...service, ...nextValue } : service)),
+    )
+  }
+
+  const updateSource = (index: number, nextValue: Partial<SourceDraft>) => {
+    setSources((prev) =>
+      prev.map((source, sourceIndex) => (sourceIndex === index ? { ...source, ...nextValue } : source)),
+    )
   }
 
   const addRepairService = () => {
@@ -402,6 +431,18 @@ export function ActorSubmissionForm({
     return errors
   }
 
+  const resolveValidationTab = (message: string): ActorSubmissionTab => {
+    if (message === "Legg til minst en kilde." || message.startsWith("Kilde #")) {
+      return "sources"
+    }
+
+    if (message === "Legg til minst en reparasjonstjeneste." || message.startsWith("Tjeneste #")) {
+      return "repair"
+    }
+
+    return "actor"
+  }
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
@@ -409,6 +450,7 @@ export function ActorSubmissionForm({
 
     const errors = validate()
     if (errors.length) {
+      setActiveTab(resolveValidationTab(errors[0]))
       setError(errors[0])
       return
     }
@@ -491,6 +533,7 @@ export function ActorSubmissionForm({
         setRepairServices([emptyRepairService()])
         setSources([emptySource()])
         setSlugTouched(false)
+        setActiveTab("actor")
       }
 
       if (resolvedId) {
@@ -523,18 +566,212 @@ export function ActorSubmissionForm({
     </div>
   )
 
+  const renderRepairServicesSection = () => (
+    <div>
+      <div className="flex items-center justify-between gap-3">
+        <Label>Reparasjonstjenester</Label>
+        {!repairCategory && <Badge variant="secondary">Ikke påkrevd</Badge>}
+      </div>
+      {!repairCategory ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Denne kategorien kan sendes inn uten reparasjonstjenester. Velg en reparasjonskategori for å legge til tjenester.
+        </p>
+      ) : (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Legg til minst én reparasjonstjeneste som beskriver hva aktøren faktisk tilbyr.
+        </p>
+      )}
+      <div className="mt-2 grid gap-3 md:gap-4">
+        {!repairCategory && !hasAnyRepairInput ? (
+          <div className="rounded-xl border border-dashed bg-muted/20 p-4 text-sm text-muted-foreground">
+            Reparasjonstjenester er deaktivert for denne kategorien.
+          </div>
+        ) : (
+          repairServices.map((service, index) => (
+            <Card key={`repair-${index}`} className="rounded-xl border border-dashed">
+              <CardContent className="grid gap-3 p-4 md:gap-4 md:p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium">Tjeneste {index + 1}</p>
+                  {repairServices.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2"
+                      onClick={() => removeRepairService(index)}
+                      disabled={!repairCategory}
+                    >
+                      Fjern
+                    </Button>
+                  )}
+                </div>
+
+                <div>
+                  <Label>Problemtype</Label>
+                  <div className="mt-1">
+                    <SearchableSelect
+                      value={service.problemType}
+                      onChange={(value) => updateRepairService(index, { problemType: value })}
+                      placeholder="Velg problemtype"
+                      options={problemTypes.map((option) => ({
+                        value: option,
+                        label: formatProblemTypeLabel(option),
+                        keywords: option,
+                      }))}
+                      disabled={!repairCategory}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Produktkategorier</Label>
+                  <div className="mt-2">
+                    <MultiSelect
+                      value={service.itemTypes}
+                      options={itemTypes}
+                      getLabel={formatItemTypeLabel}
+                      onChange={(value) => updateRepairService(index, { itemTypes: value })}
+                      disabled={!repairCategory}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <Label>Pris fra (NOK)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={service.priceMin}
+                      onChange={(event) => updateRepairService(index, { priceMin: event.target.value })}
+                      disabled={!repairCategory}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Pris til (NOK)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={service.priceMax}
+                      onChange={(event) => updateRepairService(index, { priceMax: event.target.value })}
+                      disabled={!repairCategory}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Estimert tid (dager)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={service.etaDays}
+                    onChange={(event) => updateRepairService(index, { etaDays: event.target.value })}
+                    disabled={!repairCategory}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+      <Button type="button" variant="outline" className="mt-3 w-full sm:w-auto" onClick={addRepairService} disabled={!repairCategory}>
+        Legg til tjeneste
+      </Button>
+    </div>
+  )
+
+  const renderSourcesSection = () => (
+    <div>
+      <div className="flex items-center justify-between gap-3">
+        <Label>Kilder og dokumentasjon</Label>
+        <Badge variant="secondary">Påkrevd</Badge>
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Legg ved minst én kilde som dokumenterer aktøren før innsending.
+      </p>
+      <div className="mt-2 grid gap-3 md:gap-4">
+        {sources.map((source, index) => (
+          <Card key={`source-${index}`} className="rounded-xl border border-dashed">
+            <CardContent className="grid gap-3 p-4 md:gap-4 md:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-medium">Kilde {index + 1}</p>
+                {sources.length > 1 && (
+                  <Button type="button" variant="ghost" size="sm" className="h-8 px-2" onClick={() => removeSource(index)}>
+                    Fjern
+                  </Button>
+                )}
+              </div>
+
+              <div>
+                <Label>Type</Label>
+                <Select value={source.type} onValueChange={(value) => updateSource(index, { type: value })}>
+                  <SelectTrigger className="mt-1 w-full">
+                    <SelectValue placeholder="Velg type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sourceTypes.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {sourceTypeLabels[option] ?? formatEnumLabel(option)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Tittel</Label>
+                <Input value={source.title} onChange={(event) => updateSource(index, { title: event.target.value })} />
+              </div>
+
+              <div>
+                <Label>URL</Label>
+                <Input
+                  type="url"
+                  value={source.url}
+                  onChange={(event) => updateSource(index, { url: event.target.value })}
+                  placeholder="https://"
+                />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <Label>Dato (valgfritt)</Label>
+                  <Input
+                    type="date"
+                    value={source.capturedAt}
+                    onChange={(event) => updateSource(index, { capturedAt: event.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <Label>Notat</Label>
+                  <Input value={source.note} onChange={(event) => updateSource(index, { note: event.target.value })} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Button type="button" variant="outline" className="mt-3 w-full sm:w-auto" onClick={addSource}>
+        Legg til kilde
+      </Button>
+    </div>
+  )
+
   const sectionGridClassName = "mt-2.5 grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3"
 
-  const formBody = (
+  const legacyFormBody = (
     <div
-      className={cn(
-        "grid gap-6 md:gap-8",
-        isDialog && "min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 touch-pan-y sm:px-6 sm:py-5",
-      )}
+      className="grid gap-6 md:gap-8"
     >
       <div className="grid gap-5 md:gap-6">
         <div className="space-y-2.5">
-          <p className="text-sm font-semibold tracking-tight">Grunninfo</p>
+          <p className="text-sm font-semibold tracking-tight">{basicInfoTitle}</p>
           <div className={sectionGridClassName}>
             <div>
               <Label htmlFor="name">Navn</Label>
@@ -613,7 +850,7 @@ export function ActorSubmissionForm({
         </div>
 
         <div className="space-y-2.5">
-          <p className="text-sm font-semibold tracking-tight">Kontakt og geografi</p>
+          <p className="text-sm font-semibold tracking-tight">{contactTitle}</p>
           <div className={sectionGridClassName}>
             <div className="md:col-span-2">
               <Label htmlFor="address">Adresse</Label>
@@ -792,11 +1029,11 @@ export function ActorSubmissionForm({
         </div>
 
         <div className="space-y-2.5">
-          <p className="text-sm font-semibold tracking-tight">Bilde</p>
+          <p className="text-sm font-semibold tracking-tight">{imageTitle}</p>
           <ImageUploadField id="image" value={actor.image} onChange={(value) => updateActor("image", value)} folder="actors" />
         </div>
         <div className="space-y-2.5">
-          <p className="text-sm font-semibold tracking-tight">Detaljer og innhold</p>
+          <p className="text-sm font-semibold tracking-tight">{detailsTitle}</p>
           <div className={sectionGridClassName}>
             <div className="md:col-span-2">
               <Label>Åpningstider</Label>
@@ -831,212 +1068,47 @@ export function ActorSubmissionForm({
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-2">
-        <div>
-          <div className="flex items-center justify-between gap-3">
-            <Label>Reparasjonstjenester</Label>
-            {!repairCategory && <Badge variant="secondary">Valgfritt</Badge>}
-          </div>
-          {!repairCategory && (
-            <p className="mt-2 text-xs text-muted-foreground">Denne kategorien kan sendes inn uten reparasjonstjenester.</p>
-          )}
-          <div className="mt-2 grid gap-3 md:gap-4">
-            {repairServices.map((service, index) => (
-              <Card key={`repair-${index}`} className="rounded-xl border border-dashed">
-                <CardContent className="grid gap-3 p-4 md:gap-4 md:p-5">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-medium">Tjeneste {index + 1}</p>
-                    {repairServices.length > 1 && (
-                      <Button type="button" variant="ghost" size="sm" className="h-8 px-2" onClick={() => removeRepairService(index)}>
-                        Fjern
-                      </Button>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label>Problemtype</Label>
-                    <div className="mt-1">
-                      <SearchableSelect
-                        value={service.problemType}
-                        onChange={(value) =>
-                          setRepairServices((prev) =>
-                            prev.map((item, idx) => (idx === index ? { ...item, problemType: value } : item)),
-                          )
-                        }
-                        placeholder="Velg problemtype"
-                        options={problemTypes.map((option) => ({
-                          value: option,
-                          label: formatProblemTypeLabel(option),
-                          keywords: option,
-                        }))}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>Produktkategorier</Label>
-                    <div className="mt-2">
-                      <MultiSelect
-                        value={service.itemTypes}
-                        options={itemTypes}
-                        getLabel={formatItemTypeLabel}
-                        onChange={(value) =>
-                          setRepairServices((prev) =>
-                            prev.map((item, idx) => (idx === index ? { ...item, itemTypes: value } : item)),
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div>
-                      <Label>Pris fra (NOK)</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={service.priceMin}
-                        onChange={(event) =>
-                          setRepairServices((prev) =>
-                            prev.map((item, idx) => (idx === index ? { ...item, priceMin: event.target.value } : item)),
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div>
-                      <Label>Pris til (NOK)</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={service.priceMax}
-                        onChange={(event) =>
-                          setRepairServices((prev) =>
-                            prev.map((item, idx) => (idx === index ? { ...item, priceMax: event.target.value } : item)),
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>Estimert tid (dager)</Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={service.etaDays}
-                      onChange={(event) =>
-                        setRepairServices((prev) =>
-                          prev.map((item, idx) => (idx === index ? { ...item, etaDays: event.target.value } : item)),
-                        )
-                      }
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <Button type="button" variant="outline" className="mt-3 w-full sm:w-auto" onClick={addRepairService}>
-            Legg til tjeneste
-          </Button>
-        </div>
-
-        <div>
-          <Label>Kilder og dokumentasjon</Label>
-          <div className="mt-2 grid gap-3 md:gap-4">
-            {sources.map((source, index) => (
-              <Card key={`source-${index}`} className="rounded-xl border border-dashed">
-                <CardContent className="grid gap-3 p-4 md:gap-4 md:p-5">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-medium">Kilde {index + 1}</p>
-                    {sources.length > 1 && (
-                      <Button type="button" variant="ghost" size="sm" className="h-8 px-2" onClick={() => removeSource(index)}>
-                        Fjern
-                      </Button>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label>Type</Label>
-                    <Select
-                      value={source.type}
-                      onValueChange={(value) =>
-                        setSources((prev) => prev.map((item, idx) => (idx === index ? { ...item, type: value } : item)))
-                      }
-                    >
-                      <SelectTrigger className="mt-1 w-full">
-                        <SelectValue placeholder="Velg type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sourceTypes.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {sourceTypeLabels[option] ?? formatEnumLabel(option)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Tittel</Label>
-                    <Input
-                      value={source.title}
-                      onChange={(event) =>
-                        setSources((prev) => prev.map((item, idx) => (idx === index ? { ...item, title: event.target.value } : item)))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>URL</Label>
-                    <Input
-                      type="url"
-                      value={source.url}
-                      onChange={(event) =>
-                        setSources((prev) => prev.map((item, idx) => (idx === index ? { ...item, url: event.target.value } : item)))
-                      }
-                      placeholder="https://"
-                    />
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div>
-                      <Label>Dato (valgfritt)</Label>
-                      <Input
-                        type="date"
-                        value={source.capturedAt}
-                        onChange={(event) =>
-                          setSources((prev) =>
-                            prev.map((item, idx) => (idx === index ? { ...item, capturedAt: event.target.value } : item)),
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div>
-                      <Label>Notat</Label>
-                      <Input
-                        value={source.note}
-                        onChange={(event) =>
-                          setSources((prev) => prev.map((item, idx) => (idx === index ? { ...item, note: event.target.value } : item)))
-                        }
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <Button type="button" variant="outline" className="mt-3 w-full sm:w-auto" onClick={addSource}>
-            Legg til kilde
-          </Button>
-        </div>
+      <div className={cn("grid gap-5 xl:grid-cols-2", isDialog && "hidden")}>
+        {renderRepairServicesSection()}
+        {renderSourcesSection()}
       </div>
     </div>
+  )
+
+  const formBody = isDialog ? (
+    <Tabs
+      value={activeTab}
+      onValueChange={(value) => setActiveTab(value as ActorSubmissionTab)}
+      className="min-h-0 flex-1 gap-0"
+    >
+      <div className="px-4 pt-4 sm:px-6 sm:pt-5">
+        <TabsList className="grid h-auto w-full grid-cols-1 gap-1 rounded-xl p-1 sm:inline-flex sm:h-11 sm:w-auto sm:grid-cols-none">
+          <TabsTrigger value="actor" className="justify-start px-4 text-sm sm:justify-center sm:px-5">
+            Aktør
+          </TabsTrigger>
+          <TabsTrigger value="sources" className="justify-start px-4 text-sm sm:justify-center sm:px-5">
+            Kilder
+          </TabsTrigger>
+          <TabsTrigger value="repair" className="justify-start px-4 text-sm sm:justify-center sm:px-5">
+            Reparasjonstjenester
+          </TabsTrigger>
+        </TabsList>
+      </div>
+
+      <TabsContent value="actor" className={dialogTabBodyClassName}>
+        {legacyFormBody}
+      </TabsContent>
+
+      <TabsContent value="sources" className={dialogTabBodyClassName}>
+        {renderSourcesSection()}
+      </TabsContent>
+
+      <TabsContent value="repair" className={dialogTabBodyClassName}>
+        {renderRepairServicesSection()}
+      </TabsContent>
+    </Tabs>
+  ) : (
+    legacyFormBody
   )
 
   const feedbackMessages = (
@@ -1074,8 +1146,8 @@ export function ActorSubmissionForm({
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "grid min-w-0 gap-6 [&_label+*]:mt-2",
-        isDialog && "flex min-h-0 flex-1 flex-col gap-0",
+        "min-w-0 [&_label+*]:mt-2",
+        isDialog ? "flex min-h-0 flex-1 flex-col gap-0" : "grid gap-6",
       )}
     >
       {formBody}

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SearchableSelect } from "@/components/ui/searchable-select"
+import type { ActorFormSection } from "@/lib/actor-form-sections"
 import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { formatItemTypeLabel, formatProblemTypeLabel } from "@/lib/enum-labels"
 
@@ -35,12 +36,6 @@ type ActorRepairService = {
   priceMin: number
   priceMax: number
   etaDays: number | null
-}
-
-export type ActorFormSection = {
-  title: string
-  keys: string[]
-  layout?: string
 }
 
 export type ActorDialogContentProps = {

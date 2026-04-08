@@ -4,12 +4,31 @@ import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { authClient } from "@/lib/auth/client"
 import { ActorSubmissionDialog } from "@/components/actor-submission-dialog"
-import { ActorSubmissionForm, type ActorDraft, type RepairServiceDraft, type SourceDraft } from "@/components/actor-submission-form"
+import {
+  ActorSubmissionForm,
+  type ActorDraft,
+  type RepairServiceDraft,
+  type SourceDraft,
+} from "@/components/actor-submission-form"
+import { PublicActorDialogShell } from "@/components/public-actor-dialog-shell"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Dialog } from "@/components/ui/dialog"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { actorCopy } from "@/content/no"
 
 type ActorStatus = "pending" | "approved" | "rejected" | "archived"
@@ -117,9 +136,20 @@ const toDrafts = (actor: MyActor) => {
         itemTypes: service.itemTypes?.length ? service.itemTypes : ["phone"],
         priceMin: String(service.priceMin ?? ""),
         priceMax: String(service.priceMax ?? ""),
-        etaDays: service.etaDays === null || service.etaDays === undefined ? "" : String(service.etaDays),
+        etaDays:
+          service.etaDays === null || service.etaDays === undefined
+            ? ""
+            : String(service.etaDays),
       }))
-    : [{ problemType: "", itemTypes: [], priceMin: "", priceMax: "", etaDays: "" }]
+    : [
+        {
+          problemType: "",
+          itemTypes: [],
+          priceMin: "",
+          priceMax: "",
+          etaDays: "",
+        },
+      ]
 
   const sources: SourceDraft[] = actor.sources?.length
     ? actor.sources.map((source) => ({
@@ -166,7 +196,9 @@ export function MyActorsPanel() {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch("/api/public/my-actors", { cache: "no-store" })
+      const response = await fetch("/api/public/my-actors", {
+        cache: "no-store",
+      })
       if (!response.ok) {
         throw new Error("Kunne ikke hente aktører.")
       }
@@ -188,9 +220,12 @@ export function MyActorsPanel() {
     if (!confirmed) return
 
     try {
-      const response = await fetch(`/api/public/actor-submissions/${actor.id}`, {
-        method: "DELETE",
-      })
+      const response = await fetch(
+        `/api/public/actor-submissions/${actor.id}`,
+        {
+          method: "DELETE",
+        },
+      )
       if (!response.ok) {
         throw new Error("Sletting feilet.")
       }
@@ -216,7 +251,9 @@ export function MyActorsPanel() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle>Mine aktører</CardTitle>
-            <CardDescription>Administrer dine innsendte aktører.</CardDescription>
+            <CardDescription>
+              Administrer dine innsendte aktører.
+            </CardDescription>
           </div>
           <ActorSubmissionDialog
             triggerClassName="w-full sm:w-auto"
@@ -240,7 +277,9 @@ export function MyActorsPanel() {
         ) : error ? (
           <p className="text-sm text-destructive">{error}</p>
         ) : actors.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Du har ikke sendt inn noen aktører ennå.</p>
+          <p className="text-sm text-muted-foreground">
+            Du har ikke sendt inn noen aktører ennå.
+          </p>
         ) : (
           <>
             <div className="grid gap-3 md:hidden">
@@ -249,30 +288,60 @@ export function MyActorsPanel() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-medium">{actor.name}</p>
-                      <p className="truncate text-xs text-muted-foreground">/{actor.slug}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        /{actor.slug}
+                      </p>
                     </div>
-                    <Badge className="shrink-0" variant={actor.status === "approved" ? "default" : "secondary"}>
+                    <Badge
+                      className="shrink-0"
+                      variant={
+                        actor.status === "approved" ? "default" : "secondary"
+                      }
+                    >
                       {statusLabels[actor.status]}
                     </Badge>
                   </div>
 
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Badge variant="outline">{categoryLabels[actor.category] ?? actor.category}</Badge>
-                    <Badge variant="outline">{formatter.format(new Date(actor.updatedAt))}</Badge>
+                    <Badge variant="outline">
+                      {categoryLabels[actor.category] ?? actor.category}
+                    </Badge>
+                    <Badge variant="outline">
+                      {formatter.format(new Date(actor.updatedAt))}
+                    </Badge>
                   </div>
 
-                  {actor.reviewNote ? <p className="mt-3 text-xs text-amber-600">{actor.reviewNote}</p> : null}
+                  {actor.reviewNote ? (
+                    <p className="mt-3 text-xs text-amber-600">
+                      {actor.reviewNote}
+                    </p>
+                  ) : null}
 
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                     {actor.status === "approved" && (
-                      <Button asChild size="sm" variant="ghost" className="w-full sm:w-auto">
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="ghost"
+                        className="w-full sm:w-auto"
+                      >
                         <Link href={`/aktorer/${actor.slug}`}>Vis</Link>
                       </Button>
                     )}
-                    <Button className="w-full sm:w-auto" size="sm" variant="outline" onClick={() => openEditDialog(actor)}>
+                    <Button
+                      className="w-full sm:w-auto"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openEditDialog(actor)}
+                    >
                       Rediger
                     </Button>
-                    <Button className="w-full sm:w-auto" size="sm" variant="destructive" onClick={() => handleDelete(actor)}>
+                    <Button
+                      className="w-full sm:w-auto"
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(actor)}
+                    >
                       Slett
                     </Button>
                   </div>
@@ -297,19 +366,35 @@ export function MyActorsPanel() {
                       <TableCell className="font-medium">
                         <div className="flex flex-col">
                           <span>{actor.name}</span>
-                          <span className="text-xs text-muted-foreground">/{actor.slug}</span>
-                          {actor.reviewNote && <span className="mt-1 text-xs text-amber-600">{actor.reviewNote}</span>}
+                          <span className="text-xs text-muted-foreground">
+                            /{actor.slug}
+                          </span>
+                          {actor.reviewNote && (
+                            <span className="mt-1 text-xs text-amber-600">
+                              {actor.reviewNote}
+                            </span>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={actor.status === "approved" ? "default" : "secondary"}>
+                        <Badge
+                          variant={
+                            actor.status === "approved"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
                           {statusLabels[actor.status]}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{categoryLabels[actor.category] ?? actor.category}</Badge>
+                        <Badge variant="outline">
+                          {categoryLabels[actor.category] ?? actor.category}
+                        </Badge>
                       </TableCell>
-                      <TableCell>{formatter.format(new Date(actor.updatedAt))}</TableCell>
+                      <TableCell>
+                        {formatter.format(new Date(actor.updatedAt))}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex flex-wrap justify-end gap-2">
                           {actor.status === "approved" && (
@@ -317,10 +402,18 @@ export function MyActorsPanel() {
                               <Link href={`/aktorer/${actor.slug}`}>Vis</Link>
                             </Button>
                           )}
-                          <Button size="sm" variant="outline" onClick={() => openEditDialog(actor)}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openEditDialog(actor)}
+                          >
                             Rediger
                           </Button>
-                          <Button size="sm" variant="destructive" onClick={() => handleDelete(actor)}>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDelete(actor)}
+                          >
                             Slett
                           </Button>
                         </div>
@@ -334,12 +427,14 @@ export function MyActorsPanel() {
         )}
       </CardContent>
 
-      <Dialog open={editOpen} onOpenChange={(open) => (open ? setEditOpen(true) : closeEditDialog())}>
-        <DialogContent className="h-dvh max-h-dvh w-screen max-w-none gap-0 rounded-none border-0 px-0 py-0 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[98vw] sm:max-w-7xl sm:rounded-2xl sm:border sm:px-0 sm:py-0 [&>[data-slot=dialog-header]+:not([data-slot=dialog-footer]):not([data-slot=dialog-close])]:overflow-visible [&>[data-slot=dialog-header]+:not([data-slot=dialog-footer]):not([data-slot=dialog-close])]:p-0 [&>[data-slot=dialog-header]+:not([data-slot=dialog-footer]):not([data-slot=dialog-close])]:pr-0">
-          <DialogHeader className="border-b bg-background/95 px-4 pb-3 pt-[calc(1rem+env(safe-area-inset-top,0px))] text-left backdrop-blur sm:px-6 sm:pb-4 sm:pt-6">
-            <DialogTitle>Rediger aktør</DialogTitle>
-            <DialogDescription>Oppdater detaljer og send inn på nytt.</DialogDescription>
-          </DialogHeader>
+      <Dialog
+        open={editOpen}
+        onOpenChange={(open) => (open ? setEditOpen(true) : closeEditDialog())}
+      >
+        <PublicActorDialogShell
+          title="Rediger aktør"
+          description="Oppdater detaljer og send inn på nytt."
+        >
           {selectedActor && (
             <ActorSubmissionForm
               key={selectedActor.id}
@@ -356,7 +451,7 @@ export function MyActorsPanel() {
               }}
             />
           )}
-        </DialogContent>
+        </PublicActorDialogShell>
       </Dialog>
     </Card>
   )

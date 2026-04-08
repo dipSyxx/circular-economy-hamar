@@ -23,6 +23,7 @@ import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { getCountyByName, getMunicipalitiesForCounty, norwayCounties } from "@/lib/geo"
 import { EDITORIAL_THEMES } from "@/lib/data"
+import { ACTOR_FORM_SECTIONS } from "@/lib/actor-form-sections"
 import {
   formatCategoryLabel,
   formatEnumLabel,
@@ -241,49 +242,7 @@ const lookupConfigByField: Record<string, LookupConfig> = {
   sourceId: { resource: "co2e-sources", labelFields: ["title", "key"], searchFields: ["title", "key"] },
 }
 
-const actorFormSections = [
-  {
-    title: "Grunninfo",
-    keys: ["name", "slug", "category", "description", "longDescription"],
-  },
-  {
-    title: "Kontakt og plassering",
-    keys: [
-      "address",
-      "postalCode",
-      "county",
-      "municipality",
-      "city",
-      "area",
-      "lat",
-      "lng",
-      "phone",
-      "email",
-      "website",
-      "instagram",
-      "nationwide",
-    ],
-  },
-  {
-    title: "Bilde",
-    keys: ["image"],
-    layout: "stack",
-  },
-  {
-    title: "Detaljer og innhold",
-    keys: ["openingHours", "openingHoursOsm", "tags", "benefits", "howToUse"],
-  },
-  {
-    title: "Administrasjon",
-    keys: ["status", "reviewNote", "createdById", "reviewedById", "reviewedAt"],
-  },
-  {
-    title: "System",
-    keys: ["id", "createdAt", "updatedAt"],
-  },
-]
-
-const actorFieldOrder = actorFormSections.flatMap((section) => section.keys)
+const actorFieldOrder = ACTOR_FORM_SECTIONS.flatMap((section) => section.keys)
 const actorHiddenKeys = new Set(["baseCountyId", "baseMunicipalityId"])
 
 const getEnumOptions = (resourceKey: string, field: string) => {
@@ -2057,7 +2016,7 @@ export function ResourceManager({
             <ActorDialogContent
               mode={mode}
               actorId={selectedId}
-              actorFormSections={actorFormSections}
+              actorFormSections={ACTOR_FORM_SECTIONS}
               actorExtraKeys={actorExtraKeys}
               formKeys={formKeys}
               renderField={renderField}
