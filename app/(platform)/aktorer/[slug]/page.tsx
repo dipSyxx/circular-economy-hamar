@@ -126,8 +126,8 @@ export default async function ActorPage({ params }: ActorPageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <BackButton fallbackHref={backFallback} label={actorPageCopy.backLabel} className="mb-6" />
 
-      <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
-        <div className="min-w-0 space-y-6 sm:space-y-8 lg:col-span-2">
+      <div className="grid gap-6 sm:gap-8 lg:grid-cols-3">
+        <div className="contents lg:col-span-2 lg:block lg:min-w-0 lg:space-y-8">
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted sm:aspect-[16/10] lg:aspect-video">
             <ActorImage src={actor.image} alt={actor.name} />
           </div>
@@ -235,19 +235,23 @@ export default async function ActorPage({ params }: ActorPageProps) {
             </CardContent>
           </Card>
 
-          <RelatedGuidesSection
-            title="Praktiske guider som passer her"
-            description="Guidene under matcher kategorien til aktøren først, og fylket deretter."
-            guides={relatedGuides}
-          />
-          <RelatedArticlesSection
-            title="Redaksjonelle artikler som gir mer kontekst"
-            description="Les mer om lokale mønstre, datakvalitet og hvordan denne typen tilbud passer inn i et større sirkulært bilde."
-            articles={relatedArticles}
-          />
+          <div className="order-last">
+            <RelatedGuidesSection
+              title="Praktiske guider som passer her"
+              description="Guidene under matcher kategorien til aktøren først, og fylket deretter."
+              guides={relatedGuides}
+            />
+          </div>
+          <div className="order-last">
+            <RelatedArticlesSection
+              title="Redaksjonelle artikler som gir mer kontekst"
+              description="Les mer om lokale mønstre, datakvalitet og hvordan denne typen tilbud passer inn i et større sirkulært bilde."
+              articles={relatedArticles}
+            />
+          </div>
         </div>
 
-        <div className="min-w-0 space-y-6">
+        <div className="contents lg:block lg:min-w-0 lg:space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Tillit og datakvalitet</CardTitle>
