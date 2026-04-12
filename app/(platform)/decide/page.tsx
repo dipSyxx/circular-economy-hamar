@@ -1,4 +1,4 @@
-import { DecisionWizard } from "@/components/decision-wizard"
+import { DecisionModes } from "@/components/decision-modes"
 import { pageCopy } from "@/content/no"
 import { getActors, getCo2eSourceItems, getCo2eSources } from "@/lib/public-data"
 
@@ -22,7 +22,7 @@ export default async function DecidePage() {
 
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <DecisionWizard actors={actors} co2eSources={co2eSources} co2eSourceItems={co2eSourceItems} />
+          <DecisionModes actors={actors} co2eSources={co2eSources} co2eSourceItems={co2eSourceItems} />
         </div>
       </section>
     </div>
