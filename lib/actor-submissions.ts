@@ -1,5 +1,6 @@
 import { type ActorCategory, type ItemType, type ProblemType, type SourceType } from "@prisma/client"
 import { supportsRepairServices } from "@/lib/categories"
+import { validateRepairServiceAgainstScope } from "@/lib/category-repair-scope"
 import { getCountyByName, getMunicipalityByName, normalizeActorGeo } from "@/lib/geo"
 
 export type SubmissionPayload = {
@@ -153,6 +154,14 @@ export const validateActorSubmission = (payload: SubmissionPayload) => {
         etaDays: toNumber(service.etaDays),
       }
     })
+
+  for (let i = 0; i < repairServices.length; i++) {
+    const row = repairServices[i]
+    const scopeError = validateRepairServiceAgainstScope(category, row.problemType, row.itemTypes)
+    if (scopeError) {
+      return { ok: false as const, error: `Tjeneste #${i + 1}: ${scopeError}` }
+    }
+  }
 
   if (!supportsRepairServices(category) && repairServices.length > 0) {
     return { ok: false as const, error: "Denne kategorien kan ikke ha reparasjonstjenester." }

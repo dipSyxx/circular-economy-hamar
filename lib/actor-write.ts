@@ -1,5 +1,6 @@
 import { Prisma, type ActorCategory, type ItemType, type ProblemType } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
+import { validateRepairServiceAgainstScope } from "@/lib/category-repair-scope"
 import { categoryRules, supportsRepairServices } from "@/lib/categories"
 import { type ActorGeoInput } from "@/lib/geo"
 import {
@@ -111,6 +112,27 @@ export const assertActorCanAcceptRepairServices = async (db: GeoDbClient, actorI
 
   assertRepairServicesAllowed(actor.category, 1)
   return actor
+}
+
+/** Ensures every stored repair service fits the actor category (e.g. after category change). */
+export const assertActorRepairServicesMatchCategory = async (
+  db: GeoDbClient,
+  actorId: string,
+  category: ActorCategory,
+) => {
+  if (!supportsRepairServices(category)) return
+
+  const services = await db.actorRepairService.findMany({
+    where: { actorId },
+    select: { problemType: true, itemTypes: true },
+  })
+
+  for (const service of services) {
+    const err = validateRepairServiceAgainstScope(category, service.problemType, service.itemTypes)
+    if (err) {
+      throw new Error(`${err} Fjern eller oppdater reparasjonstjenestene før du lagrer denne kategorien.`)
+    }
+  }
 }
 
 export const prepareActorPersistData = async (

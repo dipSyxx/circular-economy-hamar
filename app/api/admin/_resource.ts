@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server"
 import { revalidateTag } from "next/cache"
+import type { ActorCategory, ItemType, ProblemType } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
+import { validateRepairServiceAgainstScope } from "@/lib/category-repair-scope"
 import { adminResourceConfig } from "@/lib/admin/resource-config"
 import { requireAdminApi, sanitizePayload } from "@/app/api/admin/_helpers"
+import { parseAdminActorNestedRelations } from "@/lib/admin/actor-create-staging"
 import {
   assertActorCanAcceptRepairServices,
   assertActorCategorySupportsExistingRepairServices,
+  assertActorRepairServicesMatchCategory,
   prepareActorPersistData,
+  replaceActorServiceAreas,
 } from "@/lib/actor-write"
 import { prepareArticlePersistData } from "@/lib/article-write"
 import { safeDeleteBlob } from "@/lib/blob"
@@ -64,10 +69,20 @@ export const createAdminResource = async (resource: string, request: Request) =>
     const affectedActorIds = new Set<string>()
     let affectedCountySlug: string | null = null
 
+    let preparedActor:
+      | Awaited<ReturnType<typeof prepareActorPersistData>>
+      | undefined
+
     if (resource === "actors") {
-      const prepared = await prepareActorPersistData(prisma, data as never)
-      data = prepared.actorData
-      affectedCountySlug = typeof prepared.actorData.countySlug === "string" ? prepared.actorData.countySlug : null
+      const actorPayload = { ...data } as Record<string, unknown>
+      const nestedRepairs = actorPayload.repairServices
+      const nestedSources = actorPayload.sources
+      delete actorPayload.repairServices
+      delete actorPayload.sources
+
+      preparedActor = await prepareActorPersistData(prisma, actorPayload as never)
+      data = preparedActor.actorData
+      affectedCountySlug = typeof preparedActor.actorData.countySlug === "string" ? preparedActor.actorData.countySlug : null
     }
 
     if (resource === "articles") {
@@ -79,7 +94,13 @@ export const createAdminResource = async (resource: string, request: Request) =>
       if (!actorId) {
         return NextResponse.json({ error: "actorId er påkrevd." }, { status: 400 })
       }
-      await assertActorCanAcceptRepairServices(prisma, actorId)
+      const actor = await assertActorCanAcceptRepairServices(prisma, actorId)
+      const problemType = data.problemType as ProblemType
+      const itemTypes = Array.isArray(data.itemTypes) ? (data.itemTypes as ItemType[]) : []
+      const scopeError = validateRepairServiceAgainstScope(actor.category as ActorCategory, problemType, itemTypes)
+      if (scopeError) {
+        return NextResponse.json({ error: scopeError }, { status: 400 })
+      }
       affectedActorIds.add(actorId)
     }
 
@@ -92,10 +113,56 @@ export const createAdminResource = async (resource: string, request: Request) =>
     }
 
     const model = (prisma as Record<string, any>)[config.model]
-    const created = await model.create({ data })
-    if (resource === "actors") {
-      affectedActorIds.add(created.id)
-      affectedCountySlug = created.countySlug ?? affectedCountySlug
+
+    let created: Record<string, unknown>
+    if (resource === "actors" && preparedActor) {
+      const nested = parseAdminActorNestedRelations(
+        data.category as ActorCategory,
+        (body as Record<string, unknown>).repairServices,
+        (body as Record<string, unknown>).sources,
+      )
+
+      const actorRow = await prisma.$transaction(async (tx) => {
+        const actor = await tx.actor.create({
+          data: data as never,
+        })
+
+        await replaceActorServiceAreas(tx, actor.id, preparedActor.serviceAreaLinks)
+
+        if (nested.repairServices.length > 0) {
+          await tx.actorRepairService.createMany({
+            data: nested.repairServices.map((service) => ({
+              actorId: actor.id,
+              problemType: service.problemType,
+              itemTypes: service.itemTypes,
+              priceMin: service.priceMin,
+              priceMax: service.priceMax,
+              etaDays: service.etaDays,
+            })),
+          })
+        }
+
+        if (nested.sources.length > 0) {
+          await tx.actorSource.createMany({
+            data: nested.sources.map((source) => ({
+              actorId: actor.id,
+              type: source.type,
+              title: source.title,
+              url: source.url,
+              capturedAt: source.capturedAt,
+              note: source.note,
+            })),
+          })
+        }
+
+        return actor
+      })
+
+      created = actorRow as Record<string, unknown>
+      affectedActorIds.add(actorRow.id)
+      affectedCountySlug = actorRow.countySlug ?? affectedCountySlug
+    } else {
+      created = (await model.create({ data })) as Record<string, unknown>
     }
     if (affectedActorIds.size > 0 || affectedCountySlug) {
       await refreshAutomationStateForActors(
@@ -156,6 +223,7 @@ export const updateAdminResource = async (resource: string, id: string, request:
         ...data,
       }
       await assertActorCategorySupportsExistingRepairServices(prisma, id, mergedActor.category)
+      await assertActorRepairServicesMatchCategory(prisma, id, mergedActor.category as ActorCategory)
       const prepared = await prepareActorPersistData(prisma, mergedActor as never)
       data = prepared.actorData
       affectedActorIds.add(id)
@@ -177,12 +245,24 @@ export const updateAdminResource = async (resource: string, id: string, request:
     if (resource === "actor-repair-services") {
       const existingRepairService = await prisma.actorRepairService.findUnique({
         where: { id },
-        select: { actorId: true },
+        select: {
+          actorId: true,
+          problemType: true,
+          itemTypes: true,
+        },
       })
       if (!existingRepairService) {
         return NextResponse.json({ error: "Not found" }, { status: 404 })
       }
-      await assertActorCanAcceptRepairServices(prisma, existingRepairService.actorId)
+      const actor = await assertActorCanAcceptRepairServices(prisma, existingRepairService.actorId)
+      const problemType = (data.problemType ?? existingRepairService.problemType) as ProblemType
+      const itemTypes = (
+        Array.isArray(data.itemTypes) ? data.itemTypes : existingRepairService.itemTypes
+      ) as ItemType[]
+      const scopeError = validateRepairServiceAgainstScope(actor.category as ActorCategory, problemType, itemTypes)
+      if (scopeError) {
+        return NextResponse.json({ error: scopeError }, { status: 400 })
+      }
       affectedActorIds.add(existingRepairService.actorId)
       delete data.actorId
     }

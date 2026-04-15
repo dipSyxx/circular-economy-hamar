@@ -13,6 +13,7 @@ import {
 import { parseCsv, type CsvRow } from "@/lib/csv"
 import { prisma } from "@/lib/prisma"
 import { categoryOrder, supportsRepairServices } from "@/lib/categories"
+import { repairServiceRowMatchesScope } from "@/lib/category-repair-scope"
 import { getCountyBySlug, getMunicipalityBySlug, normalizeActorGeo } from "@/lib/geo"
 import {
   assertActorCanAcceptRepairServices,
@@ -22,6 +23,7 @@ import {
   replaceActorServiceAreas,
 } from "@/lib/actor-write"
 import { seedCanonicalGeoTaxonomy } from "@/lib/geo-taxonomy"
+import { formatCategoryLabel } from "@/lib/enum-labels"
 import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { canonicalizeSourceUrl, getActorQualitySummary } from "@/lib/source-quality"
 import type { ActorImportBatchSummary, ActorImportRowSummary } from "@/lib/data"
@@ -734,6 +736,17 @@ export const createActorImportPreview = async (input: ImportPreviewInput) => {
     }
     if (!category || !supportsRepairServices(category)) {
       validationErrors.push("Reparasjonsdata kan bare brukes for reparasjonskategorier.")
+    }
+
+    if (
+      category &&
+      supportsRepairServices(category) &&
+      validationErrors.length === 0 &&
+      !repairServiceRowMatchesScope(category, problemType, sortedItemTypes)
+    ) {
+      validationErrors.push(
+        `Reparasjonstjenesten matcher ikke aktørkategorien «${formatCategoryLabel(category)}» (problemtype eller varetyper).`,
+      )
     }
 
     const duplicateKey = `${actorSlug}|${problemType}|${sortedItemTypes.join(",")}`

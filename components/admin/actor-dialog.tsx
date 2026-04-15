@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect, type JSX } from "react"
-import { Plus, Trash2, ExternalLink } from "lucide-react"
+import { useState, useEffect, useMemo, type JSX } from "react"
+import { ExternalLink, Plus, Trash2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,6 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import type { ActorFormSection } from "@/lib/actor-form-sections"
+import {
+  getRepairServiceItemTypesForCategory,
+  getRepairServiceProblemTypesForCategory,
+} from "@/lib/category-repair-scope"
+import { supportsRepairServices } from "@/lib/categories"
+import type { AdminStagedRepair, AdminStagedSource } from "@/lib/admin/actor-create-staging"
 import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { formatItemTypeLabel, formatProblemTypeLabel } from "@/lib/enum-labels"
 
@@ -41,6 +48,14 @@ type ActorRepairService = {
 export type ActorDialogContentProps = {
   mode: "create" | "edit"
   actorId: string | null
+  /** Current actor category from admin draft (filters repair service enums). */
+  actorCategory?: string
+  /** Staged kilder while creating a new actor (saved with first Lagre). */
+  createStagedSources?: AdminStagedSource[]
+  onCreateStagedSourcesChange?: (next: AdminStagedSource[]) => void
+  /** Staged reparasjonstjenester while creating a new actor. */
+  createStagedRepairs?: AdminStagedRepair[]
+  onCreateStagedRepairsChange?: (next: AdminStagedRepair[]) => void
   actorFormSections: ActorFormSection[]
   actorExtraKeys: string[]
   formKeys: string[]
@@ -72,18 +87,140 @@ const EMPTY_SOURCE = {
 }
 
 const EMPTY_REPAIR = {
-  problemType: "screen" as string,
+  problemType: "" as string,
   itemTypes: [] as string[],
-  priceMin: "" as string | number,
-  priceMax: "" as string | number,
-  etaDays: "" as string | number,
+  priceMin: "",
+  priceMax: "",
+  etaDays: "",
 }
 
 // ---------------------------------------------------------------------------
 // SourcesManager
 // ---------------------------------------------------------------------------
 
-function SourcesManager({ actorId }: { actorId: string }) {
+type SourcesManagerProps =
+  | { variant: "persisted"; actorId: string }
+  | {
+      variant: "staging"
+      sources: AdminStagedSource[]
+      onChange: (next: AdminStagedSource[]) => void
+    }
+
+function SourcesManager(props: SourcesManagerProps) {
+  if (props.variant === "staging") {
+    return <SourcesManagerStaging sources={props.sources} onChange={props.onChange} />
+  }
+  return <SourcesManagerPersisted actorId={props.actorId} />
+}
+
+function SourcesManagerStaging({
+  sources,
+  onChange,
+}: {
+  sources: AdminStagedSource[]
+  onChange: (next: AdminStagedSource[]) => void
+}) {
+  const update = (index: number, patch: Partial<AdminStagedSource>) => {
+    onChange(sources.map((s, i) => (i === index ? { ...s, ...patch } : s)))
+  }
+
+  const removeAt = (index: number) => {
+    onChange(sources.filter((_, i) => i !== index))
+  }
+
+  const addSource = () => {
+    onChange([...sources, { type: "website", title: "", url: "", capturedAt: "", note: "" }])
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-3">
+        <Label>Kilder og dokumentasjon</Label>
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Legg ved minst én kilde som dokumenterer aktøren før innsending.
+      </p>
+      <div className="mt-2 grid gap-3 md:gap-4">
+        {sources.map((source, index) => (
+          <Card key={`staged-src-${index}`} className="rounded-xl border border-dashed">
+            <CardContent className="grid gap-3 p-4 md:gap-4 md:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-medium">Kilde {index + 1}</p>
+                {sources.length > 1 && (
+                  <Button type="button" variant="ghost" size="sm" className="h-8 px-2" onClick={() => removeAt(index)}>
+                    Fjern
+                  </Button>
+                )}
+              </div>
+
+              <div>
+                <Label>Type</Label>
+                <Select value={source.type} onValueChange={(value) => update(index, { type: value })}>
+                  <SelectTrigger className="mt-1 w-full">
+                    <SelectValue placeholder="Velg type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SOURCE_TYPES.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {formatSourceType(t)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Tittel</Label>
+                <Input
+                  className="mt-1"
+                  value={source.title}
+                  onChange={(e) => update(index, { title: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label>URL</Label>
+                <Input
+                  type="url"
+                  className="mt-1"
+                  value={source.url}
+                  onChange={(e) => update(index, { url: e.target.value })}
+                  placeholder="https://"
+                />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <Label>Dato (valgfritt)</Label>
+                  <Input
+                    type="date"
+                    className="mt-1"
+                    value={source.capturedAt}
+                    onChange={(e) => update(index, { capturedAt: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Notat</Label>
+                  <Input
+                    className="mt-1"
+                    value={source.note}
+                    onChange={(e) => update(index, { note: e.target.value })}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Button type="button" variant="outline" className="mt-3 w-full sm:w-auto" onClick={addSource}>
+        Legg til kilde
+      </Button>
+    </div>
+  )
+}
+
+function SourcesManagerPersisted({ actorId }: { actorId: string }) {
   const [sources, setSources] = useState<ActorSource[]>([])
   const [loading, setLoading] = useState(true)
   const [adding, setAdding] = useState(false)
@@ -294,13 +431,239 @@ function SourcesManager({ actorId }: { actorId: string }) {
 // RepairServicesManager
 // ---------------------------------------------------------------------------
 
-function RepairServicesManager({ actorId }: { actorId: string }) {
+type RepairServicesManagerProps =
+  | { variant: "persisted"; actorId: string; actorCategory?: string }
+  | {
+      variant: "staging"
+      actorCategory?: string
+      services: AdminStagedRepair[]
+      onChange: (next: AdminStagedRepair[]) => void
+    }
+
+function RepairServicesManager(props: RepairServicesManagerProps) {
+  if (props.variant === "staging") {
+    return (
+      <RepairServicesManagerStaging
+        actorCategory={props.actorCategory}
+        services={props.services}
+        onChange={props.onChange}
+      />
+    )
+  }
+  return <RepairServicesManagerPersisted actorId={props.actorId} actorCategory={props.actorCategory} />
+}
+
+function RepairServicesManagerStaging({
+  actorCategory,
+  services,
+  onChange,
+}: {
+  actorCategory?: string
+  services: AdminStagedRepair[]
+  onChange: (next: AdminStagedRepair[]) => void
+}) {
+  const categoryKey = actorCategory?.trim() ?? ""
+  const isRepairCategory = categoryKey ? supportsRepairServices(categoryKey) : false
+
+  const problemOptions = useMemo(() => {
+    if (!isRepairCategory) return [...PROBLEM_TYPES]
+    const scoped = getRepairServiceProblemTypesForCategory(categoryKey)
+    return scoped.length ? scoped : [...PROBLEM_TYPES]
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryKey, isRepairCategory])
+
+  const itemOptions = useMemo(() => {
+    if (!isRepairCategory) return [...ITEM_TYPES]
+    const scoped = getRepairServiceItemTypesForCategory(categoryKey)
+    return scoped.length ? scoped : [...ITEM_TYPES]
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryKey, isRepairCategory])
+
+  const update = (index: number, patch: Partial<AdminStagedRepair>) => {
+    onChange(services.map((s, i) => (i === index ? { ...s, ...patch } : s)))
+  }
+
+  const toggleItemType = (index: number, type: string) => {
+    const current = services[index].itemTypes
+    const next = current.includes(type) ? current.filter((t) => t !== type) : [...current, type]
+    update(index, { itemTypes: next })
+  }
+
+  const removeAt = (index: number) => {
+    onChange(services.filter((_, i) => i !== index))
+  }
+
+  const addService = () => {
+    onChange([...services, { problemType: "", itemTypes: [], priceMin: "", priceMax: "", etaDays: "" }])
+  }
+
+  const hasAnyInput = services.some(
+    (s) => s.problemType || s.itemTypes.length || s.priceMin || s.priceMax || s.etaDays,
+  )
+
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-3">
+        <Label>Reparasjonstjenester</Label>
+        {!isRepairCategory && <Badge variant="secondary">Ikke påkrevd</Badge>}
+      </div>
+      {!isRepairCategory ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Denne kategorien kan sendes inn uten reparasjonstjenester. Velg en reparasjonskategori på fanen «Aktør» for å legge til tjenester.
+        </p>
+      ) : (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Legg til minst én reparasjonstjeneste som beskriver hva aktøren faktisk tilbyr.
+        </p>
+      )}
+      <div className="mt-2 grid gap-3 md:gap-4">
+        {!isRepairCategory && !hasAnyInput ? (
+          <div className="rounded-xl border border-dashed bg-muted/20 p-4 text-sm text-muted-foreground">
+            Reparasjonstjenester er deaktivert for denne kategorien.
+          </div>
+        ) : (
+          services.map((service, index) => (
+            <Card key={`staged-repair-${index}`} className="rounded-xl border border-dashed">
+              <CardContent className="grid gap-3 p-4 md:gap-4 md:p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium">Tjeneste {index + 1}</p>
+                  {services.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2"
+                      onClick={() => removeAt(index)}
+                      disabled={!isRepairCategory}
+                    >
+                      Fjern
+                    </Button>
+                  )}
+                </div>
+
+                <div>
+                  <Label>Problemtype</Label>
+                  <div className="mt-1">
+                    <SearchableSelect
+                      value={service.problemType}
+                      onChange={(value) => update(index, { problemType: value })}
+                      placeholder="Velg problemtype"
+                      options={problemOptions.map((option) => ({
+                        value: option,
+                        label: formatProblemTypeLabel(option),
+                        keywords: option,
+                      }))}
+                      disabled={!isRepairCategory}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Produktkategorier</Label>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    {itemOptions.map((type) => {
+                      const checked = service.itemTypes.includes(type)
+                      return (
+                        <label
+                          key={type}
+                          className={`flex items-start gap-2.5 rounded-xl border border-input px-3 py-3 text-sm leading-snug cursor-pointer ${
+                            checked ? "border-primary/40 bg-primary/5" : ""
+                          } ${!isRepairCategory ? "cursor-not-allowed opacity-60" : ""}`}
+                        >
+                          <Checkbox
+                            checked={checked}
+                            onCheckedChange={() => toggleItemType(index, type)}
+                            disabled={!isRepairCategory}
+                          />
+                          <span className="min-w-0">{formatItemTypeLabel(type)}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <Label>Pris fra (NOK)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="1"
+                      className="mt-1"
+                      value={service.priceMin}
+                      onChange={(e) => update(index, { priceMin: e.target.value })}
+                      disabled={!isRepairCategory}
+                    />
+                  </div>
+                  <div>
+                    <Label>Pris til (NOK)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="1"
+                      className="mt-1"
+                      value={service.priceMax}
+                      onChange={(e) => update(index, { priceMax: e.target.value })}
+                      disabled={!isRepairCategory}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Estimert tid (dager)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="1"
+                    className="mt-1"
+                    value={service.etaDays}
+                    onChange={(e) => update(index, { etaDays: e.target.value })}
+                    disabled={!isRepairCategory}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        className="mt-3 w-full sm:w-auto"
+        onClick={addService}
+        disabled={!isRepairCategory}
+      >
+        Legg til tjeneste
+      </Button>
+    </div>
+  )
+}
+
+function RepairServicesManagerPersisted({ actorId, actorCategory }: { actorId: string; actorCategory?: string }) {
   const [services, setServices] = useState<ActorRepairService[]>([])
   const [loading, setLoading] = useState(true)
   const [adding, setAdding] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [draft, setDraft] = useState(EMPTY_REPAIR)
+
+  const categoryKey = actorCategory?.trim() ?? ""
+  const isRepairCategory = categoryKey ? supportsRepairServices(categoryKey) : false
+
+  const problemOptions = useMemo(() => {
+    if (!isRepairCategory) return [...PROBLEM_TYPES]
+    const scoped = getRepairServiceProblemTypesForCategory(categoryKey)
+    return scoped.length ? scoped : [...PROBLEM_TYPES]
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryKey, isRepairCategory])
+
+  const itemOptions = useMemo(() => {
+    if (!isRepairCategory) return [...ITEM_TYPES]
+    const scoped = getRepairServiceItemTypesForCategory(categoryKey)
+    return scoped.length ? scoped : [...ITEM_TYPES]
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryKey, isRepairCategory])
 
   const load = async () => {
     setLoading(true)
@@ -430,11 +793,11 @@ function RepairServicesManager({ actorId }: { actorId: string }) {
               <Label className="text-xs">Problemtype *</Label>
               <SearchableSelect
                 value={draft.problemType}
-                options={PROBLEM_TYPES.map((p) => ({
-                  value: p,
-                  label: formatProblemTypeLabel(p),
-                  keywords: p,
-                }))}
+                      options={problemOptions.map((p) => ({
+                        value: p,
+                        label: formatProblemTypeLabel(p),
+                        keywords: p,
+                      }))}
                 onChange={(v) => setDraft((prev) => ({ ...prev, problemType: v }))}
                 placeholder="Velg problemtype"
               />
@@ -443,7 +806,7 @@ function RepairServicesManager({ actorId }: { actorId: string }) {
             <div className="space-y-1.5 sm:col-span-2">
               <Label className="text-xs">Gjenstandstyper *</Label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {ITEM_TYPES.map((type) => {
+                {itemOptions.map((type) => {
                   const checked = draft.itemTypes.includes(type)
                   return (
                     <label
@@ -517,7 +880,7 @@ function RepairServicesManager({ actorId }: { actorId: string }) {
           </div>
         </div>
       ) : (
-        <Button type="button" variant="outline" size="sm" onClick={() => setAdding(true)}>
+        <Button type="button" variant="outline" size="sm" onClick={() => setAdding(true)} disabled={!isRepairCategory}>
           <Plus className="mr-2 size-4" />
           Legg til tjeneste
         </Button>
@@ -533,26 +896,32 @@ function RepairServicesManager({ actorId }: { actorId: string }) {
 export function ActorDialogContent({
   mode,
   actorId,
+  actorCategory,
+  createStagedSources,
+  onCreateStagedSourcesChange,
+  createStagedRepairs,
+  onCreateStagedRepairsChange,
   actorFormSections,
   actorExtraKeys,
   formKeys,
   renderField,
 }: ActorDialogContentProps) {
+  const canStageCreate =
+    mode === "create" &&
+    createStagedSources &&
+    onCreateStagedSourcesChange &&
+    createStagedRepairs &&
+    onCreateStagedRepairsChange
+
   return (
     <Tabs defaultValue="actor" className="w-full">
       <TabsList className="mb-4 h-11 px-1 gap-1">
         <TabsTrigger value="actor" className="px-5 text-sm">Aktør</TabsTrigger>
-        <TabsTrigger value="sources" disabled={mode === "create"} className="px-5 text-sm">
+        <TabsTrigger value="sources" disabled={mode === "create" && !canStageCreate} className="px-5 text-sm">
           Aktørkilder
-          {mode === "create" && (
-            <span className="ml-1.5 text-xs opacity-40">(lagre først)</span>
-          )}
         </TabsTrigger>
-        <TabsTrigger value="repair" disabled={mode === "create"} className="px-5 text-sm">
+        <TabsTrigger value="repair" disabled={mode === "create" && !canStageCreate} className="px-5 text-sm">
           Reparasjons-tjenester
-          {mode === "create" && (
-            <span className="ml-1.5 text-xs opacity-40">(lagre først)</span>
-          )}
         </TabsTrigger>
       </TabsList>
 
@@ -587,12 +956,16 @@ export function ActorDialogContent({
       {/* ---- Aktørkilder tab ---- */}
       <TabsContent value="sources">
         <div className="max-h-[60vh] overflow-y-auto pr-1">
-          {mode === "create" || !actorId ? (
-            <p className="text-sm text-muted-foreground py-4">
-              Lagre aktøren først for å legge til kilder.
-            </p>
+          {canStageCreate ? (
+            <SourcesManager
+              variant="staging"
+              sources={createStagedSources}
+              onChange={onCreateStagedSourcesChange}
+            />
+          ) : mode === "edit" && actorId ? (
+            <SourcesManager variant="persisted" actorId={actorId} />
           ) : (
-            <SourcesManager actorId={actorId} />
+            <p className="text-sm text-muted-foreground py-4">Lagre aktøren først for å legge til kilder.</p>
           )}
         </div>
       </TabsContent>
@@ -600,12 +973,19 @@ export function ActorDialogContent({
       {/* ---- Reparasjons-tjenester tab ---- */}
       <TabsContent value="repair">
         <div className="max-h-[60vh] overflow-y-auto pr-1">
-          {mode === "create" || !actorId ? (
+          {canStageCreate ? (
+            <RepairServicesManager
+              variant="staging"
+              actorCategory={actorCategory}
+              services={createStagedRepairs}
+              onChange={onCreateStagedRepairsChange}
+            />
+          ) : mode === "edit" && actorId ? (
+            <RepairServicesManager variant="persisted" actorId={actorId} actorCategory={actorCategory} />
+          ) : (
             <p className="text-sm text-muted-foreground py-4">
               Lagre aktøren først for å legge til reparasjonstjenester.
             </p>
-          ) : (
-            <RepairServicesManager actorId={actorId} />
           )}
         </div>
       </TabsContent>

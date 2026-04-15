@@ -19,6 +19,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AddressSearchInput } from "@/components/address-search-input"
 import { ImageUploadField } from "@/components/image-upload"
 import { ActorDialogContent } from "@/components/admin/actor-dialog"
+import {
+  emptyAdminStagedRepair,
+  emptyAdminStagedSource,
+  type AdminStagedRepair,
+  type AdminStagedSource,
+} from "@/lib/admin/actor-create-staging"
 import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { getCountyByName, getMunicipalitiesForCounty, norwayCounties } from "@/lib/geo"
@@ -30,7 +36,8 @@ import {
   formatItemTypeLabel,
   formatProblemTypeLabel,
 } from "@/lib/enum-labels"
-import { categoryOrder } from "@/lib/categories"
+import { categoryOrder, supportsRepairServices } from "@/lib/categories"
+import { clampRepairServiceDraftToCategory } from "@/lib/category-repair-scope"
 
 type ResourceManagerProps = {
   resourceKey: string
@@ -1011,6 +1018,12 @@ export function ResourceManager({
   const [mode, setMode] = useState<"create" | "edit">("create")
   const [draft, setDraft] = useState<AdminRow>({})
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [createStagedSources, setCreateStagedSources] = useState<AdminStagedSource[]>(() => [
+    emptyAdminStagedSource(),
+  ])
+  const [createStagedRepairs, setCreateStagedRepairs] = useState<AdminStagedRepair[]>(() => [
+    emptyAdminStagedRepair(),
+  ])
   const [saving, setSaving] = useState(false)
   const [slugTouched, setSlugTouched] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -1314,6 +1327,8 @@ export function ResourceManager({
     setMode("create")
     setSelectedId(null)
     setDraft(buildDraft({}, defaultPayload))
+    setCreateStagedSources([emptyAdminStagedSource()])
+    setCreateStagedRepairs([emptyAdminStagedRepair()])
     setSlugTouched(false)
     setDialogOpen(true)
   }
@@ -1369,7 +1384,8 @@ export function ResourceManager({
             })
 
       if (!response.ok) {
-        throw new Error("Lagring feilet")
+        const errBody = (await response.json().catch(() => null)) as { error?: string } | null
+        throw new Error(errBody?.error || "Lagring feilet")
       }
       setDialogOpen(false)
       await loadItems()
@@ -1576,7 +1592,35 @@ export function ResourceManager({
               onChange={(next) => setDraft((prev) => ({ ...prev, [key]: next }))}
               disabled={isReadOnly}
             />
-            ) : enumOptions && meta.kind !== "array" ? (
+            ) : isActorResource && key === "category" ? (
+            <Select
+              value={typeof value === "string" ? value : ""}
+              onValueChange={(next) => {
+                setDraft((prev) => ({ ...prev, category: next }))
+                if (mode === "create") {
+                  if (!supportsRepairServices(next)) {
+                    setCreateStagedRepairs([{ problemType: "", itemTypes: [], priceMin: "", priceMax: "", etaDays: "" }])
+                  } else {
+                    setCreateStagedRepairs((prev) =>
+                      prev.map((s) => clampRepairServiceDraftToCategory(next, s)),
+                    )
+                  }
+                }
+              }}
+              disabled={isReadOnly}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Velg kategori" />
+              </SelectTrigger>
+              <SelectContent>
+                {categoryOrder.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {formatEnumValue("category", option)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : enumOptions && meta.kind !== "array" ? (
             useSearchableSelect ? (
               <SearchableSelect
                 value={typeof value === "string" ? value : NONE_VALUE}
@@ -1696,44 +1740,65 @@ export function ResourceManager({
               className="min-h-[140px] font-mono text-xs"
             />
             ) : (
-              <Input
-                {...commonProps}
-                type={
-                  isArticleResource && key === "publishedAt"
-                    ? "date"
-                    : meta.kind === "number"
-                      ? "number"
-                      : "text"
-                }
-                value={
-                  isArticleResource && key === "publishedAt"
-                    ? (formatInputValue(value, meta) as string).slice(0, 10)
-                    : (formatInputValue(value, meta) as string)
-                }
-                onChange={(event) => {
-                  const nextValue = event.target.value
-                  if (meta.kind === "number") {
-                    setDraft((prev) => ({
-                      ...prev,
-                      [key]: nextValue === "" ? null : Number(nextValue),
-                    }))
-                    return
+              <>
+                <Input
+                  {...commonProps}
+                  type={
+                    isArticleResource && key === "publishedAt"
+                      ? "date"
+                      : meta.kind === "number"
+                        ? "number"
+                        : "text"
                   }
-                  if (isAutoSlugField) {
-                    setSlugTouched(true)
+                  value={
+                    isArticleResource && key === "publishedAt"
+                      ? (formatInputValue(value, meta) as string).slice(0, 10)
+                      : isAutoSlugField && !slugTouched
+                        ? slugify(typeof draft.name === "string" ? draft.name : typeof draft.title === "string" ? draft.title : "")
+                        : (formatInputValue(value, meta) as string)
                   }
-                  setDraft((prev) => {
-                    const nextDraft = {
-                      ...prev,
-                      [key]: nextValue,
+                  placeholder={isAutoSlugField ? "kort-navn" : undefined}
+                  onChange={(event) => {
+                    const nextValue = event.target.value
+                    if (meta.kind === "number") {
+                      setDraft((prev) => ({
+                        ...prev,
+                        [key]: nextValue === "" ? null : Number(nextValue),
+                      }))
+                      return
                     }
-                    if (isAutoSlugSourceField && !slugTouched) {
-                      nextDraft.slug = slugify(nextValue)
+                    if (isAutoSlugField) {
+                      setSlugTouched(true)
                     }
-                    return nextDraft
-                  })
-                }}
-              />
+                    setDraft((prev) => {
+                      const nextDraft = {
+                        ...prev,
+                        [key]: nextValue,
+                      }
+                      if (isAutoSlugSourceField && !slugTouched) {
+                        nextDraft.slug = slugify(nextValue)
+                      }
+                      return nextDraft
+                    })
+                  }}
+                />
+                {isAutoSlugField && isActorResource && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    URL: /aktorer/
+                    {slugTouched
+                      ? (typeof value === "string" && value) || "slug"
+                      : slugify(typeof draft.name === "string" ? draft.name : "") || "slug"}
+                  </p>
+                )}
+                {isAutoSlugField && isArticleResource && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    URL: /artikler/
+                    {slugTouched
+                      ? (typeof value === "string" && value) || "slug"
+                      : slugify(typeof draft.title === "string" ? draft.title : "") || "slug"}
+                  </p>
+                )}
+              </>
             )}
         </div>
       </div>
@@ -2016,6 +2081,11 @@ export function ResourceManager({
             <ActorDialogContent
               mode={mode}
               actorId={selectedId}
+              actorCategory={typeof draft.category === "string" ? draft.category : undefined}
+              createStagedSources={createStagedSources}
+              onCreateStagedSourcesChange={setCreateStagedSources}
+              createStagedRepairs={createStagedRepairs}
+              onCreateStagedRepairsChange={setCreateStagedRepairs}
               actorFormSections={ACTOR_FORM_SECTIONS}
               actorExtraKeys={actorExtraKeys}
               formKeys={formKeys}

@@ -18,6 +18,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { categoryOrder, supportsRepairServices } from "@/lib/categories"
 import {
+  clampRepairServiceDraftToCategory,
+  getRepairServiceItemTypesForCategory,
+  getRepairServiceProblemTypesForCategory,
+} from "@/lib/category-repair-scope"
+import {
   formatCategoryLabel,
   formatEnumLabel,
   formatItemTypeLabel,
@@ -25,7 +30,6 @@ import {
 } from "@/lib/enum-labels"
 import { ACTOR_FORM_SECTIONS } from "@/lib/actor-form-sections"
 import { getCountyByName, getMunicipalitiesForCounty, norwayCounties } from "@/lib/geo"
-import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { cn } from "@/lib/utils"
 
 export type ActorDraft = {
@@ -84,8 +88,6 @@ type ActorSubmissionFormProps = {
 
 type ActorSubmissionTab = "actor" | "sources" | "repair"
 
-const problemTypes = PROBLEM_TYPES
-const itemTypes = ITEM_TYPES
 const sourceTypes = ["website", "social", "google_reviews", "article", "map"]
 
 const sourceTypeLabels: Record<string, string> = {
@@ -310,6 +312,11 @@ export function ActorSubmissionForm({
   )
   const isDialog = variant === "dialog"
   const repairCategory = supportsRepairServices(actor.category)
+  const repairProblemTypes = useMemo(
+    () => getRepairServiceProblemTypesForCategory(actor.category),
+    [actor.category],
+  )
+  const repairItemTypes = useMemo(() => getRepairServiceItemTypesForCategory(actor.category), [actor.category])
   const selectedCountySlug = useMemo(() => getCountyByName(actor.county)?.slug ?? "", [actor.county])
   const municipalityOptions = useMemo(
     () => (selectedCountySlug ? getMunicipalitiesForCounty(selectedCountySlug) : []),
@@ -331,6 +338,11 @@ export function ActorSubmissionForm({
         : [emptyRepairService()],
     )
   }, [repairCategory])
+
+  useEffect(() => {
+    if (!repairCategory) return
+    setRepairServices((prev) => prev.map((service) => clampRepairServiceDraftToCategory(actor.category, service)))
+  }, [actor.category, repairCategory])
 
   const hasRepairServiceInput = (service: RepairServiceDraft) =>
     Boolean(
@@ -613,7 +625,7 @@ export function ActorSubmissionForm({
                       value={service.problemType}
                       onChange={(value) => updateRepairService(index, { problemType: value })}
                       placeholder="Velg problemtype"
-                      options={problemTypes.map((option) => ({
+                      options={repairProblemTypes.map((option) => ({
                         value: option,
                         label: formatProblemTypeLabel(option),
                         keywords: option,
@@ -628,7 +640,7 @@ export function ActorSubmissionForm({
                   <div className="mt-2">
                     <MultiSelect
                       value={service.itemTypes}
-                      options={itemTypes}
+                      options={repairItemTypes}
                       getLabel={formatItemTypeLabel}
                       onChange={(value) => updateRepairService(index, { itemTypes: value })}
                       disabled={!repairCategory}
@@ -811,6 +823,10 @@ export function ActorSubmissionForm({
                   updateActor("category", value)
                   if (!supportsRepairServices(value)) {
                     setRepairServices([emptyRepairService()])
+                  } else {
+                    setRepairServices((prev) =>
+                      prev.map((service) => clampRepairServiceDraftToCategory(value, service)),
+                    )
                   }
                 }}
               >
