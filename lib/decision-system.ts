@@ -1,4 +1,5 @@
 import {
+  type DecisionCaseKey,
   evaluateDecision,
   type ConfidenceLevel,
   type DecisionInput,
@@ -43,6 +44,7 @@ export const DECISION_SYSTEM_VERSION = "decision-system-v1"
 
 export type {
   ConfidenceLevel,
+  DecisionCaseKey,
   CoverageReason,
   DecisionGeoContext,
   DecisionInput,

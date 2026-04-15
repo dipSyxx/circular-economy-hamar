@@ -124,11 +124,18 @@ const getServiceMatchQuality = (
   service: RepairService,
   problemType: ProblemType,
   itemType: ItemType,
+  caseKey?: DecisionInput["caseKey"],
 ) => {
-  if (service.problemType !== problemType) return 0
   const items = service.itemTypes ?? []
-  if (!items.length) return 0.7
-  return items.includes(itemType) ? 1 : 0.3
+  const itemQuality = !items.length ? 0.7 : items.includes(itemType) ? 1 : 0.3
+
+  if (caseKey === "screen_protector") {
+    if (service.problemType !== "screen") return 0
+    return itemQuality * 0.35
+  }
+
+  if (service.problemType !== problemType) return 0
+  return itemQuality
 }
 
 const serializeDate = (value?: Date) => value?.toISOString()
@@ -218,13 +225,14 @@ const getRecommendationCandidates = (
   let baseCandidates: CandidateActor[] = []
 
   if (decision.recommendation === "repair") {
+    const shouldExposeServiceMatch = input.caseKey !== "screen_protector"
     baseCandidates = scopedActors
       .filter((actor) => repairCategories.has(actor.category))
       .map((actor) => {
         let bestServiceMatch: RepairService | null = null
         let bestServiceQuality = 0
         for (const service of actor.repairServices ?? []) {
-          const quality = getServiceMatchQuality(service, input.problemType, input.itemType)
+          const quality = getServiceMatchQuality(service, input.problemType, input.itemType, input.caseKey)
           if (quality > bestServiceQuality) {
             bestServiceQuality = quality
             bestServiceMatch = service
@@ -236,7 +244,7 @@ const getRecommendationCandidates = (
           actor,
           geoPriority,
           coverageReason,
-          serviceMatch: bestServiceMatch,
+          serviceMatch: shouldExposeServiceMatch ? bestServiceMatch : null,
           serviceMatchQuality: bestServiceQuality,
           recommendationFit: categoryWeightsByRecommendation.repair[actor.category] ?? 0,
         }
@@ -326,6 +334,10 @@ const getWhyThisActor = (
     if (candidate.serviceMatch.priceMax <= input.budgetNok) {
       why.push(`Estimert reparasjon passer innenfor budsjettet ditt.`)
     }
+  }
+
+  if (recommendation === "repair" && input.caseKey === "screen_protector" && candidate.serviceMatchQuality > 0) {
+    why.push("Kan sannsynligvis hjelpe med ny skjermbeskytter eller sjekk av om underliggende skjerm er skadet.")
   }
 
   if (recommendation !== "repair") {

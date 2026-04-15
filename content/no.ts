@@ -517,11 +517,80 @@ const decideProblemOptionsElectronics = [
   { value: "other", label: "Annet" },
 ];
 
+const decideProblemOptionsPhone = [
+  { value: "screen", label: "Knust skjerm" },
+  { value: "battery", label: "Dårlig batteri" },
+  { value: "no_power", label: "Starter ikke" },
+  { value: "overheating", label: "Overoppheting" },
+  { value: "charging_port", label: "Ladeport fungerer ikke" },
+  { value: "speaker", label: "Lyd fungerer ikke" },
+  { value: "microphone", label: "Mikrofon fungerer ikke" },
+  { value: "camera", label: "Kamera fungerer ikke" },
+  { value: "software", label: "Programvare/oppdatering" },
+  { value: "connectivity", label: "Tilkobling" },
+  { value: "water", label: "Vannskade" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsLaptop = [
+  { value: "screen", label: "Knust skjerm" },
+  { value: "battery", label: "Dårlig batteri" },
+  { value: "slow", label: "Treg ytelse" },
+  { value: "no_power", label: "Starter ikke" },
+  { value: "overheating", label: "Overoppheting" },
+  { value: "charging_port", label: "Ladeport fungerer ikke" },
+  { value: "keyboard", label: "Tastatur fungerer ikke" },
+  { value: "trackpad", label: "Styreflate fungerer ikke" },
+  { value: "storage", label: "Lagring/minne" },
+  { value: "software", label: "Programvare/oppdatering" },
+  { value: "connectivity", label: "Tilkobling" },
+  { value: "water", label: "Vannskade" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsTablet = [
+  { value: "screen", label: "Knust skjerm" },
+  { value: "battery", label: "Dårlig batteri" },
+  { value: "no_power", label: "Starter ikke" },
+  { value: "charging_port", label: "Ladeport fungerer ikke" },
+  { value: "speaker", label: "Lyd fungerer ikke" },
+  { value: "microphone", label: "Mikrofon fungerer ikke" },
+  { value: "camera", label: "Kamera fungerer ikke" },
+  { value: "software", label: "Programvare/oppdatering" },
+  { value: "connectivity", label: "Tilkobling" },
+  { value: "water", label: "Vannskade" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsDesktop = [
+  { value: "slow", label: "Treg ytelse" },
+  { value: "no_power", label: "Starter ikke" },
+  { value: "overheating", label: "Overoppheting" },
+  { value: "speaker", label: "Lyd fungerer ikke" },
+  { value: "storage", label: "Lagring/minne" },
+  { value: "software", label: "Programvare/oppdatering" },
+  { value: "connectivity", label: "Tilkobling" },
+  { value: "broken_part", label: "Ødelagt del" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsWatch = [
+  { value: "screen", label: "Knust skjerm" },
+  { value: "battery", label: "Dårlig batteri" },
+  { value: "no_power", label: "Starter ikke" },
+  { value: "charging_port", label: "Lader fungerer ikke" },
+  { value: "connectivity", label: "Tilkobling" },
+  { value: "water", label: "Vannskade" },
+  { value: "broken_part", label: "Ødelagt del" },
+  { value: "other", label: "Annet" },
+];
+
 const decideProblemOptionsDisplay = [
   { value: "screen", label: "Skjermproblem" },
   { value: "no_power", label: "Starter ikke" },
   { value: "connectivity", label: "Tilkobling" },
   { value: "speaker", label: "Lyd fungerer ikke" },
+  { value: "broken_part", label: "Ødelagt del" },
   { value: "other", label: "Annet" },
 ];
 
@@ -529,6 +598,31 @@ const decideProblemOptionsPrinter = [
   { value: "no_power", label: "Starter ikke" },
   { value: "connectivity", label: "Tilkobling" },
   { value: "software", label: "Programvare/driver" },
+  { value: "noise", label: "Unormal støy" },
+  { value: "broken_part", label: "Ødelagt del" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsCamera = [
+  { value: "screen", label: "Skjermproblem" },
+  { value: "battery", label: "Dårlig batteri" },
+  { value: "no_power", label: "Starter ikke" },
+  { value: "charging_port", label: "Ladeport fungerer ikke" },
+  { value: "camera", label: "Linse/kamera fungerer ikke" },
+  { value: "connectivity", label: "Tilkobling" },
+  { value: "water", label: "Vannskade" },
+  { value: "broken_part", label: "Ødelagt del" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsConsole = [
+  { value: "no_power", label: "Starter ikke" },
+  { value: "overheating", label: "Overoppheting" },
+  { value: "charging_port", label: "Port fungerer ikke" },
+  { value: "speaker", label: "Lyd fungerer ikke" },
+  { value: "storage", label: "Lagring/minne" },
+  { value: "software", label: "Programvare/oppdatering" },
+  { value: "connectivity", label: "Tilkobling" },
   { value: "broken_part", label: "Ødelagt del" },
   { value: "other", label: "Annet" },
 ];
@@ -548,6 +642,14 @@ const decideProblemOptionsAppliance = [
   { value: "leak", label: "Lekkasjer" },
   { value: "noise", label: "Unormal støy" },
   { value: "motor", label: "Motor/kompressor" },
+  { value: "broken_part", label: "Ødelagt del" },
+  { value: "other", label: "Annet" },
+];
+
+const decideProblemOptionsSmallAppliance = [
+  { value: "no_power", label: "Starter ikke" },
+  { value: "overheating", label: "Overoppheting" },
+  { value: "noise", label: "Unormal støy" },
   { value: "broken_part", label: "Ødelagt del" },
   { value: "other", label: "Annet" },
 ];
@@ -617,18 +719,18 @@ export const decideCopy = {
     { value: "other", label: "Annet" },
   ],
   problemOptions: {
-    phone: decideProblemOptionsElectronics,
-    laptop: decideProblemOptionsElectronics,
-    tablet: decideProblemOptionsElectronics,
-    desktop: decideProblemOptionsElectronics,
-    smartwatch: decideProblemOptionsElectronics,
+    phone: decideProblemOptionsPhone,
+    laptop: decideProblemOptionsLaptop,
+    tablet: decideProblemOptionsTablet,
+    desktop: decideProblemOptionsDesktop,
+    smartwatch: decideProblemOptionsWatch,
     tv: decideProblemOptionsDisplay,
     monitor: decideProblemOptionsDisplay,
     printer: decideProblemOptionsPrinter,
-    camera: decideProblemOptionsElectronics,
-    gaming_console: decideProblemOptionsElectronics,
+    camera: decideProblemOptionsCamera,
+    gaming_console: decideProblemOptionsConsole,
     audio: decideProblemOptionsAudio,
-    small_appliance: decideProblemOptionsAppliance,
+    small_appliance: decideProblemOptionsSmallAppliance,
     large_appliance: decideProblemOptionsAppliance,
     bicycle: decideProblemOptionsBike,
     furniture: decideProblemOptionsFurniture,
@@ -651,6 +753,18 @@ export const decideCopy = {
     title: "Beskriv problemet med egne ord",
     description: "Skriv kort hva som har skjedd, så tolker vi problemet og kobler det mot beslutningsmotoren og lokale aktører.",
     inputLabel: "Hva trenger du hjelp med?",
+    constraintsTitle: "Rammer for vurderingen",
+    constraintsDescription: "Legg inn budsjett, ønsket tid og hva som betyr mest for deg før vi vurderer saken.",
+    priorityUnsetLabel: "Ingen spesifikk prioritet",
+    invalidBudgetLabel: "Oppgi et gyldig budsjett på 0 eller mer.",
+    invalidTimeLabel: "Oppgi en gyldig tid på 0 dager eller mer.",
+    locationHint: "Del gjerne posisjonen din for å få mer presise lokale anbefalinger.",
+    locationReadyLabel: "Posisjonen din er lagt til og brukes i lokale anbefalinger.",
+    geoPromptTitle: "Del posisjonen din for bedre treff",
+    geoPromptDescription:
+      "For de beste resultatene og mer presise anbefalingene trenger vi posisjonen din. Du kan også fortsette uten og legge den til senere.",
+    geoPromptConfirmLabel: "Be om geodata",
+    geoPromptSkipLabel: "Fortsett uten geodata",
     placeholder:
       "For eksempel: Bordbenet er løst, joggeskoene mine har løsnet i sålen, eller telefonskjermen virker ikke.",
     submitLabel: "Få AI-råd",

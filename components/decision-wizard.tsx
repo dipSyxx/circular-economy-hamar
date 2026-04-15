@@ -11,6 +11,7 @@ import { DecisionOverview } from "@/components/decision-overview"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { getDecisionAssistantDefaults } from "@/lib/ai/decision-assistant-defaults"
 import { decideCopy, pageCopy } from "@/content/no"
 import type { Actor, Co2eSource, Co2eSourceItem } from "@/lib/data"
 import type {
@@ -41,12 +42,13 @@ export function DecisionWizard({
   co2eSourceItems,
   showIntro = true,
 }: DecisionWizardProps) {
+  const { budgetNok: defaultBudgetNok, timeDays: defaultTimeDays } = getDecisionAssistantDefaults()
   const [step, setStep] = useState(0)
   const [showResult, setShowResult] = useState(false)
   const [itemType, setItemType] = useState<ItemType | null>(null)
   const [problemType, setProblemType] = useState<ProblemType | null>(null)
-  const [budget, setBudget] = useState(1500)
-  const [timeDays, setTimeDays] = useState(3)
+  const [budget, setBudget] = useState(defaultBudgetNok)
+  const [timeDays, setTimeDays] = useState(defaultTimeDays)
   const [priority, setPriority] = useState<Priority | undefined>(undefined)
   const [countySlug, setCountySlug] = useState("")
   const [municipalitySlug, setMunicipalitySlug] = useState("")
@@ -222,8 +224,8 @@ export function DecisionWizard({
     setShowResult(false)
     setItemType(null)
     setProblemType(null)
-    setBudget(1500)
-    setTimeDays(3)
+    setBudget(defaultBudgetNok)
+    setTimeDays(defaultTimeDays)
     setPriority(undefined)
     setCountySlug("")
     setMunicipalitySlug("")

@@ -1,0 +1,7 @@
+export const DEFAULT_DECISION_ASSISTANT_BUDGET_NOK = 1500
+export const DEFAULT_DECISION_ASSISTANT_TIME_DAYS = 3
+
+export const getDecisionAssistantDefaults = () => ({
+  budgetNok: DEFAULT_DECISION_ASSISTANT_BUDGET_NOK,
+  timeDays: DEFAULT_DECISION_ASSISTANT_TIME_DAYS,
+})

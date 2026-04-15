@@ -1,4 +1,4 @@
-import type { DecisionInput, DecisionOutput } from "@/lib/decision-system"
+import type { DecisionInput, DecisionOutput, Priority } from "@/lib/decision-system"
 import type {
   DecisionGeoContext,
   DecisionMatchFallbackReason,
@@ -7,6 +7,9 @@ import type {
 
 export interface AIDecisionRequest extends DecisionGeoContext {
   message: string
+  budgetNok?: number
+  timeDays?: number
+  priority?: Priority
 }
 
 export interface AIDecisionResponse {

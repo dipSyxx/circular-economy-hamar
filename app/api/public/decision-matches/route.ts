@@ -7,6 +7,7 @@ import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { getActors } from "@/lib/public-data"
 
 const PRIORITIES = ["save_money", "save_time", "save_impact", "balanced"] as const
+const CASE_KEYS = ["screen_protector"] as const
 
 const requestSchema = z.object({
   itemType: z.enum(ITEM_TYPES),
@@ -14,6 +15,7 @@ const requestSchema = z.object({
   budgetNok: z.number().min(0),
   timeDays: z.number().min(0),
   priority: z.enum(PRIORITIES).optional(),
+  caseKey: z.enum(CASE_KEYS).optional(),
   modelRepairabilityScore: z.number().min(0).max(10).optional(),
   countySlug: z.string().trim().min(1).optional(),
   municipalitySlug: z.string().trim().min(1).optional(),

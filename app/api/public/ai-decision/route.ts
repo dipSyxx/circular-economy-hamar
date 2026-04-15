@@ -7,8 +7,13 @@ import { evaluateDecisionForContext } from "@/lib/decision-system-server"
 import { TRANSPORT_MODES } from "@/lib/decision-system"
 import { getActors } from "@/lib/public-data"
 
+const PRIORITIES = ["save_money", "save_time", "save_impact", "balanced"] as const
+
 const requestSchema = z.object({
   message: z.string().trim().min(3),
+  budgetNok: z.number().int().min(0).optional(),
+  timeDays: z.number().int().min(0).optional(),
+  priority: z.enum(PRIORITIES).optional(),
   countySlug: z.string().trim().min(1).optional(),
   municipalitySlug: z.string().trim().min(1).optional(),
   userLat: z.number().min(-90).max(90).optional(),
@@ -27,8 +32,12 @@ export async function POST(request: Request) {
 
   try {
     const actors = await getActors()
-    const { message, countySlug, municipalitySlug, userLat, userLng, transportMode, maxTravelMinutes } = parsed.data
-    const extraction = await extractDecisionAssistantInput(message)
+    const { message, budgetNok, timeDays, priority, countySlug, municipalitySlug, userLat, userLng, transportMode, maxTravelMinutes } = parsed.data
+    const extraction = await extractDecisionAssistantInput(message, {
+      budgetNok,
+      timeDays,
+      priority,
+    })
     const result = await evaluateDecisionForContext(extraction.extractedInput, actors, {
       countySlug,
       municipalitySlug,

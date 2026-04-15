@@ -3,6 +3,7 @@ import type { ItemType, ProblemType } from "@/lib/prisma-enums"
 export type { ItemType, ProblemType } from "@/lib/prisma-enums"
 export type Priority = "save_money" | "save_time" | "save_impact" | "balanced"
 export type Recommendation = "repair" | "buy_used" | "donate" | "recycle"
+export type DecisionCaseKey = "screen_protector"
 export type ReasonKey =
   | "budget_ok"
   | "fast_enough"
@@ -20,6 +21,7 @@ export interface DecisionInput {
   budgetNok: number
   timeDays: number
   priority?: Priority
+  caseKey?: DecisionCaseKey
   modelRepairabilityScore?: number
 }
 
@@ -72,10 +74,32 @@ interface DecisionDataEntry {
   usedPriceMax: number
   newPrice: number
   risk: number
+  reusePotential?: number
+  recyclePotential?: number
 }
 
-type DecisionData = Record<ItemType, Partial<Record<ProblemType, DecisionDataEntry>>>
+interface ProblemProfile {
+  repairCostMinMultiplier: number
+  repairCostMaxMultiplier: number
+  repairDaysDelta: number
+  riskDelta: number
+  donateSuitability: number
+  recycleSuitability: number
+}
+
+interface CaseBehavior {
+  data: Partial<DecisionDataEntry>
+  impactMultiplier?: number
+  optionSuitability?: Partial<Record<Recommendation, number>>
+}
+
 type Co2Range = { min: number; max: number }
+type DecisionSpecificity = "case" | "item_problem" | "item_profile"
+
+const MIN_VISIBLE_OPTION_SUITABILITY = 0.08
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
+const roundPositive = (value: number, min = 0) => Math.max(min, Math.round(value))
 
 const embodiedCo2eKg: Record<ItemType, Co2Range> = {
   phone: { min: 48, max: 60 },
@@ -141,65 +165,253 @@ const getCo2eSavedRange = (itemType: ItemType, optionType: Recommendation, baseR
   }
 }
 
+const scaleRange = (range: Co2Range, factor: number): Co2Range => ({
+  min: range.min * factor,
+  max: range.max * factor,
+})
+
 const policyBias: Record<Recommendation, number> = {
-  repair: 0.06,
-  buy_used: 0.03,
-  donate: 0.02,
-  recycle: -0.04,
+  repair: 0.08,
+  buy_used: 0.02,
+  donate: -0.02,
+  recycle: -0.08,
 }
 
-const genericDecisionData: Partial<Record<ProblemType, DecisionDataEntry>> = {
-  other: {
-    repairCostMin: 500,
-    repairCostMax: 1500,
-    repairDays: 3,
-    usedPriceMin: 1500,
-    usedPriceMax: 4000,
-    newPrice: 7000,
-    risk: 0.2,
-  },
+const itemProfiles: Record<ItemType, DecisionDataEntry> = {
+  phone: { repairCostMin: 500, repairCostMax: 1400, repairDays: 1, usedPriceMin: 2000, usedPriceMax: 5000, newPrice: 8000, risk: 0.12, reusePotential: 0.42, recyclePotential: 0.95 },
+  laptop: { repairCostMin: 1000, repairCostMax: 2800, repairDays: 2, usedPriceMin: 3000, usedPriceMax: 8000, newPrice: 12000, risk: 0.15, reusePotential: 0.55, recyclePotential: 0.95 },
+  tablet: { repairCostMin: 700, repairCostMax: 1900, repairDays: 2, usedPriceMin: 1500, usedPriceMax: 4500, newPrice: 6500, risk: 0.14, reusePotential: 0.45, recyclePotential: 0.93 },
+  desktop: { repairCostMin: 900, repairCostMax: 2200, repairDays: 2, usedPriceMin: 2500, usedPriceMax: 6500, newPrice: 9000, risk: 0.12, reusePotential: 0.6, recyclePotential: 0.95 },
+  smartwatch: { repairCostMin: 400, repairCostMax: 1100, repairDays: 2, usedPriceMin: 1000, usedPriceMax: 2500, newPrice: 3500, risk: 0.16, reusePotential: 0.35, recyclePotential: 0.9 },
+  tv: { repairCostMin: 1200, repairCostMax: 3200, repairDays: 4, usedPriceMin: 2500, usedPriceMax: 7000, newPrice: 9000, risk: 0.22, reusePotential: 0.5, recyclePotential: 0.85 },
+  monitor: { repairCostMin: 600, repairCostMax: 1600, repairDays: 2, usedPriceMin: 1200, usedPriceMax: 3500, newPrice: 5000, risk: 0.12, reusePotential: 0.55, recyclePotential: 0.9 },
+  printer: { repairCostMin: 350, repairCostMax: 1000, repairDays: 2, usedPriceMin: 400, usedPriceMax: 1500, newPrice: 2500, risk: 0.18, reusePotential: 0.35, recyclePotential: 0.85 },
+  camera: { repairCostMin: 700, repairCostMax: 2000, repairDays: 3, usedPriceMin: 2500, usedPriceMax: 7000, newPrice: 9000, risk: 0.16, reusePotential: 0.6, recyclePotential: 0.85 },
+  gaming_console: { repairCostMin: 500, repairCostMax: 1500, repairDays: 2, usedPriceMin: 1800, usedPriceMax: 4500, newPrice: 6500, risk: 0.12, reusePotential: 0.55, recyclePotential: 0.9 },
+  audio: { repairCostMin: 250, repairCostMax: 900, repairDays: 2, usedPriceMin: 500, usedPriceMax: 2500, newPrice: 3500, risk: 0.15, reusePotential: 0.45, recyclePotential: 0.82 },
+  small_appliance: { repairCostMin: 250, repairCostMax: 900, repairDays: 2, usedPriceMin: 400, usedPriceMax: 1800, newPrice: 2500, risk: 0.18, reusePotential: 0.4, recyclePotential: 0.82 },
+  large_appliance: { repairCostMin: 900, repairCostMax: 3000, repairDays: 3, usedPriceMin: 2500, usedPriceMax: 9000, newPrice: 12000, risk: 0.22, reusePotential: 0.5, recyclePotential: 0.9 },
+  bicycle: { repairCostMin: 180, repairCostMax: 850, repairDays: 1, usedPriceMin: 1200, usedPriceMax: 5000, newPrice: 7000, risk: 0.08, reusePotential: 0.78, recyclePotential: 0.55 },
+  furniture: { repairCostMin: 150, repairCostMax: 700, repairDays: 2, usedPriceMin: 500, usedPriceMax: 3500, newPrice: 5000, risk: 0.08, reusePotential: 0.92, recyclePotential: 0.28 },
+  clothing: { repairCostMin: 50, repairCostMax: 220, repairDays: 2, usedPriceMin: 100, usedPriceMax: 700, newPrice: 900, risk: 0.04, reusePotential: 0.88, recyclePotential: 0.18 },
+  footwear: { repairCostMin: 90, repairCostMax: 320, repairDays: 2, usedPriceMin: 200, usedPriceMax: 900, newPrice: 1400, risk: 0.08, reusePotential: 0.58, recyclePotential: 0.16 },
+  other: { repairCostMin: 400, repairCostMax: 1300, repairDays: 3, usedPriceMin: 1000, usedPriceMax: 3500, newPrice: 5000, risk: 0.2, reusePotential: 0.42, recyclePotential: 0.6 },
 }
 
-const decisionData: DecisionData = {
+const problemProfiles: Record<ProblemType, ProblemProfile> = {
+  screen: { repairCostMinMultiplier: 1.25, repairCostMaxMultiplier: 1.45, repairDaysDelta: 0, riskDelta: 0.04, donateSuitability: 0.18, recycleSuitability: 0.35 },
+  battery: { repairCostMinMultiplier: 0.95, repairCostMaxMultiplier: 1.15, repairDaysDelta: 0, riskDelta: 0.08, donateSuitability: 0.12, recycleSuitability: 0.65 },
+  slow: { repairCostMinMultiplier: 0.45, repairCostMaxMultiplier: 0.6, repairDaysDelta: 0, riskDelta: -0.06, donateSuitability: 0.65, recycleSuitability: 0.1 },
+  no_power: { repairCostMinMultiplier: 1.2, repairCostMaxMultiplier: 1.45, repairDaysDelta: 1, riskDelta: 0.12, donateSuitability: 0.08, recycleSuitability: 0.85 },
+  water: { repairCostMinMultiplier: 1.45, repairCostMaxMultiplier: 1.8, repairDaysDelta: 2, riskDelta: 0.18, donateSuitability: 0.03, recycleSuitability: 0.92 },
+  overheating: { repairCostMinMultiplier: 0.85, repairCostMaxMultiplier: 1.05, repairDaysDelta: 0, riskDelta: 0.12, donateSuitability: 0.12, recycleSuitability: 0.75 },
+  charging_port: { repairCostMinMultiplier: 0.7, repairCostMaxMultiplier: 0.85, repairDaysDelta: 0, riskDelta: 0.03, donateSuitability: 0.2, recycleSuitability: 0.4 },
+  speaker: { repairCostMinMultiplier: 0.65, repairCostMaxMultiplier: 0.8, repairDaysDelta: 0, riskDelta: 0.02, donateSuitability: 0.35, recycleSuitability: 0.32 },
+  microphone: { repairCostMinMultiplier: 0.65, repairCostMaxMultiplier: 0.8, repairDaysDelta: 0, riskDelta: 0.02, donateSuitability: 0.3, recycleSuitability: 0.32 },
+  camera: { repairCostMinMultiplier: 0.75, repairCostMaxMultiplier: 0.95, repairDaysDelta: 0, riskDelta: 0.03, donateSuitability: 0.3, recycleSuitability: 0.28 },
+  keyboard: { repairCostMinMultiplier: 0.75, repairCostMaxMultiplier: 0.95, repairDaysDelta: 0, riskDelta: 0.03, donateSuitability: 0.28, recycleSuitability: 0.25 },
+  trackpad: { repairCostMinMultiplier: 0.7, repairCostMaxMultiplier: 0.9, repairDaysDelta: 0, riskDelta: 0.02, donateSuitability: 0.25, recycleSuitability: 0.22 },
+  storage: { repairCostMinMultiplier: 0.75, repairCostMaxMultiplier: 0.95, repairDaysDelta: 1, riskDelta: 0.04, donateSuitability: 0.4, recycleSuitability: 0.35 },
+  software: { repairCostMinMultiplier: 0.35, repairCostMaxMultiplier: 0.5, repairDaysDelta: 0, riskDelta: -0.08, donateSuitability: 0.75, recycleSuitability: 0.08 },
+  connectivity: { repairCostMinMultiplier: 0.5, repairCostMaxMultiplier: 0.7, repairDaysDelta: 0, riskDelta: 0.01, donateSuitability: 0.45, recycleSuitability: 0.18 },
+  broken_part: { repairCostMinMultiplier: 0.6, repairCostMaxMultiplier: 0.8, repairDaysDelta: 0, riskDelta: 0.03, donateSuitability: 0.24, recycleSuitability: 0.28 },
+  cosmetic: { repairCostMinMultiplier: 0.3, repairCostMaxMultiplier: 0.45, repairDaysDelta: 0, riskDelta: -0.08, donateSuitability: 0.88, recycleSuitability: 0.05 },
+  noise: { repairCostMinMultiplier: 0.6, repairCostMaxMultiplier: 0.85, repairDaysDelta: 0, riskDelta: 0.05, donateSuitability: 0.18, recycleSuitability: 0.42 },
+  leak: { repairCostMinMultiplier: 0.95, repairCostMaxMultiplier: 1.2, repairDaysDelta: 1, riskDelta: 0.15, donateSuitability: 0.04, recycleSuitability: 0.88 },
+  motor: { repairCostMinMultiplier: 1.2, repairCostMaxMultiplier: 1.45, repairDaysDelta: 1, riskDelta: 0.14, donateSuitability: 0.04, recycleSuitability: 0.82 },
+  zipper: { repairCostMinMultiplier: 0.5, repairCostMaxMultiplier: 0.7, repairDaysDelta: 0, riskDelta: -0.03, donateSuitability: 0.25, recycleSuitability: 0.08 },
+  seam: { repairCostMinMultiplier: 0.35, repairCostMaxMultiplier: 0.55, repairDaysDelta: 0, riskDelta: -0.04, donateSuitability: 0.35, recycleSuitability: 0.06 },
+  tear: { repairCostMinMultiplier: 0.4, repairCostMaxMultiplier: 0.6, repairDaysDelta: 0, riskDelta: -0.02, donateSuitability: 0.2, recycleSuitability: 0.08 },
+  stain: { repairCostMinMultiplier: 0.25, repairCostMaxMultiplier: 0.4, repairDaysDelta: 0, riskDelta: -0.05, donateSuitability: 0.52, recycleSuitability: 0.08 },
+  sole: { repairCostMinMultiplier: 0.55, repairCostMaxMultiplier: 0.8, repairDaysDelta: 0, riskDelta: 0.01, donateSuitability: 0.18, recycleSuitability: 0.08 },
+  chain: { repairCostMinMultiplier: 0.35, repairCostMaxMultiplier: 0.55, repairDaysDelta: 0, riskDelta: -0.04, donateSuitability: 0.35, recycleSuitability: 0.06 },
+  brake: { repairCostMinMultiplier: 0.5, repairCostMaxMultiplier: 0.75, repairDaysDelta: 0, riskDelta: 0.08, donateSuitability: 0.08, recycleSuitability: 0.08 },
+  tire: { repairCostMinMultiplier: 0.3, repairCostMaxMultiplier: 0.5, repairDaysDelta: 0, riskDelta: -0.03, donateSuitability: 0.25, recycleSuitability: 0.12 },
+  wheel: { repairCostMinMultiplier: 0.45, repairCostMaxMultiplier: 0.7, repairDaysDelta: 0, riskDelta: 0.02, donateSuitability: 0.2, recycleSuitability: 0.1 },
+  other: { repairCostMinMultiplier: 1, repairCostMaxMultiplier: 1, repairDaysDelta: 0, riskDelta: 0, donateSuitability: 0.25, recycleSuitability: 0.3 },
+}
+
+const itemProblemOverrides: Partial<Record<ItemType, Partial<Record<ProblemType, Partial<DecisionDataEntry>>>>> = {
   phone: {
-    screen: { repairCostMin: 800, repairCostMax: 2000, repairDays: 1, usedPriceMin: 2000, usedPriceMax: 5000, newPrice: 8000, risk: 0.1 },
-    battery: { repairCostMin: 500, repairCostMax: 1000, repairDays: 1, usedPriceMin: 2000, usedPriceMax: 5000, newPrice: 8000, risk: 0.1 },
-    slow: { repairCostMin: 300, repairCostMax: 800, repairDays: 1, usedPriceMin: 2000, usedPriceMax: 5000, newPrice: 8000, risk: 0.05 },
-    no_power: { repairCostMin: 1000, repairCostMax: 2500, repairDays: 3, usedPriceMin: 2000, usedPriceMax: 5000, newPrice: 8000, risk: 0.25 },
-    water: { repairCostMin: 1500, repairCostMax: 3500, repairDays: 4, usedPriceMin: 2000, usedPriceMax: 5000, newPrice: 8000, risk: 0.35 },
-    other: { repairCostMin: 600, repairCostMax: 1500, repairDays: 2, usedPriceMin: 1800, usedPriceMax: 4000, newPrice: 7000, risk: 0.2 },
+    screen: { repairCostMin: 900, repairCostMax: 2500, repairDays: 1, risk: 0.14 },
+    battery: { repairCostMin: 600, repairCostMax: 1200, repairDays: 1, risk: 0.18 },
+    charging_port: { repairCostMin: 500, repairCostMax: 1200, repairDays: 1, risk: 0.14 },
+    software: { repairCostMin: 150, repairCostMax: 500, repairDays: 1, risk: 0.05 },
+    water: { repairCostMin: 1600, repairCostMax: 3600, repairDays: 4, risk: 0.4 },
   },
   laptop: {
-    screen: { repairCostMin: 1500, repairCostMax: 4000, repairDays: 3, usedPriceMin: 3000, usedPriceMax: 8000, newPrice: 12000, risk: 0.15 },
-    battery: { repairCostMin: 800, repairCostMax: 2000, repairDays: 2, usedPriceMin: 3000, usedPriceMax: 8000, newPrice: 12000, risk: 0.1 },
-    slow: { repairCostMin: 500, repairCostMax: 1500, repairDays: 2, usedPriceMin: 3000, usedPriceMax: 8000, newPrice: 12000, risk: 0.1 },
-    no_power: { repairCostMin: 2000, repairCostMax: 5000, repairDays: 4, usedPriceMin: 3000, usedPriceMax: 8000, newPrice: 12000, risk: 0.3 },
-    water: { repairCostMin: 2500, repairCostMax: 6000, repairDays: 5, usedPriceMin: 3000, usedPriceMax: 8000, newPrice: 12000, risk: 0.4 },
-    other: { repairCostMin: 1200, repairCostMax: 3000, repairDays: 3, usedPriceMin: 3000, usedPriceMax: 8000, newPrice: 12000, risk: 0.2 },
+    screen: { repairCostMin: 1800, repairCostMax: 4500, repairDays: 3, risk: 0.18 },
+    battery: { repairCostMin: 900, repairCostMax: 2200, repairDays: 2, risk: 0.16 },
+    keyboard: { repairCostMin: 700, repairCostMax: 1800, repairDays: 2, risk: 0.14 },
+    trackpad: { repairCostMin: 700, repairCostMax: 1600, repairDays: 2, risk: 0.14 },
+    storage: { repairCostMin: 800, repairCostMax: 2200, repairDays: 2, risk: 0.16 },
+    software: { repairCostMin: 300, repairCostMax: 900, repairDays: 1, risk: 0.06 },
+    water: { repairCostMin: 2600, repairCostMax: 6200, repairDays: 5, risk: 0.45 },
   },
-  tablet: genericDecisionData,
-  desktop: genericDecisionData,
-  smartwatch: genericDecisionData,
-  tv: genericDecisionData,
-  monitor: genericDecisionData,
-  printer: genericDecisionData,
-  camera: genericDecisionData,
-  gaming_console: genericDecisionData,
-  audio: genericDecisionData,
-  small_appliance: genericDecisionData,
-  large_appliance: genericDecisionData,
-  bicycle: genericDecisionData,
-  furniture: genericDecisionData,
+  tablet: {
+    screen: { repairCostMin: 900, repairCostMax: 2400, repairDays: 2, risk: 0.17 },
+    battery: { repairCostMin: 600, repairCostMax: 1400, repairDays: 2, risk: 0.19 },
+  },
+  tv: {
+    screen: { repairCostMin: 1800, repairCostMax: 5000, repairDays: 5, risk: 0.3 },
+  },
+  monitor: {
+    screen: { repairCostMin: 700, repairCostMax: 2000, repairDays: 2, risk: 0.16 },
+  },
+  printer: {
+    software: { repairCostMin: 150, repairCostMax: 500, repairDays: 1, risk: 0.08 },
+    broken_part: { repairCostMin: 250, repairCostMax: 850, repairDays: 2, risk: 0.2 },
+  },
+  camera: {
+    camera: { repairCostMin: 600, repairCostMax: 1800, repairDays: 3, risk: 0.18 },
+    screen: { repairCostMin: 500, repairCostMax: 1400, repairDays: 2, risk: 0.15 },
+  },
+  gaming_console: {
+    software: { repairCostMin: 200, repairCostMax: 600, repairDays: 1, risk: 0.07 },
+    overheating: { repairCostMin: 350, repairCostMax: 1100, repairDays: 2, risk: 0.22 },
+  },
+  audio: {
+    battery: { repairCostMin: 200, repairCostMax: 700, repairDays: 1, risk: 0.16 },
+  },
+  small_appliance: {
+    overheating: { repairCostMin: 250, repairCostMax: 800, repairDays: 1, risk: 0.22 },
+  },
+  large_appliance: {
+    leak: { repairCostMin: 1500, repairCostMax: 4000, repairDays: 3, risk: 0.32 },
+    motor: { repairCostMin: 1800, repairCostMax: 5000, repairDays: 4, risk: 0.35 },
+  },
+  bicycle: {
+    chain: { repairCostMin: 100, repairCostMax: 350, repairDays: 1, risk: 0.05 },
+    brake: { repairCostMin: 150, repairCostMax: 450, repairDays: 1, risk: 0.12 },
+    tire: { repairCostMin: 120, repairCostMax: 300, repairDays: 1, risk: 0.04 },
+    wheel: { repairCostMin: 200, repairCostMax: 600, repairDays: 1, risk: 0.08 },
+  },
+  furniture: {
+    broken_part: { repairCostMin: 100, repairCostMax: 450, repairDays: 2, risk: 0.08, reusePotential: 0.9, recyclePotential: 0.2 },
+    cosmetic: { repairCostMin: 50, repairCostMax: 250, repairDays: 1, risk: 0.04, reusePotential: 0.95, recyclePotential: 0.15 },
+  },
   clothing: {
-    zipper: { repairCostMin: 100, repairCostMax: 300, repairDays: 3, usedPriceMin: 100, usedPriceMax: 500, newPrice: 800, risk: 0.05 },
-    seam: { repairCostMin: 50, repairCostMax: 200, repairDays: 2, usedPriceMin: 100, usedPriceMax: 500, newPrice: 800, risk: 0.05 },
-    other: { repairCostMin: 150, repairCostMax: 400, repairDays: 3, usedPriceMin: 150, usedPriceMax: 600, newPrice: 900, risk: 0.1 },
+    zipper: { repairCostMin: 100, repairCostMax: 300, repairDays: 2, risk: 0.04, reusePotential: 0.88, recyclePotential: 0.12 },
+    seam: { repairCostMin: 50, repairCostMax: 200, repairDays: 1, risk: 0.03, reusePotential: 0.9, recyclePotential: 0.1 },
+    tear: { repairCostMin: 80, repairCostMax: 250, repairDays: 2, risk: 0.04, reusePotential: 0.7, recyclePotential: 0.12 },
+    stain: { repairCostMin: 50, repairCostMax: 180, repairDays: 1, risk: 0.02, reusePotential: 0.65, recyclePotential: 0.12 },
   },
-  footwear: genericDecisionData,
-  other: genericDecisionData,
+  footwear: {
+    sole: { repairCostMin: 120, repairCostMax: 350, repairDays: 2, risk: 0.08, reusePotential: 0.5, recyclePotential: 0.1 },
+    seam: { repairCostMin: 100, repairCostMax: 260, repairDays: 1, risk: 0.05, reusePotential: 0.6, recyclePotential: 0.08 },
+    tear: { repairCostMin: 100, repairCostMax: 300, repairDays: 2, risk: 0.06, reusePotential: 0.4, recyclePotential: 0.1 },
+    stain: { repairCostMin: 40, repairCostMax: 120, repairDays: 1, risk: 0.02, reusePotential: 0.35, recyclePotential: 0.08 },
+  },
 }
 
-const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
+const decisionCaseBehaviors: Record<DecisionCaseKey, CaseBehavior> = {
+  screen_protector: {
+    data: {
+      repairCostMin: 120,
+      repairCostMax: 400,
+      repairDays: 1,
+      usedPriceMin: 250,
+      usedPriceMax: 450,
+      newPrice: 450,
+      risk: 0.02,
+      reusePotential: 0.08,
+      recyclePotential: 0.18,
+    },
+    impactMultiplier: 0.08,
+    optionSuitability: {
+      repair: 1,
+      buy_used: 0.04,
+      donate: 0.02,
+      recycle: 0.06,
+    },
+  },
+}
+
+const rightToRepairItems = new Set<ItemType>([
+  "phone",
+  "laptop",
+  "tablet",
+  "desktop",
+  "smartwatch",
+  "tv",
+  "monitor",
+  "printer",
+  "camera",
+  "gaming_console",
+  "audio",
+  "small_appliance",
+  "large_appliance",
+])
+
+const mergeDecisionDataEntry = (
+  base: DecisionDataEntry,
+  overrides?: Partial<DecisionDataEntry>,
+): DecisionDataEntry => {
+  if (!overrides) return base
+
+  return {
+    repairCostMin: overrides.repairCostMin ?? base.repairCostMin,
+    repairCostMax: overrides.repairCostMax ?? base.repairCostMax,
+    repairDays: overrides.repairDays ?? base.repairDays,
+    usedPriceMin: overrides.usedPriceMin ?? base.usedPriceMin,
+    usedPriceMax: overrides.usedPriceMax ?? base.usedPriceMax,
+    newPrice: overrides.newPrice ?? base.newPrice,
+    risk: overrides.risk ?? base.risk,
+    reusePotential: overrides.reusePotential ?? base.reusePotential,
+    recyclePotential: overrides.recyclePotential ?? base.recyclePotential,
+  }
+}
+
+const buildDecisionData = (
+  input: DecisionInput,
+): {
+  data: DecisionDataEntry
+  problemProfile: ProblemProfile
+  caseBehavior?: CaseBehavior
+  impactMultiplier: number
+  specificity: DecisionSpecificity
+} => {
+  const itemProfile = itemProfiles[input.itemType] ?? itemProfiles.other
+  const problemProfile = problemProfiles[input.problemType] ?? problemProfiles.other
+
+  let data: DecisionDataEntry = {
+    repairCostMin: roundPositive(itemProfile.repairCostMin * problemProfile.repairCostMinMultiplier, 50),
+    repairCostMax: roundPositive(itemProfile.repairCostMax * problemProfile.repairCostMaxMultiplier, 50),
+    repairDays: roundPositive(itemProfile.repairDays + problemProfile.repairDaysDelta, 1),
+    usedPriceMin: itemProfile.usedPriceMin,
+    usedPriceMax: itemProfile.usedPriceMax,
+    newPrice: itemProfile.newPrice,
+    risk: clamp(itemProfile.risk + problemProfile.riskDelta, 0.02, 0.75),
+    reusePotential: itemProfile.reusePotential ?? itemProfiles.other.reusePotential,
+    recyclePotential: itemProfile.recyclePotential ?? itemProfiles.other.recyclePotential,
+  }
+
+  let specificity: DecisionSpecificity = "item_profile"
+  const itemProblemOverride = itemProblemOverrides[input.itemType]?.[input.problemType]
+  data = mergeDecisionDataEntry(data, itemProblemOverride)
+  if (itemProblemOverride) {
+    specificity = "item_problem"
+  }
+
+  const caseBehavior = input.caseKey ? decisionCaseBehaviors[input.caseKey] : undefined
+  if (caseBehavior) {
+    data = mergeDecisionDataEntry(data, caseBehavior.data)
+    specificity = "case"
+  }
+
+  data.repairCostMax = Math.max(data.repairCostMax, data.repairCostMin)
+  data.usedPriceMax = Math.max(data.usedPriceMax, data.usedPriceMin)
+  data.reusePotential = clamp(data.reusePotential ?? itemProfiles.other.reusePotential ?? 0.42, 0.02, 0.98)
+  data.recyclePotential = clamp(data.recyclePotential ?? itemProfiles.other.recyclePotential ?? 0.6, 0.02, 0.99)
+
+  return {
+    data,
+    problemProfile,
+    caseBehavior,
+    impactMultiplier: clamp(caseBehavior?.impactMultiplier ?? 1, 0.02, 1),
+    specificity,
+  }
+}
 
 const getWeights = (priority?: Priority) => {
   switch (priority) {
@@ -240,34 +452,50 @@ const getRepairSuccessProbability = (risk: number, modelRepairabilityScore?: num
   return probability
 }
 
-export function evaluateDecision(input: DecisionInput): DecisionOutput {
-  const itemData = decisionData[input.itemType] ?? decisionData.other
-  const data = itemData?.[input.problemType] ?? itemData?.other ?? decisionData.other.other
+const getBuyUsedSuitability = (data: DecisionDataEntry) => {
+  const repairMedian = (data.repairCostMin + data.repairCostMax) / 2
+  const usedMedian = Math.max(1, (data.usedPriceMin + data.usedPriceMax) / 2)
+  const ratio = repairMedian / usedMedian
 
-  if (!data) {
-    const budgetTooLow = input.budgetNok < 1
-    const timeTooShort = input.timeDays < 1
-    return {
-      recommendation: "buy_used",
-      explainability: ["best_overall"],
-      options: [],
-      status: "not_fully_feasible",
-      recommendedFeasible: false,
-      bestFeasibleOption: null,
-      confidence: "low",
-      planB: {
-        key: "buy_used",
-        budgetTooLow,
-        timeTooShort,
-        deltaBudgetNok: 0,
-        deltaTimeDays: 0,
-      },
-    }
+  if (ratio <= 0.25) return 0.3
+  if (ratio <= 0.45) return 0.45
+  if (ratio <= 0.7) return 0.6
+  if (ratio <= 1) return 0.72
+  return 0.82
+}
+
+const getOptionSuitability = (
+  optionType: Recommendation,
+  data: DecisionDataEntry,
+  problemProfile: ProblemProfile,
+  caseBehavior?: CaseBehavior,
+) => {
+  const caseOverride = caseBehavior?.optionSuitability?.[optionType]
+  if (typeof caseOverride === "number") {
+    return clamp(caseOverride, 0.01, 1)
   }
 
+  if (optionType === "repair") {
+    return clamp(0.96 - data.risk * 0.55, 0.45, 0.98)
+  }
+
+  if (optionType === "buy_used") {
+    const riskBoost = data.risk >= 0.3 ? 0.08 : 0
+    return clamp(getBuyUsedSuitability(data) + riskBoost, 0.2, 0.9)
+  }
+
+  if (optionType === "donate") {
+    return clamp((data.reusePotential ?? 0.42) * problemProfile.donateSuitability, 0.02, 0.95)
+  }
+
+  return clamp((data.recyclePotential ?? 0.6) * problemProfile.recycleSuitability, 0.02, 0.98)
+}
+
+export function evaluateDecision(input: DecisionInput): DecisionOutput {
+  const { data, problemProfile, caseBehavior, impactMultiplier, specificity } = buildDecisionData(input)
   const newPrice = data.newPrice
-  const baseCo2e = embodiedCo2eKg[input.itemType] ?? embodiedCo2eKg.other
-  const riskPenalty = data.risk * 15
+  const baseCo2e = scaleRange(embodiedCo2eKg[input.itemType] ?? embodiedCo2eKg.other, impactMultiplier)
+  const riskPenalty = data.risk * 12
   const repairSuccessProb = getRepairSuccessProbability(data.risk, input.modelRepairabilityScore)
 
   const options: DecisionOption[] = [
@@ -354,21 +582,33 @@ export function evaluateDecision(input: DecisionInput): DecisionOutput {
     },
   ]
 
+  const optionSuitability = new Map<Recommendation, number>()
+
   options.forEach((option) => {
-    const co2eRange = getCo2eSavedRange(input.itemType, option.type, baseCo2e)
-    option.co2eSavedMin = Math.round(co2eRange.min)
-    option.co2eSavedMax = Math.round(co2eRange.max)
+    const suitability = getOptionSuitability(option.type, data, problemProfile, caseBehavior)
+    optionSuitability.set(option.type, suitability)
+
+    let co2eRange = getCo2eSavedRange(input.itemType, option.type, baseCo2e)
+    if (option.type === "donate" || option.type === "recycle") {
+      co2eRange = scaleRange(co2eRange, suitability)
+    } else if (caseBehavior?.optionSuitability?.[option.type] !== undefined) {
+      co2eRange = scaleRange(co2eRange, suitability)
+    }
+
+    option.co2eSavedMin = roundPositive(co2eRange.min)
+    option.co2eSavedMax = roundPositive(co2eRange.max)
 
     const co2eMedian = (option.co2eSavedMin + option.co2eSavedMax) / 2
-    option.impactScore = clamp((co2eMedian / baseCo2e.max) * 100, 5, 95)
+    option.impactScore = clamp((co2eMedian / Math.max(baseCo2e.max, 1)) * 100, 0, 95)
     if (option.type === "repair") {
-      option.impactScore = clamp(option.impactScore - riskPenalty, 5, 95)
+      option.impactScore = clamp(option.impactScore - riskPenalty, 0, 95)
     }
 
     if (option.type === "repair") {
-      option.expectedCostMin = Math.round(option.costMin / repairSuccessProb)
-      option.expectedCostMax = Math.round(option.costMax / repairSuccessProb)
-      option.expectedTimeDays = option.timeDays / repairSuccessProb
+      const riskOverhead = 1 - repairSuccessProb
+      option.expectedCostMin = roundPositive(option.costMin * (1 + riskOverhead * 0.2))
+      option.expectedCostMax = roundPositive(option.costMax * (1 + riskOverhead * 0.35))
+      option.expectedTimeDays = option.timeDays + riskOverhead * 0.5
     } else {
       option.expectedCostMin = option.costMin
       option.expectedCostMax = option.costMax
@@ -376,7 +616,7 @@ export function evaluateDecision(input: DecisionInput): DecisionOutput {
     }
 
     const feasibilityCostMax = option.type === "repair" ? option.expectedCostMax : option.costMax
-    const feasibilityTimeDays = option.type === "repair" ? option.expectedTimeDays : option.timeDays
+    const feasibilityTimeDays = option.timeDays
     const feasibility = getFeasibilityStatus(feasibilityCostMax, feasibilityTimeDays, input)
     option.feasibilityStatus = feasibility.status
     option.deltaBudgetNok = feasibility.deltaBudgetNok
@@ -384,47 +624,63 @@ export function evaluateDecision(input: DecisionInput): DecisionOutput {
     option.feasible = feasibility.status === "ok"
   })
 
-  const maxTime = Math.max(...options.map((opt) => opt.expectedTimeDays)) || 1
+  const maxTime = Math.max(...options.map((option) => option.expectedTimeDays), 1)
   const weights = getWeights(input.priority)
-
   const repairOption = options.find((option) => option.type === "repair")
   const usedOption = options.find((option) => option.type === "buy_used")
   let switchingPenalty = 0
+  let repairPreferenceBonus = 0
+
   if (repairOption && usedOption) {
     const repairMedian = (repairOption.expectedCostMin + repairOption.expectedCostMax) / 2
     const usedMedian = (usedOption.expectedCostMin + usedOption.expectedCostMax) / 2
-    if (repairMedian <= usedMedian * 1.1) {
-      switchingPenalty = 0.05
+
+    if (repairMedian <= usedMedian * 1.15) {
+      switchingPenalty = 0.08
+    }
+
+    if (repairMedian <= usedMedian * 0.45 && repairOption.expectedTimeDays <= usedOption.expectedTimeDays + 1) {
+      repairPreferenceBonus = 0.06
     }
   }
 
   options.forEach((option) => {
+    const suitability = optionSuitability.get(option.type) ?? 1
     const costMedian = (option.expectedCostMin + option.expectedCostMax) / 2
-    const moneyScore = clamp((newPrice - costMedian) / newPrice, 0, 1)
+    const moneyScore = clamp((newPrice - costMedian) / Math.max(newPrice, 1), 0, 1)
     const impactScore = option.impactScore / 100
     const timeScore = clamp(1 - option.expectedTimeDays / maxTime, 0, 1)
     const feasibilityPenalty =
       option.feasibilityStatus === "ok" ? 0 : option.feasibilityStatus === "both_short" ? 0.35 : 0.2
-    const penalty = option.type === "buy_used" ? switchingPenalty : 0
+    const typePenalty =
+      option.type === "repair"
+        ? (1 - suitability) * 0.12
+        : option.type === "buy_used"
+          ? (1 - suitability) * 0.18
+          : (1 - suitability) * 0.45
+    const switching = option.type === "buy_used" ? switchingPenalty : 0
+    const repairBonus = option.type === "repair" ? repairPreferenceBonus : 0
 
     option.utility = clamp(
       weights.money * moneyScore +
         weights.impact * impactScore +
         weights.time * timeScore -
         feasibilityPenalty -
-        penalty +
-        policyBias[option.type],
+        typePenalty -
+        switching +
+        policyBias[option.type] +
+        repairBonus,
       0,
       1,
     )
 
-    if (option.costMax <= input.budgetNok) {
+    if (option.expectedCostMax <= input.budgetNok) {
       option.reasons.push("budget_ok")
     }
-    if (option.timeDays <= input.timeDays) {
+    if (option.expectedTimeDays <= input.timeDays) {
       option.reasons.push("fast_enough")
     }
-    if (option.impactScore >= 70) {
+    if (option.impactScore >= 65) {
       option.reasons.push("high_impact")
     }
     if (data.risk >= 0.3 && option.type === "repair") {
@@ -432,19 +688,23 @@ export function evaluateDecision(input: DecisionInput): DecisionOutput {
     }
     if (
       option.type === "repair" &&
-      (input.itemType === "phone" || input.itemType === "laptop" || (input.modelRepairabilityScore ?? 0) >= 7)
+      (rightToRepairItems.has(input.itemType) || (input.modelRepairabilityScore ?? 0) >= 7)
     ) {
       option.reasons.push("policy_right_to_repair")
     }
   })
 
   const sorted = [...options].sort((a, b) => b.utility - a.utility)
-  const recommendation = sorted[0]
-  const status: DecisionStatus = options.some((option) => option.feasible) ? "feasible" : "not_fully_feasible"
+  const finalOptions = sorted.filter(
+    (option) => (optionSuitability.get(option.type) ?? 1) >= MIN_VISIBLE_OPTION_SUITABILITY,
+  )
+  const visibleOptions = finalOptions.length > 0 ? finalOptions : sorted.slice(0, 1)
+  const recommendation = visibleOptions[0]
+  const status: DecisionStatus = visibleOptions.some((option) => option.feasible) ? "feasible" : "not_fully_feasible"
   const recommendedFeasible = recommendation.feasible
-  const bestFeasible = sorted.find((option) => option.feasible) ?? null
+  const bestFeasible = visibleOptions.find((option) => option.feasible) ?? null
 
-  let confidenceScore = itemData?.[input.problemType] ? 0.75 : itemData?.other ? 0.6 : 0.5
+  let confidenceScore = specificity === "case" ? 0.84 : specificity === "item_problem" ? 0.75 : 0.64
   if (data.risk >= 0.3) {
     confidenceScore -= 0.1
   }
@@ -455,10 +715,10 @@ export function evaluateDecision(input: DecisionInput): DecisionOutput {
     if (input.modelRepairabilityScore >= 7) confidenceScore += 0.05
     if (input.modelRepairabilityScore <= 3) confidenceScore -= 0.05
   }
-  if (sorted.length >= 2) {
-    const gap = sorted[0].utility - sorted[1].utility
-    if (gap > 0.15) confidenceScore += 0.1
-    if (gap < 0.05) confidenceScore -= 0.1
+  if (visibleOptions.length >= 2) {
+    const gap = visibleOptions[0].utility - visibleOptions[1].utility
+    if (gap > 0.15) confidenceScore += 0.08
+    if (gap < 0.05) confidenceScore -= 0.08
   }
   if (status === "not_fully_feasible") {
     confidenceScore -= 0.1
@@ -471,7 +731,7 @@ export function evaluateDecision(input: DecisionInput): DecisionOutput {
   return {
     recommendation: recommendation.type,
     explainability: recommendation.reasons.length ? recommendation.reasons : ["best_overall"],
-    options: sorted,
+    options: visibleOptions,
     status,
     recommendedFeasible,
     bestFeasibleOption: bestFeasible ? bestFeasible.type : null,
