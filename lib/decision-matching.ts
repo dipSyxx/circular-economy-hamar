@@ -478,11 +478,23 @@ export const matchDecisionActors = async (
     geoContext.municipalitySlug,
   )
 
-  if (candidates.length === 0) {
+  const selectedCandidates =
+    decision.recommendation === "repair"
+      ? candidates.filter((candidate) => candidate.serviceMatchQuality > 0)
+      : candidates
+
+  if (decision.recommendation === "repair" && selectedCandidates.length === 0) {
+    return {
+      matchedActors: [],
+      fallbackReason: "no_repair_service_match",
+    }
+  }
+
+  if (selectedCandidates.length === 0) {
     return { matchedActors: [] }
   }
 
-  const materialized = await materializeMatches(candidates, input, decision, geoContext)
+  const materialized = await materializeMatches(selectedCandidates, input, decision, geoContext)
   const withTravelData = materialized.filter((candidate) => candidate.travelMinutes !== null)
 
   let fallbackReason: DecisionMatchFallbackReason | undefined

@@ -31,6 +31,7 @@ const getCoverageReasonLabel = (reason: CoverageReason) => decideCopy.matching.c
 
 const getFallbackReasonLabel = (reason?: DecisionMatchFallbackReason) => {
   if (reason === "travel_limit_exceeded") return decideCopy.matching.fallbackTravelLimitLabel
+  if (reason === "no_repair_service_match") return decideCopy.matching.fallbackNoRepairServiceMatchLabel
   return null
 }
 

@@ -11,7 +11,7 @@ export type CoverageReason =
   | "service_area_municipality"
   | "service_area_county"
   | "nationwide_fallback"
-export type DecisionMatchFallbackReason = "travel_limit_exceeded"
+export type DecisionMatchFallbackReason = "travel_limit_exceeded" | "no_repair_service_match"
 
 export interface DecisionGeoContext {
   countySlug?: string | null

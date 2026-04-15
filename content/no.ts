@@ -872,6 +872,8 @@ export const decideCopy = {
     liveMatchErrorLabel: "Kunne ikke hente lokale forslag akkurat nå.",
     fallbackTravelLimitLabel:
       "Ingen aktører passet reisegrensen din, så vi viser de beste alternativene likevel.",
+    fallbackNoRepairServiceMatchLabel:
+      "Vi fant ingen lokale reparatører som dekker akkurat denne typen vare og problem.",
     whyThisActorTitle: "Hvorfor denne aktøren",
     travelApproximateLabel: "Omtrentlig",
     coverageReasonLabels: {
