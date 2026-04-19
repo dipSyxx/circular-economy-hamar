@@ -14,6 +14,7 @@ import type {
 import { TRANSPORT_MODES } from "@/lib/decision-match-types"
 import { getAvailableCountyOptions, getAvailableMunicipalityOptions } from "@/lib/actor-scope"
 import { formatTime } from "@/lib/opening-hours"
+import { formatRepairServicePriceLabel, isRepairServiceGuaranteedWithinBudget } from "@/lib/repair-price-format"
 import { recordAction } from "@/lib/profile-store"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -255,7 +256,7 @@ export function DecisionMatchPanel({
             const openBadgeLabel = getOpenBadgeLabel(matchedActor)
             const travelSummary = getTravelSummary(matchedActor)
             const priceLabel = serviceMatch
-              ? `${decideCopy.matching.priceRangeLabel}: ${serviceMatch.priceMin}-${serviceMatch.priceMax} kr`
+              ? `${decideCopy.matching.priceRangeLabel}: ${formatRepairServicePriceLabel(serviceMatch)}`
               : null
             const etaLabel = serviceMatch?.etaDays
               ? `${decideCopy.matching.etaLabel}: ~${serviceMatch.etaDays} ${daysLabel}`
@@ -287,7 +288,7 @@ export function DecisionMatchPanel({
                   <div className="flex flex-wrap gap-2">
                     {openBadgeLabel && <Badge variant="secondary">{openBadgeLabel}</Badge>}
                     {serviceMatch && <Badge variant="secondary">{decideCopy.matching.serviceMatchLabel}</Badge>}
-                    {serviceMatch && budget >= serviceMatch.priceMax && (
+                    {serviceMatch && isRepairServiceGuaranteedWithinBudget(serviceMatch, budget) && (
                       <Badge variant="secondary">{decideCopy.matching.budgetFitLabel}</Badge>
                     )}
                     {actor.isTrusted && <Badge variant="secondary">Verifisert</Badge>}

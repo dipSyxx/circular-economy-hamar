@@ -18,6 +18,7 @@ import {
 } from "@/lib/category-repair-scope"
 import { supportsRepairServices } from "@/lib/categories"
 import type { AdminStagedRepair, AdminStagedSource } from "@/lib/admin/actor-create-staging"
+import { formatRepairServicePriceLabel } from "@/lib/repair-price-format"
 import { ITEM_TYPES, PROBLEM_TYPES } from "@/lib/prisma-enums"
 import { formatItemTypeLabel, formatProblemTypeLabel } from "@/lib/enum-labels"
 
@@ -41,7 +42,7 @@ type ActorRepairService = {
   problemType: string
   itemTypes: string[]
   priceMin: number
-  priceMax: number
+  priceMax: number | null
   etaDays: number | null
 }
 
@@ -584,7 +585,7 @@ function RepairServicesManagerStaging({
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <Label>Pris fra (NOK)</Label>
+                    <Label>Fra-pris (NOK)</Label>
                     <Input
                       type="number"
                       min="0"
@@ -596,7 +597,7 @@ function RepairServicesManagerStaging({
                     />
                   </div>
                   <div>
-                    <Label>Pris til (NOK)</Label>
+                    <Label>Makspris (NOK, valgfri)</Label>
                     <Input
                       type="number"
                       min="0"
@@ -686,12 +687,17 @@ function RepairServicesManagerPersisted({ actorId, actorCategory }: { actorId: s
 
   const handleAdd = async () => {
     const priceMin = Number(draft.priceMin)
-    const priceMax = Number(draft.priceMax)
+    const priceMax = draft.priceMax.trim() ? Number(draft.priceMax) : null
     if (!draft.problemType || draft.itemTypes.length === 0) {
       setError("Problemtype og minst én gjenstandstype er påkrevd.")
       return
     }
-    if (Number.isNaN(priceMin) || Number.isNaN(priceMax) || priceMin < 0 || priceMax < priceMin) {
+    if (
+      Number.isNaN(priceMin) ||
+      (priceMax !== null && Number.isNaN(priceMax)) ||
+      priceMin < 0 ||
+      (priceMax !== null && priceMax < priceMin)
+    ) {
       setError("Ugyldig prisintervall.")
       return
     }
@@ -758,7 +764,7 @@ function RepairServicesManagerPersisted({ actorId, actorCategory }: { actorId: s
                     {formatProblemTypeLabel(service.problemType)}
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    {service.priceMin}–{service.priceMax} kr
+                    {formatRepairServicePriceLabel(service)}
                     {service.etaDays != null ? ` · ${service.etaDays} dager` : ""}
                   </span>
                 </div>
@@ -827,7 +833,7 @@ function RepairServicesManagerPersisted({ actorId, actorCategory }: { actorId: s
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs">Minstepris (kr) *</Label>
+              <Label className="text-xs">Fra-pris (kr) *</Label>
               <Input
                 type="number"
                 min={0}
@@ -838,7 +844,7 @@ function RepairServicesManagerPersisted({ actorId, actorCategory }: { actorId: s
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Makspris (kr) *</Label>
+              <Label className="text-xs">Makspris (kr, valgfri)</Label>
               <Input
                 type="number"
                 min={0}

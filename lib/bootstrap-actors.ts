@@ -86,7 +86,7 @@ export const loadBootstrapActorFixtures = async (
       problemType: row.problem_type.trim() as ProblemType,
       itemTypes: splitList(row.item_types) as ItemType[],
       priceMin: toNumber(row.price_min) ?? 0,
-      priceMax: toNumber(row.price_max) ?? 0,
+      priceMax: toNumber(row.price_max),
       etaDays: toNumber(row.eta_days),
     })
     repairServicesBySlug.set(actorSlug, bucket)

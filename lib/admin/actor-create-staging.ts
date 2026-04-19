@@ -58,7 +58,7 @@ export type ParsedAdminRepairService = {
   problemType: ProblemType
   itemTypes: ItemType[]
   priceMin: number
-  priceMax: number
+  priceMax: number | null
   etaDays: number | null
 }
 
@@ -102,10 +102,10 @@ export function parseAdminActorNestedRelations(
       if (!itemTypes.length) {
         throw new Error(`Tjeneste #${index + 1} må ha minst én varetype.`)
       }
-      if (priceMin === null || priceMax === null) {
+      if (priceMin === null) {
         throw new Error(`Tjeneste #${index + 1} må ha prisområde.`)
       }
-      if (priceMin > priceMax) {
+      if (priceMax !== null && priceMin > priceMax) {
         throw new Error(`Tjeneste #${index + 1} har ugyldig prisområde.`)
       }
 

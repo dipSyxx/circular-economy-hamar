@@ -130,8 +130,8 @@ const fieldLabelNO: Record<string, string> = {
   // Repair service
   problemType: "Problemtype",
   itemTypes: "Gjenstandstyper",
-  priceMin: "Minstepris (kr)",
-  priceMax: "Makspris (kr)",
+  priceMin: "Fra-pris (kr)",
+  priceMax: "Makspris (kr, valgfri)",
   etaDays: "Ledetid (dager)",
   // Actor source
   type: "Type",

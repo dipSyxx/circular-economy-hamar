@@ -21,7 +21,7 @@ export type ActorRepairServiceInput = {
   problemType: ProblemType
   itemTypes: ItemType[]
   priceMin: number
-  priceMax: number
+  priceMax: number | null
   etaDays?: number | null
 }
 

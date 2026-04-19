@@ -723,7 +723,10 @@ export const createActorImportPreview = async (input: ImportPreviewInput) => {
     if (sortedItemTypes.length === 0 || sortedItemTypes.some((item) => !itemTypes.has(item))) {
       validationErrors.push("item_types er påkrevd og må være gyldige.")
     }
-    if (priceMin === null || priceMax === null) validationErrors.push("price_min og price_max er påkrevd.")
+    if (priceMin === null) validationErrors.push("price_min er påkrevd.")
+    if (priceMin !== null && priceMax !== null && priceMax < priceMin) {
+      validationErrors.push("price_max må være tom eller >= price_min.")
+    }
 
     const actorTarget = actorSlug ? actorTargets.get(actorSlug) : null
     const matchedActor = actorTarget?.existingActor ?? (actorSlug ? actorsBySlug.get(actorSlug) ?? null : null)
@@ -1074,7 +1077,8 @@ export const applyActorImportBatch = async (batchId: string, reviewerId?: string
         problemType: problemTypeValue,
         itemTypes: itemTypesValue,
         priceMin: Number(normalized.priceMin ?? 0),
-        priceMax: Number(normalized.priceMax ?? 0),
+        priceMax:
+          normalized.priceMax === null || normalized.priceMax === undefined ? null : Number(normalized.priceMax),
         etaDays: normalized.etaDays === null || normalized.etaDays === undefined ? null : Number(normalized.etaDays),
       }
 

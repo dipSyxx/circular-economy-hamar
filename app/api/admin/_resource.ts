@@ -20,6 +20,25 @@ import { refreshAutomationStateForActors, refreshAutomationStateForCounties } fr
 
 const getResourceConfig = (resource: string) => adminResourceConfig[resource]
 
+const parseRepairServicePriceInput = (priceMinRaw: unknown, priceMaxRaw: unknown) => {
+  const priceMin = typeof priceMinRaw === "number" ? priceMinRaw : Number(priceMinRaw)
+  const priceMax =
+    priceMaxRaw === null || priceMaxRaw === undefined || priceMaxRaw === ""
+      ? null
+      : typeof priceMaxRaw === "number"
+        ? priceMaxRaw
+        : Number(priceMaxRaw)
+
+  if (!Number.isFinite(priceMin) || priceMin < 0) {
+    return { error: "price_min er påkrevd og må være >= 0." } as const
+  }
+  if (priceMax !== null && (!Number.isFinite(priceMax) || priceMax < priceMin)) {
+    return { error: "price_max må være tom eller >= price_min." } as const
+  }
+
+  return { priceMin, priceMax } as const
+}
+
 const revalidatePublicResource = (resource: string) => {
   const tagsByResource: Record<string, string[]> = {
     actors: ["public-actors"],
@@ -95,6 +114,10 @@ export const createAdminResource = async (resource: string, request: Request) =>
       if (!actorId) {
         return NextResponse.json({ error: "actorId er påkrevd." }, { status: 400 })
       }
+      const parsedPrices = parseRepairServicePriceInput(data.priceMin, data.priceMax)
+      if ("error" in parsedPrices) {
+        return NextResponse.json({ error: parsedPrices.error }, { status: 400 })
+      }
       const actor = await assertActorCanAcceptRepairServices(prisma, actorId)
       const problemType = data.problemType as ProblemType
       const itemTypes = Array.isArray(data.itemTypes) ? (data.itemTypes as ItemType[]) : []
@@ -102,6 +125,8 @@ export const createAdminResource = async (resource: string, request: Request) =>
       if (scopeError) {
         return NextResponse.json({ error: scopeError }, { status: 400 })
       }
+      data.priceMin = parsedPrices.priceMin
+      data.priceMax = parsedPrices.priceMax
       affectedActorIds.add(actorId)
     }
 
@@ -254,6 +279,8 @@ export const updateAdminResource = async (resource: string, id: string, request:
           actorId: true,
           problemType: true,
           itemTypes: true,
+          priceMin: true,
+          priceMax: true,
         },
       })
       if (!existingRepairService) {
@@ -264,10 +291,19 @@ export const updateAdminResource = async (resource: string, id: string, request:
       const itemTypes = (
         Array.isArray(data.itemTypes) ? data.itemTypes : existingRepairService.itemTypes
       ) as ItemType[]
+      const parsedPrices = parseRepairServicePriceInput(
+        data.priceMin ?? existingRepairService.priceMin,
+        data.priceMax ?? existingRepairService.priceMax,
+      )
+      if ("error" in parsedPrices) {
+        return NextResponse.json({ error: parsedPrices.error }, { status: 400 })
+      }
       const scopeError = validateRepairServiceAgainstScope(actor.category as ActorCategory, problemType, itemTypes)
       if (scopeError) {
         return NextResponse.json({ error: scopeError }, { status: 400 })
       }
+      data.priceMin = parsedPrices.priceMin
+      data.priceMax = parsedPrices.priceMax
       affectedActorIds.add(existingRepairService.actorId)
       delete data.actorId
     }
