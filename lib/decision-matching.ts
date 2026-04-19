@@ -20,6 +20,7 @@ import { formatCategoryLabel, formatItemTypeLabel, formatProblemTypeLabel } from
 import { getCountyBySlug, getMunicipalityBySlug } from "@/lib/geo"
 import { getActorGeographyMatchPriority } from "@/lib/actor-scope"
 import { getOpeningStatus } from "@/lib/opening-hours"
+import { isRepairServiceGuaranteedWithinBudget } from "@/lib/repair-price-format"
 import { estimateActorTravel } from "@/lib/travel-estimates"
 
 const MAX_MATCHED_ACTORS = 6
@@ -331,7 +332,7 @@ const getWhyThisActor = (
     const itemLabel = formatItemTypeLabel(input.itemType).toLowerCase()
     const problemLabel = formatProblemTypeLabel(input.problemType).toLowerCase()
     why.push(`Kan hjelpe med ${problemLabel} på ${itemLabel}.`)
-    if (candidate.serviceMatch.priceMax <= input.budgetNok) {
+    if (isRepairServiceGuaranteedWithinBudget(candidate.serviceMatch, input.budgetNok)) {
       why.push(`Estimert reparasjon passer innenfor budsjettet ditt.`)
     }
   }
