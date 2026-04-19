@@ -1,2 +1,6 @@
 actor_slug,problem_type,item_types,price_min,price_max,eta_days
-eksempel-aktor,screen,phone|laptop,900,1800,2
+phonefix-arendal-arendal,screen,phone,1299,,
+sykkelsport-as-arendal,chain,bicycle,399,499,
+sykkelsport-as-arendal,brake,bicycle,899,1099,
+sykkelsport-as-arendal,wheel,bicycle,899,1099,
+sykkelsport-as-arendal,tire,bicycle,199,350,

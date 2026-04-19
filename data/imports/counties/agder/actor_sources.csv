@@ -1,2 +1,572 @@
 actor_slug,type,title,url,captured_at,note
-eksempel-aktor,website,Offisiell nettside,https://example.no,2026-03-29,Primarkilde for aapningstider og kontaktinfo
+nms-gjenbruk-arendal-arendal,website,Offisiell nettside,https://www.nmsgjenbruk.no/butikkene-vare/arendal-fc1f9,2026-04-15,
+nms-gjenbruk-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=6763385523698587961&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+kirkens-bymisjon-bazar-bruktbutikk-arendal,website,Offisiell nettside,https://kirkensbymisjon.no/bazar-toy-og-som/,2026-04-15,
+kirkens-bymisjon-bazar-bruktbutikk-arendal,map,Google Maps,https://maps.google.com/?cid=14633137247112189901&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+gjenbruksglede-arendal,website,Offisiell nettside,https://www.facebook.com/gjenbruksglede/,2026-04-15,
+gjenbruksglede-arendal,map,Google Maps,https://maps.google.com/?cid=15622985663747887634&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+boks-for-oppsamling-av-klaer-uff-arendal,website,Offisiell nettside,http://www.uffnorge.org/,2026-04-15,
+boks-for-oppsamling-av-klaer-uff-arendal,map,Google Maps,https://maps.google.com/?cid=5285956394331367205&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+tore-a-nilsen-arendal-auksjonsforretning-arendal,map,Google Maps,https://maps.google.com/?cid=12971747278558891578&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+nms-gjenbruk-grimstad-grimstad,website,Offisiell nettside,https://www.nmsgjenbruk.no/butikkene-vare/grimstad-464d7,2026-04-15,
+nms-gjenbruk-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=7747656724295393613&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+instituttets-bruktbutikk-grimstad,website,Offisiell nettside,https://www.facebook.com/bruktbutikkenigrimstad/,2026-04-15,
+instituttets-bruktbutikk-grimstad,map,Google Maps,https://maps.google.com/?cid=2095454387818344691&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+fokus-gjenbruk-as-grimstad,website,Offisiell nettside,https://fokusgjenbruk.no/,2026-04-15,
+fokus-gjenbruk-as-grimstad,map,Google Maps,https://maps.google.com/?cid=4317894982879973321&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+gjenbruksgleder-grimstad,website,Offisiell nettside,https://fokusgjenbruk.no/,2026-04-15,
+gjenbruksgleder-grimstad,map,Google Maps,https://maps.google.com/?cid=4446684496842626946&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+avigo-sirkulaer-grimstad,map,Google Maps,https://maps.google.com/?cid=3993211780036160061&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+guldsmedkleiva-brukt-antikk-grimstad,website,Offisiell nettside,https://www.facebook.com/share/17jcXh28tF/,2026-04-15,
+guldsmedkleiva-brukt-antikk-grimstad,map,Google Maps,https://maps.google.com/?cid=10284064644126091320&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+nms-gjenbruk-risor-risor,website,Offisiell nettside,https://www.nmsgjenbruk.no/butikkene-vare/risor-f6e2b,2026-04-15,
+nms-gjenbruk-risor-risor,map,Google Maps,https://maps.google.com/?cid=12594000281616837796&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+fretex-bruktbutikk-risor,website,Offisiell nettside,https://www.fretex.no/handle/finn-butikk/fretex-risor/,2026-04-15,
+fretex-bruktbutikk-risor,map,Google Maps,https://maps.google.com/?cid=12897627919663231157&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+nms-gjenbruk-evje-evje,website,Offisiell nettside,http://www.nmsgjenbruk.no/butikkene-vare/evje-dc379,2026-04-15,
+nms-gjenbruk-evje-evje,map,Google Maps,https://maps.google.com/?cid=14091932358228673014&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sjappa-bruktutsalg-evje,map,Google Maps,https://maps.google.com/?cid=8955563129967009093&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+unik-gaver-gjenbruk-evje,website,Offisiell nettside,https://www.facebook.com/UnikEvje,2026-04-15,
+unik-gaver-gjenbruk-evje,map,Google Maps,https://maps.google.com/?cid=263983539818307290&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+brukt-elsket-vennesla,map,Google Maps,https://maps.google.com/?cid=11587632471308095491&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+kontakten-bruktbutikk-vennesla,map,Google Maps,https://maps.google.com/?cid=12303366211715708819&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+setesdal-husflid-valle,website,Offisiell nettside,http://www.setesdalhusflid.no/,2026-04-15,
+setesdal-husflid-valle,map,Google Maps,https://maps.google.com/?cid=16161160340813991037&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+vennesla-gjenbruk-vennesla,map,Google Maps,https://maps.google.com/?cid=2405490990066175860&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+setesdal-miljo-gjenvinning-iks-evje,website,Offisiell nettside,http://www.smg-iks.no/,2026-04-15,
+setesdal-miljo-gjenvinning-iks-evje,map,Google Maps,https://maps.google.com/?cid=5149520230338322866&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sareptas-brukthandel-froland,map,Google Maps,https://maps.google.com/?cid=9350548880675284212&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+verditorget-nedenes,website,Offisiell nettside,http://www.facebook.com/Gjenbruksbutikken,2026-04-15,
+verditorget-nedenes,map,Google Maps,https://maps.google.com/?cid=3451651360360497865&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+hjembu-gard-as-risor,website,Offisiell nettside,http://www.hjembu.no/,2026-04-15,
+hjembu-gard-as-risor,map,Google Maps,https://maps.google.com/?cid=16316947962023231541&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+rosseland-bruktbutikk-brennasen,map,Google Maps,https://maps.google.com/?cid=7614264055571858487&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+greipstad-bruktbutikk-brennasen,website,Offisiell nettside,https://m.facebook.com/Greipstad-Bruktbutikk-177115600632,2026-04-15,
+greipstad-bruktbutikk-brennasen,map,Google Maps,https://maps.google.com/?cid=2741019876201929004&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+din-handel-arendal-arendal,website,Offisiell nettside,https://dinhandel.com/,2026-04-15,
+din-handel-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=13735449063901402694&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+galleri-normisjon-arendal-arendal,website,Offisiell nettside,https://www.gallerinormisjon.no/galleri-arendal/,2026-04-15,
+galleri-normisjon-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=17496453924626444646&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+brukbar-arendal,website,Offisiell nettside,http://www.agderrenovasjon.no/,2026-04-15,
+brukbar-arendal,map,Google Maps,https://maps.google.com/?cid=13753079697448082182&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+pureinnocent-arendal,map,Google Maps,https://maps.google.com/?cid=11250667798740715268&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+karusellen-grimstad,website,Offisiell nettside,https://www.facebook.com/frabarntilbarn,2026-04-15,
+karusellen-grimstad,map,Google Maps,https://maps.google.com/?cid=11848814238958413177&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+karo-og-jossi-s-fortryllende-lekebutikk-risor,website,Offisiell nettside,http://www.karoogjossi.no/,2026-04-15,
+karo-og-jossi-s-fortryllende-lekebutikk-risor,map,Google Maps,https://maps.google.com/?cid=12679096861821501235&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+ex-libris-antikvariat-tvedestrand,website,Offisiell nettside,https://www.bokbyen-skagerrak.no/sample-page-2/exlibris-antikvariat/,2026-04-15,
+ex-libris-antikvariat-tvedestrand,map,Google Maps,https://maps.google.com/?cid=2774215359024729099&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+coop-marked-ose-i-setesdal-bygland,website,Offisiell nettside,https://www.coop.no/butikker/coop-marked-matkroken/coop-marked-ose-i-setesdal-2398,2026-04-15,
+coop-marked-ose-i-setesdal-bygland,map,Google Maps,https://maps.google.com/?cid=13133794819869727777&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+coop-prix-byglandsfjord-byglandsfjord,website,Offisiell nettside,https://www.coop.no/butikker/coop-prix/coop-prix-byglandsfjord-1332,2026-04-15,
+coop-prix-byglandsfjord-byglandsfjord,map,Google Maps,https://maps.google.com/?cid=1916890834953925786&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+frelsesarmeen-arendal,website,Offisiell nettside,http://www.frelsesarmeen.no/no/vart_arbeid/korps_menigheter/hoyre_kolonne/divisjonene/vestre/hoyre_kolonne/vare_tilbud/arendal_korps/,2026-04-15,
+frelsesarmeen-arendal,map,Google Maps,https://maps.google.com/?cid=10916197461531982503&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+nms-gjenbruk-lillesand-lillesand,website,Offisiell nettside,https://www.nmsgjenbruk.no/butikkene-vare/lillesand-92c65,2026-04-15,
+nms-gjenbruk-lillesand-lillesand,map,Google Maps,https://maps.google.com/?cid=190921500357364044&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+gjenbruken-lillesand-lillesand,website,Offisiell nettside,https://gjenbruken.no/lillesand/,2026-04-15,
+gjenbruken-lillesand-lillesand,map,Google Maps,https://maps.google.com/?cid=9838616847375642733&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+homborsund-landhandel-homborsund,map,Google Maps,https://maps.google.com/?cid=18192622006427536564&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+arendal-verktoy-utleie-arendal,map,Google Maps,https://maps.google.com/?cid=7938951880694256766&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+j-t-liftutleie-as-grimstad,website,Offisiell nettside,https://www.jt-liftutleie.no/,2026-04-15,
+j-t-liftutleie-as-grimstad,map,Google Maps,https://maps.google.com/?cid=2942850255585714336&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+monter-grimstad-grimstad,website,Offisiell nettside,https://www.monter.no/?utm_source=Google&utm_medium=Organic+Search&utm_campaign=Google_my_business,2026-04-15,
+monter-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=9589816456730723166&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bua-grimstad-grimstad,website,Offisiell nettside,https://www.bua.io/utlansordninger/bua-grimstad,2026-04-15,
+bua-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=14692034836738908897&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+fargerike-grimstad-grimstad,website,Offisiell nettside,https://www.fargerike.no/fargehandel/grimstad/?utm_source=Google+My+Business&utm_medium=Organic&utm_content=grimstad,2026-04-15,
+fargerike-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=11414237941265066857&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bondekompaniet-grimstad-grimstad,website,Offisiell nettside,http://www.bondekompaniet.no/,2026-04-15,
+bondekompaniet-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=2808616478193584907&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+ferda-avd-grimstad-grimstad,website,Offisiell nettside,http://www.ferda.no/,2026-04-15,
+ferda-avd-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=14175084016850766322&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+arendal-utleie-as-arendal,website,Offisiell nettside,https://www.arendalutleie.no/,2026-04-15,
+arendal-utleie-as-arendal,map,Google Maps,https://maps.google.com/?cid=13851739751863056329&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+grenstol-maskinutleie-as-tvedestrand,website,Offisiell nettside,https://grenstolmaskinutleie.no/,2026-04-15,
+grenstol-maskinutleie-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=14349463136160642758&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+risor-lager-utleie-risor,map,Google Maps,https://maps.google.com/?cid=8340230999003181162&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+ristol-maskinutleie-entreprenor-arendal,website,Offisiell nettside,https://ristolmaskin.no/,2026-04-15,
+ristol-maskinutleie-entreprenor-arendal,map,Google Maps,https://maps.google.com/?cid=9246494409203902302&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+liftkongen-no-evje,website,Offisiell nettside,http://liftkongen.no/,2026-04-15,
+liftkongen-no-evje,map,Google Maps,https://maps.google.com/?cid=17115003948168528615&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+uleberg-og-trydal-maskin-as-bykle,website,Offisiell nettside,http://ulebergogtrydalmaskin.no/,2026-04-15,
+uleberg-og-trydal-maskin-as-bykle,map,Google Maps,https://maps.google.com/?cid=12926430571876412005&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+uleberg-maskin-og-transport-as-hovden-i-setesdal,website,Offisiell nettside,https://ulebergmaskin.no/,2026-04-15,
+uleberg-maskin-og-transport-as-hovden-i-setesdal,map,Google Maps,https://maps.google.com/?cid=10988133998102520607&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+utstyrs-teknikk-hoyde-teknikk-as-avd-vennesla-vennesla,website,Offisiell nettside,https://hoydeteknikk.no/verktoey/,2026-04-15,
+utstyrs-teknikk-hoyde-teknikk-as-avd-vennesla-vennesla,map,Google Maps,https://maps.google.com/?cid=5591342004626950081&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+schenk-utleie-as-lillesand,website,Offisiell nettside,https://schenkutleie.no/,2026-04-15,
+schenk-utleie-as-lillesand,map,Google Maps,https://maps.google.com/?cid=9292118525585366328&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bakkan-dekk-og-utleie-as-vennesla,website,Offisiell nettside,https://www.bakkanutleie.no/,2026-04-15,
+bakkan-dekk-og-utleie-as-vennesla,map,Google Maps,https://maps.google.com/?cid=4360143477549546233&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+maskinentreprenor-kay-jeiskelid-bykle,map,Google Maps,https://maps.google.com/?cid=4806310192775973580&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+brokke-alpinsenter-rysstad,website,Offisiell nettside,http://www.brokke.com/,2026-04-15,
+brokke-alpinsenter-rysstad,map,Google Maps,https://maps.google.com/?cid=550657420481369140&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+kirkens-bymisjon-skattkammeret-arendal-arendal,website,Offisiell nettside,https://kirkensbymisjon.no/skattkammeret/arendal/,2026-04-15,
+kirkens-bymisjon-skattkammeret-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=14421422341821363390&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bua-lillesand-lillesand,website,Offisiell nettside,https://www.bua.io/,2026-04-15,
+bua-lillesand-lillesand,map,Google Maps,https://maps.google.com/?cid=18026504061276034926&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bua-groos-grimstad,map,Google Maps,https://maps.google.com/?cid=17602521026179649211&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+tvedestrand-frivilligsentral-tvedestrand,website,Offisiell nettside,https://tvedestrand.frivilligsentral.no/,2026-04-15,
+tvedestrand-frivilligsentral-tvedestrand,map,Google Maps,https://maps.google.com/?cid=11141740316932923865&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bua-bygland-bygland,website,Offisiell nettside,https://www.bua.no/utlansordninger/bua-bygland,2026-04-15,
+bua-bygland-bygland,map,Google Maps,https://maps.google.com/?cid=14015749048343300928&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+arendal-bibliotek-arendal,website,Offisiell nettside,https://arendalbibliotek.no/,2026-04-15,
+arendal-bibliotek-arendal,map,Google Maps,https://maps.google.com/?cid=3155914572466569594&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+aust-agder-bibliotek-og-kulturformidling-arendal,map,Google Maps,https://maps.google.com/?cid=9339325141459967269&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+grimstad-bibliotek-grimstad,website,Offisiell nettside,http://www.grimstadbibliotek.no/,2026-04-15,
+grimstad-bibliotek-grimstad,map,Google Maps,https://maps.google.com/?cid=6276491916821975728&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+risor-bibliotek-risor,website,Offisiell nettside,http://risorbibliotek.no/,2026-04-15,
+risor-bibliotek-risor,map,Google Maps,https://maps.google.com/?cid=1994324143136018225&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+tvedestrand-folkebibliotek-tvedestrand,website,Offisiell nettside,https://www.tvedestrand.kommune.no/tjenester/bibliotek-kultur-frivillighet-idrett-badepark-og-fritid/tvedestrand-folkebibliotek/,2026-04-15,
+tvedestrand-folkebibliotek-tvedestrand,map,Google Maps,https://maps.google.com/?cid=15980026150448235150&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+phonefix-arendal-arendal,website,Offisiell nettside,https://phonefix.no/,2026-04-19,Offisiell side og JSON-LD beskriver skjerm/batteri/ladekontaktreparasjon; forsiden oppgir iPhone-skjermbytte fra kr 1299
+phonefix-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=8852693067180219757&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+iphonemannen-as-arendal,website,Offisiell nettside,http://www.iphonemannen.no/,2026-04-15,
+iphonemannen-as-arendal,map,Google Maps,https://maps.google.com/?cid=11059322088805102543&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+arendal-mobil-arendal,map,Google Maps,https://maps.google.com/?cid=4474756505766086933&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+mobit-arendal,website,Offisiell nettside,https://www.mobit.no/forhandlere/arendal,2026-04-15,
+mobit-arendal,map,Google Maps,https://maps.google.com/?cid=13425695457620770010&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+elektroverkstedet-as-arendal,website,Offisiell nettside,http://www.arendalelektroverksted.no/,2026-04-15,
+elektroverkstedet-as-arendal,map,Google Maps,https://maps.google.com/?cid=5278844476971068587&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+mobile-arendal-as-arendal,website,Offisiell nettside,https://mobile.no/forhandlere/mobile-arendal,2026-04-15,
+mobile-arendal-as-arendal,map,Google Maps,https://maps.google.com/?cid=3385181630038701959&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+elesco-agder-as-grimstad,website,Offisiell nettside,http://www.elesco.no/,2026-04-15,
+elesco-agder-as-grimstad,map,Google Maps,https://maps.google.com/?cid=3074108595753721271&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+greenphones-as-tvedestrand,website,Offisiell nettside,http://www.greenphones.no/,2026-04-15,
+greenphones-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=12998618850308628102&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+databutikken-evje-as-evje,website,Offisiell nettside,http://www.dataevje.no/,2026-04-15,
+databutikken-evje-as-evje,map,Google Maps,https://maps.google.com/?cid=11997340576973897669&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+datahjelp-nedenes,website,Offisiell nettside,http://www.datahjelp.no/,2026-04-15,
+datahjelp-nedenes,map,Google Maps,https://maps.google.com/?cid=16116532841252166349&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+elon-arendal-arendal,website,Offisiell nettside,https://www.elon.no/butikker/arendal/elon-arendal,2026-04-15,
+elon-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=17649175372551221605&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+elkjop-arendal-arendal,website,Offisiell nettside,https://www.elkjop.no/?utm_source=google&utm_medium=organic&utm_campaign=1002,2026-04-15,
+elkjop-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=12115824174887404183&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+elkjop-phonehouse-arendal-arendal,website,Offisiell nettside,https://www.elkjop.no/store/elkjop-phonehouse-arendal,2026-04-15,
+elkjop-phonehouse-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=16213377715331421298&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+alti-arendal-arendal,website,Offisiell nettside,https://alti.no/arendal?utm_source=google&utm_medium=infoboks&utm_campaign=gmb,2026-04-15,
+alti-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=4439641847596667862&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+agder-industrielektronikk-as-arendal,website,Offisiell nettside,http://www.aie-as.no/,2026-04-15,
+agder-industrielektronikk-as-arendal,map,Google Maps,https://maps.google.com/?cid=18180989429997164345&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+godata-as-grimstad,website,Offisiell nettside,http://www.godata.no/,2026-04-15,
+godata-as-grimstad,map,Google Maps,https://maps.google.com/?cid=17173633826502586988&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+jp-thygesen-as-sjekkpunkt-bilverksted-grimstad,website,Offisiell nettside,http://www.jpthygesen.no/,2026-04-15,
+jp-thygesen-as-sjekkpunkt-bilverksted-grimstad,map,Google Maps,https://maps.google.com/?cid=4850752731123841375&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+grimstad-chiptuning-as-grimstad,website,Offisiell nettside,http://www.gctuning.no/,2026-04-15,
+grimstad-chiptuning-as-grimstad,map,Google Maps,https://maps.google.com/?cid=8884931334703735292&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+hauglid-data-as-tvedestrand,website,Offisiell nettside,http://www.hkd.no/,2026-04-15,
+hauglid-data-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=9687677198851785298&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+pcsalg-as-tvedestrand,website,Offisiell nettside,https://pcsalg.as/,2026-04-15,
+pcsalg-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=13658862116103495392&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+elkjop-tvedestrand-tvedestrand,website,Offisiell nettside,https://www.elkjop.no/?utm_source=google_location&utm_medium=organic&utm_campaign=1281,2026-04-15,
+elkjop-tvedestrand-tvedestrand,map,Google Maps,https://maps.google.com/?cid=3913905243399934768&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+goon-cave-67-risor,map,Google Maps,https://maps.google.com/?cid=14638665576689540427&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+elesco-tvedestrand-tvedestrand,website,Offisiell nettside,http://www.elescotvedestrand.no/,2026-04-15,
+elesco-tvedestrand-tvedestrand,map,Google Maps,https://maps.google.com/?cid=15107452542452912952&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sjosenteret-risor-as-risor,website,Offisiell nettside,https://sjosenteret.no/,2026-04-15,
+sjosenteret-risor-as-risor,map,Google Maps,https://maps.google.com/?cid=1038881143502950961&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+hr-bildeler-risor-sjekkpunkt-bilverksted-risor,website,Offisiell nettside,http://www.hrbildeler.no/,2026-04-15,
+hr-bildeler-risor-sjekkpunkt-bilverksted-risor,map,Google Maps,https://maps.google.com/?cid=5426151947086964382&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+reinertsen-dataservice-as-hamresanden,website,Offisiell nettside,https://reinertsen.net/,2026-04-15,
+reinertsen-dataservice-as-hamresanden,map,Google Maps,https://maps.google.com/?cid=3385199771403238376&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+nilsen-tv-service-arendal,map,Google Maps,https://maps.google.com/?cid=10496408914435447050&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+terjesen-elektronikk-arendal,website,Offisiell nettside,http://www.terjesenelektronikk.no/,2026-04-15,
+terjesen-elektronikk-arendal,map,Google Maps,https://maps.google.com/?cid=2656909377258208665&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+elektroimportoren-arendal-arendal,website,Offisiell nettside,https://www.elektroimportoren.no/,2026-04-15,
+elektroimportoren-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=5369812248779438511&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+centrum-elektro-as-arendal,website,Offisiell nettside,https://www.centrum-elektro.no/,2026-04-15,
+centrum-elektro-as-arendal,map,Google Maps,https://maps.google.com/?cid=3394360264725008366&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bravida-arendal-elektro-service-arendal,website,Offisiell nettside,https://www.eea.no/,2026-04-15,
+bravida-arendal-elektro-service-arendal,map,Google Maps,https://maps.google.com/?cid=4522748076324021833&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+richard-andersen-elektro-arendal-arendal,website,Offisiell nettside,http://dinelektriker.com/,2026-04-15,
+richard-andersen-elektro-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=12892050039508014263&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+arendal-sound-arendal,website,Offisiell nettside,http://www.arendalsound.com/,2026-04-15,
+arendal-sound-arendal,map,Google Maps,https://maps.google.com/?cid=1529565709822906261&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+batteri-elektro-as-mekonomen-arendal,website,Offisiell nettside,http://batterielektro.no/,2026-04-15,
+batteri-elektro-as-mekonomen-arendal,map,Google Maps,https://maps.google.com/?cid=1945013325843643330&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+agder-el-installasjon-arendal-arendal,website,Offisiell nettside,http://aei.no/,2026-04-15,
+agder-el-installasjon-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=10039635272320578354&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+elon-grimstad-grimstad,website,Offisiell nettside,https://www.elon.no/butikker/grimstad/elon-grimstad,2026-04-15,
+elon-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=13850273257319909832&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+agder-el-installasjon-as-grimstad,website,Offisiell nettside,https://aei.no/,2026-04-15,
+agder-el-installasjon-as-grimstad,map,Google Maps,https://maps.google.com/?cid=2180058320554233514&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+asen-elektroservice-as-grimstad,website,Offisiell nettside,https://www.elektroservice.as/,2026-04-15,
+asen-elektroservice-as-grimstad,map,Google Maps,https://maps.google.com/?cid=3601995285078004575&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+grimstad-elektro-as-roresand,website,Offisiell nettside,http://www.grimstadelektro.no/,2026-04-15,
+grimstad-elektro-as-roresand,map,Google Maps,https://maps.google.com/?cid=7443433041187661818&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+ingeman-stad-agder-musikk-grimstad,map,Google Maps,https://maps.google.com/?cid=10340344585073247069&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+grimstad-lyd-og-bildeservice-ans-grimstad,map,Google Maps,https://maps.google.com/?cid=1462562715296333718&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+elektrofiks-as-vennesla,website,Offisiell nettside,http://www.elektrofiks.no/,2026-04-15,
+elektrofiks-as-vennesla,map,Google Maps,https://maps.google.com/?cid=2046639163449775647&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+rhe-risor-heis-og-elektroservice-risor,website,Offisiell nettside,http://www.risorelektro.no/,2026-04-15,
+rhe-risor-heis-og-elektroservice-risor,map,Google Maps,https://maps.google.com/?cid=16285878394411195476&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+tvedestrand-elektro-as-downlights-el-bil-lader-el-bil-lader-elektrisk-bil-lader-tvedestrand,website,Offisiell nettside,http://www.tvedestrandelektro.no/,2026-04-15,
+tvedestrand-elektro-as-downlights-el-bil-lader-el-bil-lader-elektrisk-bil-lader-tvedestrand,map,Google Maps,https://maps.google.com/?cid=16313493231498769845&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+rta-as-risor,website,Offisiell nettside,http://www.rta.no/,2026-04-15,
+rta-as-risor,map,Google Maps,https://maps.google.com/?cid=2823464756757637537&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+fagelektro-as-tvedestrand,website,Offisiell nettside,https://fagelektro.no/?utm_source=google&utm_medium=bedriftsprofil,2026-04-15,
+fagelektro-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=13894430698073290263&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+staerk-elektro-as-tvedestrand,website,Offisiell nettside,https://www.starkelektro.no/,2026-04-15,
+staerk-elektro-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=13459080413597693532&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+tempe-as-risor,website,Offisiell nettside,https://www.tempe.no/,2026-04-15,
+tempe-as-risor,map,Google Maps,https://maps.google.com/?cid=17872744178894250617&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+elektro-skagerrak-as-risor,website,Offisiell nettside,http://www.elektro-skagerrak.no/,2026-04-15,
+elektro-skagerrak-as-risor,map,Google Maps,https://maps.google.com/?cid=7246664234463282759&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+macdonald-it-tjenester-risor,map,Google Maps,https://maps.google.com/?cid=13985363686384929296&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+safe-control-fdv-as-tvedestrand,website,Offisiell nettside,https://www.safecontrol.no/,2026-04-15,
+safe-control-fdv-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=15800383017066138596&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bademiljo-risor-paulsen-sonn-as-risor,website,Offisiell nettside,https://www.bademiljo.no/finn-rorlegger-og-butikk/agder/paulsen-og-sonn-as/?utm_source=gmb_bademiljo_paulsen_sonn_risor&utm_medium=gmb&utm_campaign=klikket_gmb_lenke&utm_id=gmb_klikk_gmb,2026-04-15,
+bademiljo-risor-paulsen-sonn-as-risor,map,Google Maps,https://maps.google.com/?cid=10737348000298093828&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bvs-klima-ror-tvedestrand,website,Offisiell nettside,https://www.bv-vvs.no/,2026-04-15,
+bvs-klima-ror-tvedestrand,map,Google Maps,https://maps.google.com/?cid=3809049847038013577&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+jakt-og-fritid-as-tvedestrand,website,Offisiell nettside,http://www.jaktogfritid.no/,2026-04-15,
+jakt-og-fritid-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=3523300384457756135&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+brodrene-vatne-tvedestrand-tvedestrand,website,Offisiell nettside,https://www.vvseksperten.no/rorlegger/tvedestrand/brodrene-vatne-as,2026-04-15,
+brodrene-vatne-tvedestrand-tvedestrand,map,Google Maps,https://maps.google.com/?cid=6898353699342131292&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sundebru-sundebru,map,Google Maps,https://maps.google.com/?cid=8334812966378363233&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+rorleggermester-kjetil-bringsverd-vvs-as-avd-tvedestrand-tvedestrand,website,Offisiell nettside,https://kjetilbringsverdvvs.no/,2026-04-15,
+rorleggermester-kjetil-bringsverd-vvs-as-avd-tvedestrand-tvedestrand,map,Google Maps,https://maps.google.com/?cid=9332017505634924172&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+autoblikk-staubo,website,Offisiell nettside,https://autoblikk.no/,2026-04-15,
+autoblikk-staubo,map,Google Maps,https://maps.google.com/?cid=11566518378086224594&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+rorleggerfirma-erling-olsen-as-tvedestrand,website,Offisiell nettside,http://erlingolsen.no/,2026-04-15,
+rorleggerfirma-erling-olsen-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=2424255656184756670&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+risor-taxi-ans-risor,map,Google Maps,https://maps.google.com/?cid=15295791020625935172&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sb-vvs-tvedestrand,map,Google Maps,https://maps.google.com/?cid=7882079991607055218&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+stoa-elektronikk-as-fevik,website,Offisiell nettside,http://www.stoaelektronikk.no/,2026-04-15,
+stoa-elektronikk-as-fevik,map,Google Maps,https://maps.google.com/?cid=17488658828741466335&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+hydron-as-arendal,website,Offisiell nettside,https://hydron.no/,2026-04-15,
+hydron-as-arendal,map,Google Maps,https://maps.google.com/?cid=14961511689826630416&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+grisen-storsenter-tvedestrand,website,Offisiell nettside,https://alti.no/grisen-storsenter/,2026-04-15,
+grisen-storsenter-tvedestrand,map,Google Maps,https://maps.google.com/?cid=1143375068868865758&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+stemningsfullt-tvedestrand,map,Google Maps,https://maps.google.com/?cid=8946651954148624448&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sourceit-risor,website,Offisiell nettside,http://sourceit.no/,2026-04-15,
+sourceit-risor,map,Google Maps,https://maps.google.com/?cid=18090241626167963351&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+haefashion-tvedestrand,website,Offisiell nettside,https://haefashion.no/,2026-04-15,
+haefashion-tvedestrand,map,Google Maps,https://maps.google.com/?cid=842601087878633461&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+a-ventilasjon-as-songe,map,Google Maps,https://maps.google.com/?cid=3658283069657393416&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+rorlegger-jensen-as-staubo,website,Offisiell nettside,https://www.rorkjop.no/finn-rorlegger/agder/arendal/rorlegger-jensen-as?srsltid=AfmBOoqnt3ygQleIfVjvmh-7ik43rmpA50XAxt9eAoQZU3APizM_Z-u_,2026-04-15,
+rorlegger-jensen-as-staubo,map,Google Maps,https://maps.google.com/?cid=13799159204343558524&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sorlandet-vvs-as-froland,website,Offisiell nettside,https://www.sorlandetvvs.no/,2026-04-15,
+sorlandet-vvs-as-froland,map,Google Maps,https://maps.google.com/?cid=4841610849652910501&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sondeled-rorhandel-as-sondeled,map,Google Maps,https://maps.google.com/?cid=3256795940525301763&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+pm-elektro-as-arendal,website,Offisiell nettside,https://www.pm-el.no/,2026-04-15,
+pm-elektro-as-arendal,map,Google Maps,https://maps.google.com/?cid=11299591693784761128&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+setesdal-elektro-as-bykle,website,Offisiell nettside,http://www.setesdalelektro.no/,2026-04-15,
+setesdal-elektro-as-bykle,map,Google Maps,https://maps.google.com/?cid=4651835706721549766&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+lyd-og-bilde-john-andersen-evje,map,Google Maps,https://maps.google.com/?cid=14662771760294734169&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+setesdalnet-bykle,website,Offisiell nettside,https://www.setesdalnet.no/,2026-04-15,
+setesdalnet-bykle,map,Google Maps,https://maps.google.com/?cid=13899705555630846120&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+ks-service-as-evje,website,Offisiell nettside,http://www.ksserviceas.no/,2026-04-15,
+ks-service-as-evje,map,Google Maps,https://maps.google.com/?cid=17350194885888408683&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+knut-hovet-installasjonar-rysstad-rysstad,website,Offisiell nettside,http://www.hovet.com/,2026-04-15,
+knut-hovet-installasjonar-rysstad-rysstad,map,Google Maps,https://maps.google.com/?cid=1607104643111919303&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+mjaland-automatikk-evje,map,Google Maps,https://maps.google.com/?cid=1115924304805057055&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+evtek-as-evje-evje,website,Offisiell nettside,http://evtek.no/,2026-04-15,
+evtek-as-evje-evje,map,Google Maps,https://maps.google.com/?cid=17392483652013986191&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+brokke-vvs-as-rorlegger-og-vvs-i-rysstad-rysstad,website,Offisiell nettside,https://www.facebook.com/profile.php?id=61552198067839,2026-04-15,
+brokke-vvs-as-rorlegger-og-vvs-i-rysstad-rysstad,map,Google Maps,https://maps.google.com/?cid=11642104921219980918&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+troll-mountain-data-center-evje,map,Google Maps,https://maps.google.com/?cid=2834230564152317469&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+erv-teknikk-evje-as-evje,map,Google Maps,https://maps.google.com/?cid=7031100441390938177&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+altidata-as-evje,map,Google Maps,https://maps.google.com/?cid=17956066502970985864&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+knut-hovet-installasjonar-hovden-hovden-i-setesdal,website,Offisiell nettside,http://www.hovet.com/,2026-04-15,
+knut-hovet-installasjonar-hovden-hovden-i-setesdal,map,Google Maps,https://maps.google.com/?cid=5965690760106709426&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+den-lekende-skomaker-as-arendal,website,Offisiell nettside,http://www.denlekendeskomager.no/,2026-04-15,
+den-lekende-skomaker-as-arendal,map,Google Maps,https://maps.google.com/?cid=68877275803933741&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+grimstad-sko-kalesjeservice-grimstad,website,Offisiell nettside,http://gskservice.no/,2026-04-15,
+grimstad-sko-kalesjeservice-grimstad,map,Google Maps,https://maps.google.com/?cid=8129321505173474368&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+eurosko-tvedestrand,website,Offisiell nettside,https://www.eurosko.com/no/,2026-04-15,
+eurosko-tvedestrand,map,Google Maps,https://maps.google.com/?cid=18228627450707402986&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+esmaili-dame-og-herreskredderi-arendal,map,Google Maps,https://maps.google.com/?cid=11651147606750918050&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+arendal-souvenirs-klespleie-arendal,website,Offisiell nettside,https://www.arendalsouvenirs.no/,2026-04-15,
+arendal-souvenirs-klespleie-arendal,map,Google Maps,https://maps.google.com/?cid=6895437620155493381&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+meretes-atelier-lysthuset-grimstad,website,Offisiell nettside,http://www.lysthuset.no/,2026-04-15,
+meretes-atelier-lysthuset-grimstad,map,Google Maps,https://maps.google.com/?cid=3814744952832683350&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+husflidstua-grimstad,website,Offisiell nettside,http://www.husflidstua.no/,2026-04-15,
+husflidstua-grimstad,map,Google Maps,https://maps.google.com/?cid=1791951133344151745&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+stitch-bunadsom-manufaktur-staubo,map,Google Maps,https://maps.google.com/?cid=9331842532426905232&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+l-rolland-som-iveland,map,Google Maps,https://maps.google.com/?cid=4720532129210813476&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+kalesjeservice-batputer-tveit,map,Google Maps,https://maps.google.com/?cid=14867682448852859631&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+norsk-flid-husfliden-arendal-arendal,website,Offisiell nettside,http://www.norskflid.no/arendal,2026-04-15,
+norsk-flid-husfliden-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=13432636152736874560&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+garn-og-sybutikken-arendal,website,Offisiell nettside,https://www.garnogsybutikken.no/,2026-04-15,
+garn-og-sybutikken-arendal,map,Google Maps,https://maps.google.com/?cid=8527952347611651274&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+oddensenteret-grimstad,website,Offisiell nettside,https://www.odden.no/,2026-04-15,
+oddensenteret-grimstad,map,Google Maps,https://maps.google.com/?cid=14220787339228725079&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+linda-i-floistads-systue-saltrod,map,Google Maps,https://maps.google.com/?cid=811798927257635728&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+brandpark-as-avd-syralt-brekkesto,website,Offisiell nettside,http://syralt.no/,2026-04-15,
+brandpark-as-avd-syralt-brekkesto,map,Google Maps,https://maps.google.com/?cid=389835043109869559&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+arnhilds-systue-asland-finsland,map,Google Maps,https://maps.google.com/?cid=7921883890396443783&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+industrisom-as-arendal,website,Offisiell nettside,http://industrisom.no/,2026-04-15,
+industrisom-as-arendal,map,Google Maps,https://maps.google.com/?cid=7066761662262584780&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+c-la-vie-klaer-interior-as-arendal,website,Offisiell nettside,http://clavie.no/,2026-04-15,
+c-la-vie-klaer-interior-as-arendal,map,Google Maps,https://maps.google.com/?cid=17744443920706707426&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+kompanii-arendal,website,Offisiell nettside,http://www.kompanii.no/,2026-04-15,
+kompanii-arendal,map,Google Maps,https://maps.google.com/?cid=13684593349486667171&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+hos-solvi-arendal,website,Offisiell nettside,https://hossolvi.no/,2026-04-15,
+hos-solvi-arendal,map,Google Maps,https://maps.google.com/?cid=17247155553564541183&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+resolve-arendal,map,Google Maps,https://maps.google.com/?cid=2503318271323228983&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+kappahl-arendal,website,Offisiell nettside,https://www.kappahl.com/,2026-04-15,
+kappahl-arendal,map,Google Maps,https://maps.google.com/?cid=5808063680824451062&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+rens-pa-flekken-as-arendal,map,Google Maps,https://maps.google.com/?cid=13428310148849640760&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+agder-renovasjon-iks-arendal,website,Offisiell nettside,https://agderrenovasjon.no/,2026-04-15,
+agder-renovasjon-iks-arendal,map,Google Maps,https://maps.google.com/?cid=14133030357934566115&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+gitmark-arendal-arendal,website,Offisiell nettside,https://gitmark.no/arendal/,2026-04-15,
+gitmark-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=16756547396476630086&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+alti-harebakken-arendal,website,Offisiell nettside,https://www.alti.no/harebakken/?utm_source=GoogleMB&utm_medium=Infoboks&utm_campaign=GMB,2026-04-15,
+alti-harebakken-arendal,map,Google Maps,https://maps.google.com/?cid=13103095979073066666&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+gina-tricot-arendal,website,Offisiell nettside,https://www.ginatricot.com/no/find-store/arendal-alti-arendal-1413?utm_source=gmb&utm_medium=organic&utm_campaign=no-arendal-vesterveien,2026-04-15,
+gina-tricot-arendal,map,Google Maps,https://maps.google.com/?cid=7670774145597091954&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+dressmann-arendal,website,Offisiell nettside,http://dressmann.com/no/bedriftssider/finn-butikk/Norway/Dressmann_Arendal/,2026-04-15,
+dressmann-arendal,map,Google Maps,https://maps.google.com/?cid=15170804190992520179&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+veslas-boutique-grimstad-as-grimstad,website,Offisiell nettside,https://veslas.no/,2026-04-15,
+veslas-boutique-grimstad-as-grimstad,map,Google Maps,https://maps.google.com/?cid=8115869825882218072&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+hoyer-grimstad-as-grimstad,website,Offisiell nettside,https://hoyer.no/,2026-04-15,
+hoyer-grimstad-as-grimstad,map,Google Maps,https://maps.google.com/?cid=12911018348016254093&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+lithe-as-grimstad,map,Google Maps,https://maps.google.com/?cid=9544203696572621162&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+skinsation-grimstad,website,Offisiell nettside,http://www.skinsation.no/,2026-04-15,
+skinsation-grimstad,map,Google Maps,https://maps.google.com/?cid=11961428948993338758&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+dressmann-grimstad,website,Offisiell nettside,http://dressmann.com/no/bedriftssider/finn-butikk/Norway/231/,2026-04-15,
+dressmann-grimstad,map,Google Maps,https://maps.google.com/?cid=6315700764667992605&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+dekkis-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=15693961566763983546&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+dekkis-as-meca-tvedestrand,website,Offisiell nettside,https://www.facebook.com/p/Dekkis-As-61564941405713/,2026-04-15,
+dekkis-as-meca-tvedestrand,map,Google Maps,https://maps.google.com/?cid=18217034900173108863&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+amtmannsvingen-motorsenter-as-tvedestrand,website,Offisiell nettside,http://www.amtmannsvingen.com/,2026-04-15,
+amtmannsvingen-motorsenter-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=5172302167941504094&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+kenneth-hansen-risor,map,Google Maps,https://maps.google.com/?cid=5510260777818737195&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+brd-ellefsens-eftf-meca-risor,website,Offisiell nettside,http://ellefsens.no/,2026-04-15,
+brd-ellefsens-eftf-meca-risor,map,Google Maps,https://maps.google.com/?cid=7834062577719305979&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+tvedestrand-bilverksted-ans-tvedestrand,website,Offisiell nettside,http://tvedestrandbilverksted.no/kontakt-oss/,2026-04-15,
+tvedestrand-bilverksted-ans-tvedestrand,map,Google Maps,https://maps.google.com/?cid=6246200324094088694&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+mobeltapetsererverkstedet-as-arendal,website,Offisiell nettside,http://www.moebeltapetserer.no/,2026-04-15,
+mobeltapetsererverkstedet-as-arendal,map,Google Maps,https://maps.google.com/?cid=3452826837266126760&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+fagmobler-arendal-arendal,website,Offisiell nettside,https://fagmobler.no/min-butikk/aust-agder/fagmobler-arendal,2026-04-15,
+fagmobler-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=13105292293510778565&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+mobelringen-arendal-arendal,website,Offisiell nettside,http://www.mobelringen.no/,2026-04-15,
+mobelringen-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=2456173064831681063&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+grimstad-mobelrestaurering-og-forgylling-grimstad,website,Offisiell nettside,https://www.restaureringogforgylling.no/,2026-04-15,
+grimstad-mobelrestaurering-og-forgylling-grimstad,map,Google Maps,https://maps.google.com/?cid=10107530055698029570&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+risor-som-og-mobelverksted-grete-hagen-risor,map,Google Maps,https://maps.google.com/?cid=12594222775326825886&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+risor-snekkeri-as-risor,website,Offisiell nettside,https://www.risorsnekkeri.no/,2026-04-15,
+risor-snekkeri-as-risor,map,Google Maps,https://maps.google.com/?cid=9717490723822960073&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+stopp-hos-meg-anita-jul-larsen-mobeltapetserer-risor,map,Google Maps,https://maps.google.com/?cid=3405693388458223348&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+byggmester-sommerfelt-as-risor,website,Offisiell nettside,http://www.byggmestersommerfelt.no/,2026-04-15,
+byggmester-sommerfelt-as-risor,map,Google Maps,https://maps.google.com/?cid=11415803132024082638&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bo-mobler-lillesand,map,Google Maps,https://maps.google.com/?cid=16071254350117404129&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+fagmobler-grimstad-grimstad,website,Offisiell nettside,https://fagmobler.no/min-butikk/aust-agder/fagmobler-grimstad,2026-04-15,
+fagmobler-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=14077662288851708256&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bohus-arendal-arendal,website,Offisiell nettside,https://www.bohus.no/butikker/arendal,2026-04-15,
+bohus-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=15310317935341813012&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+laerdoktor-sogne-sogne,website,Offisiell nettside,https://www.facebook.com/lerdoktorsogne/,2026-04-15,
+laerdoktor-sogne-sogne,map,Google Maps,https://maps.google.com/?cid=7737898926488638800&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+gjeving-trevarefabrikk-as-tvedestrand,website,Offisiell nettside,https://www.gjeving.no/,2026-04-15,
+gjeving-trevarefabrikk-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=5878339890093704206&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sykkelsport-as-arendal,website,Offisiell nettside,https://www.sykkelsport.no/,2026-04-15,
+sykkelsport-as-arendal,website,Service og verksted,https://sykkelsport.no/service/,2026-04-19,Offisiell serviceside med verkstedtjenester og prisliste
+sykkelsport-as-arendal,map,Google Maps,https://maps.google.com/?cid=1735252395805230053&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sykkelsport-grimstad-grimstad,website,Offisiell nettside,https://www.finn.no/butikk/sykkelsportgrimstad?previous=53743965,2026-04-15,
+sykkelsport-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=18137977054863899129&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+blom-sykkelservice-grimstad,map,Google Maps,https://maps.google.com/?cid=15417998366756943100&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sykkel-bent-grimstad,website,Offisiell nettside,https://www.sykkel-bent.no/,2026-04-15,
+sykkel-bent-grimstad,map,Google Maps,https://maps.google.com/?cid=2462981833041788738&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sport-1-grimstad-grimstad,website,Offisiell nettside,https://www.sport1.no/butikker/sport-1-grimstad,2026-04-15,
+sport-1-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=11471780496649644159&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+respons-norway-nedenes,map,Google Maps,https://maps.google.com/?cid=14270635923771656291&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+tvedestrand-sykkelverksted-as-tvedestrand,website,Offisiell nettside,http://tvedestrandsykkelverksted.no/,2026-04-15,
+tvedestrand-sykkelverksted-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=7314497684398837048&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sport-1-risor-risor,website,Offisiell nettside,https://www.sport1.no/butikker/sport-1-risor,2026-04-15,
+sport-1-risor-risor,map,Google Maps,https://maps.google.com/?cid=13029763423929313518&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sport-1-vennesla-vennesla,website,Offisiell nettside,https://www.sport1.no/butikker/sport-1-vennesla,2026-04-15,
+sport-1-vennesla-vennesla,map,Google Maps,https://maps.google.com/?cid=15458937091383408738&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+brekke-sport-stoa-arendal,website,Offisiell nettside,https://www.brekkesport.no/,2026-04-15,
+brekke-sport-stoa-arendal,map,Google Maps,https://maps.google.com/?cid=4419334569068266980&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+stisykkelbyen-arendal-arendal,website,Offisiell nettside,https://www.stisykkelbyen.no/,2026-04-15,
+stisykkelbyen-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=16948734707126998543&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sport-1-arendal-arendal,website,Offisiell nettside,https://www.sport1.no/butikker/sport-1-arendal,2026-04-15,
+sport-1-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=10541288411770752103&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+xxl-arendal-arendal,website,Offisiell nettside,https://www.xxl.no/,2026-04-15,
+xxl-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=15217036761586457319&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sport-outlet-evje-evje,website,Offisiell nettside,https://sportoutlet.no/?utm_source=evje&utm_medium=linkin&utm=,2026-04-15,
+sport-outlet-evje-evje,map,Google Maps,https://maps.google.com/?cid=4592287170586015149&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+intersport-evje,website,Offisiell nettside,https://www.intersport.no/storedetail?storeID=530,2026-04-15,
+intersport-evje,map,Google Maps,https://maps.google.com/?cid=6453147418570103113&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+etappe-lillesand,website,Offisiell nettside,https://www.etappebikes.no/,2026-04-15,
+etappe-lillesand,map,Google Maps,https://maps.google.com/?cid=17344267102739777038&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+norsk-hagebruksmuseum-grimstad,website,Offisiell nettside,http://www.gbm.no/norsk-hagebruksmuseum,2026-04-15,
+norsk-hagebruksmuseum-grimstad,map,Google Maps,https://maps.google.com/?cid=17963786245670708974&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+grimstad-bys-museer-grimstad,website,Offisiell nettside,http://www.gbm.no/,2026-04-15,
+grimstad-bys-museer-grimstad,map,Google Maps,https://maps.google.com/?cid=4357985995953455545&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+carfix-arendal-arendal,website,Offisiell nettside,https://carfix.no/arendal/,2026-04-15,
+carfix-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=7232091501535760457&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+fs-auto-as-mekonomen-arendal,website,Offisiell nettside,https://www.mekonomen.no/butikk-bilverksted/arendal/gardsveien-7-at6016-144/,2026-04-15,
+fs-auto-as-mekonomen-arendal,map,Google Maps,https://maps.google.com/?cid=8020988532820638662&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+frameworks-as-arendal,website,Offisiell nettside,http://www.frameworks.no/,2026-04-15,
+frameworks-as-arendal,map,Google Maps,https://maps.google.com/?cid=11996672683386630147&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+arendal-batskade-service-as-arendal,website,Offisiell nettside,https://www.arendalbatskadeservice.no/,2026-04-15,
+arendal-batskade-service-as-arendal,map,Google Maps,https://maps.google.com/?cid=14782464590476928985&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+jorkjen-mc-arendal,map,Google Maps,https://maps.google.com/?cid=13039287647118401144&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+mekonomen-butikk-arendal-arendal,website,Offisiell nettside,https://www.mekonomen.no/finn-ditt-narmeste-verksted/arendal/gardsveien-7-at6016-000,2026-04-15,
+mekonomen-butikk-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=14639090608353569085&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bilxtra-arendal-arendal,website,Offisiell nettside,https://bilxtra.no/,2026-04-15,
+bilxtra-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=5303486688629563802&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bileko-car-parts-norway-as-avd-arendal-bcp-arendal,website,Offisiell nettside,https://www.mekonomencompany.no/vare-merkevarer/bcp/,2026-04-15,
+bileko-car-parts-norway-as-avd-arendal-bcp-arendal,map,Google Maps,https://maps.google.com/?cid=10723908292753592445&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+romnes-arendal-as-arendal,website,Offisiell nettside,https://www.romnes.no/,2026-04-15,
+romnes-arendal-as-arendal,map,Google Maps,https://maps.google.com/?cid=6307236881980332284&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+arendal-badsenter-as-arendal,website,Offisiell nettside,https://www.abaad.no/,2026-04-15,
+arendal-badsenter-as-arendal,map,Google Maps,https://maps.google.com/?cid=4901647838271060507&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bathuset-arendal-as-arendal,website,Offisiell nettside,http://www.baat-arendal.no/,2026-04-15,
+bathuset-arendal-as-arendal,map,Google Maps,https://maps.google.com/?cid=17514448853159752038&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+lovdal-auto-as-mekonomen-bilverksted-nedenes,map,Google Maps,https://maps.google.com/?cid=5497699303208556061&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+fahrrad-reparaturstation-grimstad,map,Google Maps,https://maps.google.com/?cid=5944114434998826483&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+agder-karosseri-as-grimstad,website,Offisiell nettside,http://www.agderkarosseri.no/,2026-04-15,
+agder-karosseri-as-grimstad,map,Google Maps,https://maps.google.com/?cid=6407935157756161082&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+auto-rep-as-grimstad,website,Offisiell nettside,http://autorep-as.no/,2026-04-15,
+auto-rep-as-grimstad,map,Google Maps,https://maps.google.com/?cid=4135146168471680818&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+agder-teknikk-grimstad,website,Offisiell nettside,https://www.agderteknikk.no/,2026-04-15,
+agder-teknikk-grimstad,map,Google Maps,https://maps.google.com/?cid=11387896086467084347&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+grimstad-badsenter-deler-verksted-opplag-grimstad,website,Offisiell nettside,https://www.gbaad.no/verksted/,2026-04-15,
+grimstad-badsenter-deler-verksted-opplag-grimstad,map,Google Maps,https://maps.google.com/?cid=14369402057999406016&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+komposittservice-as-grimstad,website,Offisiell nettside,https://komposittservice.no/,2026-04-15,
+komposittservice-as-grimstad,map,Google Maps,https://maps.google.com/?cid=9177800754496332129&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sb-verksted-og-transport-as-grimstad,website,Offisiell nettside,https://www.meca.no/bilverksted/grimstad/sb-verksted-og-transport-as,2026-04-15,
+sb-verksted-og-transport-as-grimstad,map,Google Maps,https://maps.google.com/?cid=4758557749558778595&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+dekkskift-tvedestrand-tvedestrand,website,Offisiell nettside,https://dekkskifttvedestrand.no/,2026-04-15,
+dekkskift-tvedestrand-tvedestrand,map,Google Maps,https://maps.google.com/?cid=12084331835240426998&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bilinstrument-service-tvedestrand,map,Google Maps,https://maps.google.com/?cid=14441349738628369549&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+cafeen-arendal-arendal,website,Offisiell nettside,https://www.cafeen-arendal.no/,2026-04-15,
+cafeen-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=9506438815425666458&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+koselig-cafe-arendal,map,Google Maps,https://maps.google.com/?cid=8644840708197149232&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+cafe-victor-arendal,website,Offisiell nettside,http://www.cafevictor.no/,2026-04-15,
+cafe-victor-arendal,map,Google Maps,https://maps.google.com/?cid=10481540520272457703&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+kopano-cafe-arendal,map,Google Maps,https://maps.google.com/?cid=12229220619877936497&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+fokussenteret-grimstad,website,Offisiell nettside,http://fokussenteret.no/,2026-04-15,
+fokussenteret-grimstad,map,Google Maps,https://maps.google.com/?cid=17265785609486268000&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+chr-repstads-sonner-as-grimstad,website,Offisiell nettside,http://www.peugeotgrimstad.no/,2026-04-15,
+chr-repstads-sonner-as-grimstad,map,Google Maps,https://maps.google.com/?cid=18246421652592254020&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+grosle-rekvisita-roresand,website,Offisiell nettside,https://www.yourvismawebsite.com/grosle-rekvisita-ans/nettbutikk,2026-04-15,
+grosle-rekvisita-roresand,map,Google Maps,https://maps.google.com/?cid=7705448158569967254&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+universitetet-i-agder-campus-grimstad-grimstad,website,Offisiell nettside,https://www.uia.no/,2026-04-15,
+universitetet-i-agder-campus-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=11189940913761581326&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+jernia-odden-grimstad,website,Offisiell nettside,https://www.jernia.no/,2026-04-15,
+jernia-odden-grimstad,map,Google Maps,https://maps.google.com/?cid=17133344537266270216&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+radhusgata-spiseri-mer-risor,website,Offisiell nettside,https://www.radhusgata.no/,2026-04-15,
+radhusgata-spiseri-mer-risor,map,Google Maps,https://maps.google.com/?cid=8843890648886432095&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+brygga-restaurant-bar-risor,website,Offisiell nettside,http://www.risorbrygga.no/,2026-04-15,
+brygga-restaurant-bar-risor,map,Google Maps,https://maps.google.com/?cid=15900814469954968848&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+risorflekken-risor,website,Offisiell nettside,http://www.turer.no/risorflekken.php,2026-04-15,
+risorflekken-risor,map,Google Maps,https://maps.google.com/?cid=6132932083022640638&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+risor-fiskemottak-as-risor,website,Offisiell nettside,http://www.fiskemottaket.no/,2026-04-15,
+risor-fiskemottak-as-risor,map,Google Maps,https://maps.google.com/?cid=9768606346634240375&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+tvedestrand-fjordhotell-tvedestrand,map,Google Maps,https://maps.google.com/?cid=18003282303826221177&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+stoga-a-s-bygland,website,Offisiell nettside,https://www.facebook.com/StogaAS,2026-04-15,
+stoga-a-s-bygland,map,Google Maps,https://maps.google.com/?cid=10944245397658851987&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+midtstol-transport-as-arendal,website,Offisiell nettside,https://www.midtstoel.no/,2026-04-15,
+midtstol-transport-as-arendal,map,Google Maps,https://maps.google.com/?cid=14948815044586269527&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+norsk-gjenvinning-as-arendal,website,Offisiell nettside,https://www.norskgjenvinning.no/,2026-04-15,
+norsk-gjenvinning-as-arendal,map,Google Maps,https://maps.google.com/?cid=8749790402057504432&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+agder-renovasjon-driftsavdelingen-osterhus-grimstad,website,Offisiell nettside,http://agderrenovasjon.no/,2026-04-15,
+agder-renovasjon-driftsavdelingen-osterhus-grimstad,map,Google Maps,https://maps.google.com/?cid=6279749782280804918&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+arnas-grimstad,website,Offisiell nettside,http://www.arnas.no/om-arnas/,2026-04-15,
+arnas-grimstad,map,Google Maps,https://maps.google.com/?cid=13089373076799135512&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+rta-avfallsmottak-grenstol-tvedestrand-tvedestrand,website,Offisiell nettside,http://www.rta.no/?CatID=1226,2026-04-15,
+rta-avfallsmottak-grenstol-tvedestrand-tvedestrand,map,Google Maps,https://maps.google.com/?cid=18079622453012944499&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+ekomarketarendal-arendal,website,Offisiell nettside,http://www.ekomarket.no/,2026-04-15,
+ekomarketarendal-arendal,map,Google Maps,https://maps.google.com/?cid=14074676072800593239&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+krydra-as-kvalitetskrydder-urter-og-kulinariske-ingredienser-pa-nett-arendal,website,Offisiell nettside,https://krydra.no/,2026-04-15,
+krydra-as-kvalitetskrydder-urter-og-kulinariske-ingredienser-pa-nett-arendal,map,Google Maps,https://maps.google.com/?cid=1766681586118278680&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sunkost-alti-arendal-arendal,website,Offisiell nettside,https://sunkost.no/sunkost-amfi-arendal-helsekost/,2026-04-15,
+sunkost-alti-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=13160419010543013373&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sostrene-kjevik-arendal,website,Offisiell nettside,http://www.søstrenekjevik.no/,2026-04-15,
+sostrene-kjevik-arendal,map,Google Maps,https://maps.google.com/?cid=10959076873045017359&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+ta-mer-mer-arendal,website,Offisiell nettside,https://www.facebook.com/profile.php?id=100095345132017,2026-04-15,
+ta-mer-mer-arendal,map,Google Maps,https://maps.google.com/?cid=4681615341761201171&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+holdbart-arendal-arendal,website,Offisiell nettside,https://www.holdbart.no/,2026-04-15,
+holdbart-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=1328019271199938429&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+plantehallen-arendal-arendal,website,Offisiell nettside,http://plantehallen.no/arendal,2026-04-15,
+plantehallen-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=2140904127752719732&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+life-arendal,website,Offisiell nettside,http://www.life.no/,2026-04-15,
+life-arendal,map,Google Maps,https://maps.google.com/?cid=11207808457379977229&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+havglott-by-morgenfugl-arendal,website,Offisiell nettside,https://morgenfugl.no/collections/eureka-havglott,2026-04-15,
+havglott-by-morgenfugl-arendal,map,Google Maps,https://maps.google.com/?cid=11178790702485905570&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+gorr-go-mad-arendal,website,Offisiell nettside,http://www.gorrgomad.no/,2026-04-15,
+gorr-go-mad-arendal,map,Google Maps,https://maps.google.com/?cid=5750311321952497283&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+hageland-arendal-arendal,website,Offisiell nettside,https://hageland.no/hagesenter/hageland-arendal/,2026-04-15,
+hageland-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=5093015084967504000&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+plantasjen-his,website,Offisiell nettside,https://www.plantasjen.no/no/vare-butikker/norge/arendal,2026-04-15,
+plantasjen-his,map,Google Maps,https://maps.google.com/?cid=16380592260011897802&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+floriss-arendal-arendal,website,Offisiell nettside,http://floriss.no/,2026-04-15,
+floriss-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=249490189070256714&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+prestegarden-i-froland-froland,map,Google Maps,https://maps.google.com/?cid=11322008572378781166&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sunkost-oddensenteret-grimstad,website,Offisiell nettside,https://sunkost.no/sunkost-oddensenteret-helsekost/,2026-04-15,
+sunkost-oddensenteret-grimstad,map,Google Maps,https://maps.google.com/?cid=14429626923167784032&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+br-tellefsen-gronnsaksutsalg-grimstad,map,Google Maps,https://maps.google.com/?cid=953284970583233846&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+smak-av-asia-asian-grocery-store-grimstad,website,Offisiell nettside,http://www.smakavasia.no/,2026-04-15,
+smak-av-asia-asian-grocery-store-grimstad,map,Google Maps,https://maps.google.com/?cid=990387749763225128&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+plantedottir-as-grimstad,website,Offisiell nettside,http://plantedottir.no/,2026-04-15,
+plantedottir-as-grimstad,map,Google Maps,https://maps.google.com/?cid=16757057050596192686&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+grimstad-kiosk-grill-as-grimstad,map,Google Maps,https://maps.google.com/?cid=6998724355989279432&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+floriss-grimstad-grimstad,website,Offisiell nettside,https://floriss.no/floriss-tusenfryd,2026-04-15,
+floriss-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=5039822519994194493&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+k-g-puntervold-as-grimstad,website,Offisiell nettside,http://puntervoldigrimstad.no/,2026-04-15,
+k-g-puntervold-as-grimstad,map,Google Maps,https://maps.google.com/?cid=3046533413838940197&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+hesnes-gartneri-kjokken-grimstad,website,Offisiell nettside,https://www.facebook.com/hesnesgartneri/?locale=nb_NO,2026-04-15,
+hesnes-gartneri-kjokken-grimstad,map,Google Maps,https://maps.google.com/?cid=4445426034968199793&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+hageland-grimstad-grimstad,website,Offisiell nettside,https://hageland.no/hagesenter/grimstad,2026-04-15,
+hageland-grimstad-grimstad,map,Google Maps,https://maps.google.com/?cid=8054106151797166201&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+olbrygging-as-grimstad,website,Offisiell nettside,http://www.olbrygging.no/,2026-04-15,
+olbrygging-as-grimstad,map,Google Maps,https://maps.google.com/?cid=12702443020222526466&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+oliven-verden-norge-as-risor,map,Google Maps,https://maps.google.com/?cid=11526897537903168929&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+stordal-gard-as-tvedestrand,website,Offisiell nettside,https://www.stoerdalgard.no/,2026-04-15,
+stordal-gard-as-tvedestrand,map,Google Maps,https://maps.google.com/?cid=13789115698384895793&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+hageland-garthe-risor,website,Offisiell nettside,https://hageland.no/hagesenter/garthe,2026-04-15,
+hageland-garthe-risor,map,Google Maps,https://maps.google.com/?cid=14948907321848995813&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+hageland-tvedestrand-tvedestrand,website,Offisiell nettside,https://hageland.no/,2026-04-15,
+hageland-tvedestrand-tvedestrand,map,Google Maps,https://maps.google.com/?cid=4345851412934218942&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+acanthus-risor,website,Offisiell nettside,http://www.acanthus.shop/,2026-04-15,
+acanthus-risor,map,Google Maps,https://maps.google.com/?cid=6933993396823443290&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+monter-risor-risor,website,Offisiell nettside,https://www.monter.no/?utm_source=Google&utm_medium=Organic+Search&utm_campaign=Google_my_business,2026-04-15,
+monter-risor-risor,map,Google Maps,https://maps.google.com/?cid=3395338657246595166&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+uppistog-gard-valle,website,Offisiell nettside,https://www.facebook.com/livslys1,2026-04-15,
+uppistog-gard-valle,map,Google Maps,https://maps.google.com/?cid=11656480932843580952&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+brokkestoylen-rysstad,website,Offisiell nettside,https://www.brokkestoylen.no/,2026-04-15,
+brokkestoylen-rysstad,map,Google Maps,https://maps.google.com/?cid=4882673933829957706&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+norengros-kjosavik-butikk-arendal-arendal,website,Offisiell nettside,https://www.norengros.no/,2026-04-15,
+norengros-kjosavik-butikk-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=14627928001771001111&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bik-bok-arendal,website,Offisiell nettside,http://bikbok.com/no/bedriftsider/butikker/butikker/norway/62e/,2026-04-15,
+bik-bok-arendal,map,Google Maps,https://maps.google.com/?cid=7859813585407722119&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+jula-arendal,website,Offisiell nettside,https://www.jula.no/vare-varehus/arendal/,2026-04-15,
+jula-arendal,map,Google Maps,https://maps.google.com/?cid=12565459186026813825&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+apotekergaarden-episenteret-as-grimstad,website,Offisiell nettside,http://www.apotekergaarden.no/,2026-04-15,
+apotekergaarden-episenteret-as-grimstad,map,Google Maps,https://maps.google.com/?cid=1212913836210331473&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bergshaven-bakeri-konditori-grimstad,website,Offisiell nettside,http://www.bergshaven.com/,2026-04-15,
+bergshaven-bakeri-konditori-grimstad,map,Google Maps,https://maps.google.com/?cid=11332272453060865859&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+odden-klaer-as-grimstad,map,Google Maps,https://maps.google.com/?cid=14198159009646414086&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+interoptik-holvik-grimstad,website,Offisiell nettside,http://www.interoptik.no/finn-butikk/interoptik-holvik/?utm_source=gmb&utm_medium=organic&utm_campaign=googlemybusiness&utm_content=holvik,2026-04-15,
+interoptik-holvik-grimstad,map,Google Maps,https://maps.google.com/?cid=10558640745936830304&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+asian-pa-torvet-grimstad,map,Google Maps,https://maps.google.com/?cid=9212461700225336553&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+fru-juske-restaurant-grimstad,website,Offisiell nettside,https://frujuske.no/,2026-04-15,
+fru-juske-restaurant-grimstad,map,Google Maps,https://maps.google.com/?cid=85379825998619582&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+stranden-risor-a-s-risor,map,Google Maps,https://maps.google.com/?cid=13837880983512973053&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+mango-market-arendal-arendal,website,Offisiell nettside,https://www.facebook.com/pg/Alanya-butikk-Arendal-995663590500869/about/?ref=page_internal,2026-04-15,
+mango-market-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=12820394263245728038&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+asian-market-arendal-arendal,website,Offisiell nettside,https://asianmarketarendal.no/,2026-04-15,
+asian-market-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=3783507299103516240&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+asia-arendal,map,Google Maps,https://maps.google.com/?cid=308968645887621504&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+mango-market-stoa-arendal,website,Offisiell nettside,https://www.facebook.com/Mango-market-arendal-995663590500869/,2026-04-15,
+mango-market-stoa-arendal,map,Google Maps,https://maps.google.com/?cid=12959878964107595708&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+bjorklund-alti-arendal-sentrum-arendal,website,Offisiell nettside,https://www.bjorklund.no/butikker/bjorklund-alti-arendal,2026-04-15,
+bjorklund-alti-arendal-sentrum-arendal,map,Google Maps,https://maps.google.com/?cid=10743549329890046001&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+krogenes-handelspark-arendal,website,Offisiell nettside,http://krogenes.no/,2026-04-15,
+krogenes-handelspark-arendal,map,Google Maps,https://maps.google.com/?cid=13304103175401335520&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+ringo-alti-arendal-arendal,website,Offisiell nettside,https://ringo.no/,2026-04-15,
+ringo-alti-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=3909444008363715459&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+kitch-n-alti-arendal-arendal,website,Offisiell nettside,https://www.kitchn.no/butikker/alti-arendal/?utm_source=google&utm_medium=organic&utm_campaign=gmb-nettsted&utm_content=alti-arendal-113,2026-04-15,
+kitch-n-alti-arendal-arendal,map,Google Maps,https://maps.google.com/?cid=1488587205356565134&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+sport-outlet-arendal-sentrum-arendal,website,Offisiell nettside,https://sportoutlet.no/,2026-04-15,
+sport-outlet-arendal-sentrum-arendal,map,Google Maps,https://maps.google.com/?cid=2069318857228510890&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+maxis-kjopesenter-arendal,website,Offisiell nettside,http://www.maxis.no/,2026-04-15,
+maxis-kjopesenter-arendal,map,Google Maps,https://maps.google.com/?cid=3532373302169956100&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+rusta-arendal,website,Offisiell nettside,https://rusta.com/no/,2026-04-15,
+rusta-arendal,map,Google Maps,https://maps.google.com/?cid=4496800210416465352&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
+tykkas-gjenvinningsstasjon-bykle,map,Google Maps,https://maps.google.com/?cid=3619238850436463215&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA,2026-04-15,Kilde: Google Places API
