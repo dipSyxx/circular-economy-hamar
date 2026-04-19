@@ -1104,7 +1104,7 @@ export const applyActorImportBatch = async (batchId: string, reviewerId?: string
       where: { batchId: batch.id },
       data: { appliedAt },
     })
-  }, { timeout: 20000, maxWait: 10000 })
+  }, { timeout: 60000, maxWait: 15000 })
 
   const appliedBatch = await prisma.actorImportBatch.findUnique({
     where: { id: batch.id },

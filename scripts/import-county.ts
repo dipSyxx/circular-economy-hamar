@@ -15,6 +15,7 @@ const parseOptions = () => {
   return {
     countySlug,
     dryRun: process.argv.includes("--dry-run"),
+    chunkSize: Number(parseArg("--chunk-size") || "50"),
     inputRoot: parseArg("--input-root") || path.join("data", "imports", "counties"),
   }
 }
@@ -44,6 +45,47 @@ const readIfExists = async (filePath: string) => {
   }
 }
 
+/** Split a CSV into chunks of N data rows, keeping the header on each chunk. */
+function chunkCsv(csv: string, chunkSize: number): string[] {
+  const lines = csv.trim().split(/\r?\n/)
+  const header = lines[0]
+  const rows = lines.slice(1).filter((l) => l.trim() !== "")
+  const chunks: string[] = []
+  for (let i = 0; i < rows.length; i += chunkSize) {
+    chunks.push([header, ...rows.slice(i, i + chunkSize)].join("\n"))
+  }
+  return chunks
+}
+
+/** Extract the set of actor_slug values from an actors CSV chunk. */
+function slugsFromActorsCsv(csv: string): Set<string> {
+  const lines = csv.trim().split(/\r?\n/)
+  const headers = lines[0].split(",")
+  const slugIdx = headers.indexOf("actor_slug")
+  if (slugIdx === -1) return new Set()
+  return new Set(
+    lines
+      .slice(1)
+      .filter((l) => l.trim() !== "")
+      .map((l) => l.split(",")[slugIdx]),
+  )
+}
+
+/** Return only the rows of a related CSV whose actor_slug is in the given set. */
+function filterRelatedCsv(csv: string | undefined, slugs: Set<string>): string | undefined {
+  if (!csv) return undefined
+  const lines = csv.trim().split(/\r?\n/)
+  const header = lines[0]
+  const headers = header.split(",")
+  const slugIdx = headers.indexOf("actor_slug")
+  if (slugIdx === -1) return csv
+  const filtered = lines.slice(1).filter((l) => {
+    const slug = l.split(",")[slugIdx]
+    return slug && slugs.has(slug)
+  })
+  return filtered.length > 0 ? [header, ...filtered].join("\n") : undefined
+}
+
 async function main() {
   const options = parseOptions()
   await ensureDatabaseUrl()
@@ -55,52 +97,74 @@ async function main() {
   const actorSourcesCsv = await readIfExists(path.join(directory, "actor_sources.csv"))
   const actorRepairServicesCsv = await readIfExists(path.join(directory, "actor_repair_services.csv"))
 
-  const preview = await createActorImportPreview({
-    filename: `county-${options.countySlug}.csv`,
-    actorsCsv,
-    actorSourcesCsv,
-    actorRepairServicesCsv,
-    createdById: null,
-  })
+  const chunks = chunkCsv(actorsCsv, options.chunkSize)
+  const totalActors = actorsCsv.trim().split(/\r?\n/).length - 1
 
   console.log(
     JSON.stringify(
       {
         countySlug: options.countySlug,
         dryRun: options.dryRun,
-        preview: {
-          create: preview.batch.createCount,
-          update: preview.batch.updateCount,
-          skip: preview.batch.skipCount,
-          error: preview.batch.errorCount,
-        },
+        totalActors,
+        chunks: chunks.length,
+        chunkSize: options.chunkSize,
       },
       null,
       2,
     ),
   )
 
-  if (preview.batch.errorCount > 0) {
-    const errorRows = preview.rows
-      .filter((row) => row.validationErrors.length > 0)
-      .map((row) => `  rad ${row.rowNumber} (${row.rowType}): ${row.validationErrors.join("; ")}`)
-    console.error(`\nValidering feilet for ${options.countySlug}:\n${errorRows.join("\n")}`)
-    process.exit(1)
+  let totalCreate = 0
+  let totalUpdate = 0
+  let totalSkip = 0
+  let totalError = 0
+
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i]
+    const slugs = slugsFromActorsCsv(chunk)
+    const chunkSources = filterRelatedCsv(actorSourcesCsv, slugs)
+    const chunkRepairs = filterRelatedCsv(actorRepairServicesCsv, slugs)
+
+    const preview = await createActorImportPreview({
+      filename: `county-${options.countySlug}-chunk-${i + 1}-of-${chunks.length}.csv`,
+      actorsCsv: chunk,
+      actorSourcesCsv: chunkSources,
+      actorRepairServicesCsv: chunkRepairs,
+      createdById: null,
+    })
+
+    totalCreate += preview.batch.createCount
+    totalUpdate += preview.batch.updateCount
+    totalSkip += preview.batch.skipCount
+    totalError += preview.batch.errorCount
+
+    if (preview.batch.errorCount > 0) {
+      const errorRows = preview.rows
+        .filter((row) => row.validationErrors.length > 0)
+        .map((row) => `  rad ${row.rowNumber} (${row.rowType}): ${row.validationErrors.join("; ")}`)
+      console.error(`\nChunk ${i + 1}: validering feilet:\n${errorRows.join("\n")}`)
+      process.exit(1)
+    }
+
+    if (options.dryRun) {
+      process.stdout.write(`  chunk ${i + 1}/${chunks.length}: ${[...slugs].slice(0, 3).join(", ")}… (dry-run)\n`)
+      continue
+    }
+
+    await applyActorImportBatch(preview.batch.id, null)
+    process.stdout.write(`  chunk ${i + 1}/${chunks.length}: applied ${preview.batch.createCount} create, ${preview.batch.updateCount} update\n`)
   }
 
-  if (options.dryRun) {
-    console.log("\n--dry-run: ingen endringer lagret.")
-    return
-  }
-
-  const applied = await applyActorImportBatch(preview.batch.id, null)
   console.log(
     JSON.stringify(
       {
-        applied: {
-          status: applied.status,
-          totalRows: applied.totalRows,
+        summary: {
+          create: totalCreate,
+          update: totalUpdate,
+          skip: totalSkip,
+          error: totalError,
         },
+        status: options.dryRun ? "dry-run" : "applied",
       },
       null,
       2,

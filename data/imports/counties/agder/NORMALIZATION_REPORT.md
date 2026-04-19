@@ -1,0 +1,510 @@
+# Agder County Import Normalization Report
+
+- Source actors: 386
+- Kept actors: 317
+- Excluded actors: 69
+- Flagged actors: 235
+- Source rows kept: 570 / 702
+
+## Excluded Actors
+
+- `power-arendal-arendal` (reparasjon): Kategorien reparasjon matcher ikke aktorprofilen godt nok for auto-import.
+- `power-grimstad-grimstad` (reparasjon): Kategorien reparasjon matcher ikke aktorprofilen godt nok for auto-import.
+- `power-risor-risor` (reparasjon): Kategorien reparasjon matcher ikke aktorprofilen godt nok for auto-import.
+- `extra-grimstad-grimstad` (reparasjon): Kategorien reparasjon matcher ikke aktorprofilen godt nok for auto-import.
+- `joker-grimstad-grimstad` (reparasjon): Kategorien reparasjon matcher ikke aktorprofilen godt nok for auto-import.
+- `bondekompaniet-tvedestrand-tvedestrand` (reparasjon): Kategorien reparasjon matcher ikke aktorprofilen godt nok for auto-import.
+- `kiwi-risor-risor` (reparasjon): Kategorien reparasjon matcher ikke aktorprofilen godt nok for auto-import.
+- `power-evje-evje` (reparasjon): Kategorien reparasjon matcher ikke aktorprofilen godt nok for auto-import.
+- `e-service-stavanger-as-lyefjell` (reparasjon): Lokasjonen ser ut til a vare utenfor Agder og bor ikke importeres automatisk.
+- `xl-bygg-grimstad-grimstad` (mottak_ombruk): Kategorien mottak_ombruk matcher ikke butikktype og bor avklares manuelt.
+- `byggmax-grimstad-grimstad` (mottak_ombruk): Kategorien mottak_ombruk matcher ikke butikktype og bor avklares manuelt.
+- `kiwi-arendal-sentrum-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `coop-mega-arendal-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `bunnpris-arendal-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `extra-havstad-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `extra-stoa-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-myrene-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-krogenes-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `extra-dampen-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `extra-maxis-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `spar-arendal-sentrum-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `meny-krogenes-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `obs-arendal-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `joker-hisoy-his` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `kiwi-saltrod-saltrod` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-his-his` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `meny-harebakken-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-nedenes-nedenes` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `kiwi-blakstadheia-froland` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `kiwi-grimstad-grimstad` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `meny-grimstad-grimstad` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `kiwi-biesletta-grimstad` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-grimstad-grimstad` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `extra-oygardsdalen-grimstad` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-grom-grimstad` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `bunnpris-grimstad-grimstad` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `joker-holvika-grimstad` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `kiwi-bergemoen-grimstad` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `joker-vik-grimstad` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `coop-prix-risor-risor` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-risor-risor` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-kragsgate-risor` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `extra-randvik-risor` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `joker-hopestrand-risor` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `joker-risor-risor` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-grenstol-tvedestrand` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `kiwi-tvedestrand-tvedestrand` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `extra-tvedestrand-tvedestrand` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-tvedestrand-tvedestrand` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `meny-tvedestrand-tvedestrand` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-brokelandsheia-sundebru` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `eurospar-brokelandsheia-sundebru` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `kiwi-sondeled-sondeled` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `joker-tvedestrand-tvedestrand` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `matkroken-kilsund-staubo` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `joker-bygland-bygland` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `joker-valle-valle` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-hovden-hovden-i-setesdal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `spar-evje-evje` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `coop-prix-hylestad-rysstad` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-evje-evje` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `extra-evje-evje` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `coop-prix-valle-valle` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `kiwi-evje-evje` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `vang-miljostasjon-synshagen-vang-i-valdres` (baerekraftig_mat): Lokasjonen ser ut til a vare utenfor Agder og bor ikke importeres automatisk.
+- `rema-1000-bie-grimstad` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-maxis-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `joker-dasnes-hornnes` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+- `rema-1000-stoa-arendal` (baerekraftig_mat): Generisk dagligvarekjede i baerekraftig_mat.
+
+## Flagged Actors
+
+- `gjenbruksglede-arendal` (brukt): Facebook eller sosial profil brukes som hovednettsted.
+- `boks-for-oppsamling-av-klaer-uff-arendal` (brukt): Mangler opening_hours_osm.
+- `tore-a-nilsen-arendal-auksjonsforretning-arendal` (brukt): Mangler nettsted.
+- `instituttets-bruktbutikk-grimstad` (brukt): Facebook eller sosial profil brukes som hovednettsted.
+- `avigo-sirkulaer-grimstad` (brukt): Mangler nettsted.
+- `guldsmedkleiva-brukt-antikk-grimstad` (brukt): Facebook eller sosial profil brukes som hovednettsted.
+- `sjappa-bruktutsalg-evje` (brukt): Mangler nettsted.; Mangler opening_hours_osm.
+- `unik-gaver-gjenbruk-evje` (brukt): Facebook eller sosial profil brukes som hovednettsted.
+- `brukt-elsket-vennesla` (brukt): Mangler nettsted.
+- `kontakten-bruktbutikk-vennesla` (brukt): Mangler nettsted.
+- `vennesla-gjenbruk-vennesla` (brukt): Mangler nettsted.; Mangler opening_hours_osm.
+- `sareptas-brukthandel-froland` (brukt): Mangler nettsted.
+- `verditorget-nedenes` (brukt): Facebook eller sosial profil brukes som hovednettsted.; Kommunefeltet ser ut til a bruke et tettsted eller delomrade og bor sjekkes manuelt.
+- `rosseland-bruktbutikk-brennasen` (brukt): Mangler nettsted.
+- `pureinnocent-arendal` (brukt): Mangler nettsted.
+- `karusellen-grimstad` (brukt): Facebook eller sosial profil brukes som hovednettsted.
+- `coop-marked-ose-i-setesdal-bygland` (brukt): Mangler opening_hours_osm.
+- `frelsesarmeen-arendal` (brukt): Mangler opening_hours_osm.
+- `homborsund-landhandel-homborsund` (brukt): Mangler nettsted.
+- `arendal-verktoy-utleie-arendal` (utleie): Mangler nettsted.; Mangler opening_hours_osm.
+- `risor-lager-utleie-risor` (utleie): Mangler nettsted.; Mangler opening_hours_osm.
+- `liftkongen-no-evje` (utleie): Mangler opening_hours_osm.
+- `uleberg-og-trydal-maskin-as-bykle` (utleie): Mangler opening_hours_osm.
+- `schenk-utleie-as-lillesand` (utleie): Mangler opening_hours_osm.
+- `maskinentreprenor-kay-jeiskelid-bykle` (utleie): Mangler nettsted.; Mangler opening_hours_osm.
+- `bua-groos-grimstad` (utleie): Mangler nettsted.; Mangler opening_hours_osm.
+- `tvedestrand-frivilligsentral-tvedestrand` (utleie): Mangler opening_hours_osm.
+- `aust-agder-bibliotek-og-kulturformidling-arendal` (utleie): Mangler nettsted.; Mangler opening_hours_osm.
+- `phonefix-arendal-arendal` (reparasjon): Mangler actor_repair_services.
+- `iphonemannen-as-arendal` (reparasjon): Mangler actor_repair_services.
+- `arendal-mobil-arendal` (reparasjon): Mangler nettsted.; Mangler actor_repair_services.
+- `mobit-arendal` (reparasjon): Mangler actor_repair_services.
+- `elektroverkstedet-as-arendal` (reparasjon): Mangler actor_repair_services.
+- `mobile-arendal-as-arendal` (reparasjon): Mangler actor_repair_services.
+- `elesco-agder-as-grimstad` (reparasjon): Mangler actor_repair_services.
+- `greenphones-as-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `databutikken-evje-as-evje` (reparasjon): Mangler actor_repair_services.
+- `datahjelp-nedenes` (reparasjon): Mangler opening_hours_osm.; Mangler actor_repair_services.; Kommunefeltet ser ut til a bruke et tettsted eller delomrade og bor sjekkes manuelt.
+- `elon-arendal-arendal` (reparasjon): Mangler actor_repair_services.
+- `elkjop-arendal-arendal` (reparasjon): Mangler actor_repair_services.
+- `elkjop-phonehouse-arendal-arendal` (reparasjon): Mangler actor_repair_services.
+- `alti-arendal-arendal` (reparasjon): Mangler actor_repair_services.
+- `agder-industrielektronikk-as-arendal` (reparasjon): Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `godata-as-grimstad` (reparasjon): Mangler actor_repair_services.
+- `jp-thygesen-as-sjekkpunkt-bilverksted-grimstad` (reparasjon): Mangler actor_repair_services.
+- `grimstad-chiptuning-as-grimstad` (reparasjon): Mangler actor_repair_services.
+- `hauglid-data-as-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `pcsalg-as-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `elkjop-tvedestrand-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `goon-cave-67-risor` (reparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `elesco-tvedestrand-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `sjosenteret-risor-as-risor` (reparasjon): Mangler actor_repair_services.
+- `hr-bildeler-risor-sjekkpunkt-bilverksted-risor` (reparasjon): Mangler actor_repair_services.
+- `reinertsen-dataservice-as-hamresanden` (reparasjon): Mangler actor_repair_services.
+- `nilsen-tv-service-arendal` (reparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `terjesen-elektronikk-arendal` (reparasjon): Mangler actor_repair_services.
+- `elektroimportoren-arendal-arendal` (reparasjon): Mangler actor_repair_services.
+- `centrum-elektro-as-arendal` (reparasjon): Mangler actor_repair_services.
+- `bravida-arendal-elektro-service-arendal` (reparasjon): Mangler actor_repair_services.
+- `richard-andersen-elektro-arendal-arendal` (reparasjon): Mangler actor_repair_services.
+- `arendal-sound-arendal` (reparasjon): Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `batteri-elektro-as-mekonomen-arendal` (reparasjon): Mangler actor_repair_services.
+- `agder-el-installasjon-arendal-arendal` (reparasjon): Mangler actor_repair_services.
+- `elon-grimstad-grimstad` (reparasjon): Mangler actor_repair_services.
+- `agder-el-installasjon-as-grimstad` (reparasjon): Mangler actor_repair_services.
+- `asen-elektroservice-as-grimstad` (reparasjon): Mangler actor_repair_services.
+- `grimstad-elektro-as-roresand` (reparasjon): Mangler actor_repair_services.; Kommunefeltet ser ut til a bruke et tettsted eller delomrade og bor sjekkes manuelt.
+- `ingeman-stad-agder-musikk-grimstad` (reparasjon): Mangler nettsted.; Mangler actor_repair_services.
+- `grimstad-lyd-og-bildeservice-ans-grimstad` (reparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `elektrofiks-as-vennesla` (reparasjon): Mangler actor_repair_services.
+- `rhe-risor-heis-og-elektroservice-risor` (reparasjon): Mangler actor_repair_services.
+- `tvedestrand-elektro-as-downlights-el-bil-lader-el-bil-lader-elektrisk-bil-lader-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `rta-as-risor` (reparasjon): Mangler actor_repair_services.
+- `fagelektro-as-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `staerk-elektro-as-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `tempe-as-risor` (reparasjon): Mangler actor_repair_services.
+- `elektro-skagerrak-as-risor` (reparasjon): Mangler actor_repair_services.
+- `macdonald-it-tjenester-risor` (reparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `safe-control-fdv-as-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `bademiljo-risor-paulsen-sonn-as-risor` (reparasjon): Mangler actor_repair_services.
+- `bvs-klima-ror-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `jakt-og-fritid-as-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `brodrene-vatne-tvedestrand-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `sundebru-sundebru` (reparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `rorleggermester-kjetil-bringsverd-vvs-as-avd-tvedestrand-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `autoblikk-staubo` (reparasjon): Mangler actor_repair_services.; Kommunefeltet ser ut til a bruke et tettsted eller delomrade og bor sjekkes manuelt.
+- `rorleggerfirma-erling-olsen-as-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `risor-taxi-ans-risor` (reparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `sb-vvs-tvedestrand` (reparasjon): Mangler nettsted.; Mangler actor_repair_services.
+- `stoa-elektronikk-as-fevik` (reparasjon): Mangler actor_repair_services.
+- `hydron-as-arendal` (reparasjon): Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `grisen-storsenter-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `stemningsfullt-tvedestrand` (reparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `sourceit-risor` (reparasjon): Mangler actor_repair_services.
+- `haefashion-tvedestrand` (reparasjon): Mangler actor_repair_services.
+- `a-ventilasjon-as-songe` (reparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `rorlegger-jensen-as-staubo` (reparasjon): Mangler actor_repair_services.; Kommunefeltet ser ut til a bruke et tettsted eller delomrade og bor sjekkes manuelt.
+- `sorlandet-vvs-as-froland` (reparasjon): Mangler actor_repair_services.
+- `sondeled-rorhandel-as-sondeled` (reparasjon): Mangler nettsted.; Mangler actor_repair_services.; Kommunefeltet ser ut til a bruke et tettsted eller delomrade og bor sjekkes manuelt.
+- `pm-elektro-as-arendal` (reparasjon): Mangler actor_repair_services.
+- `setesdal-elektro-as-bykle` (reparasjon): Mangler actor_repair_services.
+- `lyd-og-bilde-john-andersen-evje` (reparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `setesdalnet-bykle` (reparasjon): Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `ks-service-as-evje` (reparasjon): Mangler actor_repair_services.
+- `knut-hovet-installasjonar-rysstad-rysstad` (reparasjon): Mangler actor_repair_services.
+- `mjaland-automatikk-evje` (reparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `evtek-as-evje-evje` (reparasjon): Mangler actor_repair_services.
+- `brokke-vvs-as-rorlegger-og-vvs-i-rysstad-rysstad` (reparasjon): Facebook eller sosial profil brukes som hovednettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `troll-mountain-data-center-evje` (reparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `erv-teknikk-evje-as-evje` (reparasjon): Mangler nettsted.; Mangler actor_repair_services.
+- `altidata-as-evje` (reparasjon): Mangler nettsted.; Mangler actor_repair_services.
+- `knut-hovet-installasjonar-hovden-hovden-i-setesdal` (reparasjon): Mangler actor_repair_services.
+- `den-lekende-skomaker-as-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `grimstad-sko-kalesjeservice-grimstad` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `eurosko-tvedestrand` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `esmaili-dame-og-herreskredderi-arendal` (reparasjon_sko_klar): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `arendal-souvenirs-klespleie-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `meretes-atelier-lysthuset-grimstad` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `husflidstua-grimstad` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `stitch-bunadsom-manufaktur-staubo` (reparasjon_sko_klar): Mangler nettsted.; Mangler actor_repair_services.; Kommunefeltet ser ut til a bruke et tettsted eller delomrade og bor sjekkes manuelt.
+- `l-rolland-som-iveland` (reparasjon_sko_klar): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `kalesjeservice-batputer-tveit` (reparasjon_sko_klar): Mangler nettsted.; Mangler actor_repair_services.
+- `norsk-flid-husfliden-arendal-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `garn-og-sybutikken-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `oddensenteret-grimstad` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `linda-i-floistads-systue-saltrod` (reparasjon_sko_klar): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `brandpark-as-avd-syralt-brekkesto` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `arnhilds-systue-asland-finsland` (reparasjon_sko_klar): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `industrisom-as-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `c-la-vie-klaer-interior-as-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `kompanii-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `hos-solvi-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `resolve-arendal` (reparasjon_sko_klar): Mangler nettsted.; Mangler actor_repair_services.
+- `kappahl-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `rens-pa-flekken-as-arendal` (reparasjon_sko_klar): Mangler nettsted.; Mangler actor_repair_services.
+- `agder-renovasjon-iks-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `gitmark-arendal-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `alti-harebakken-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `gina-tricot-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `dressmann-arendal` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `veslas-boutique-grimstad-as-grimstad` (reparasjon_sko_klar): Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `hoyer-grimstad-as-grimstad` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `lithe-as-grimstad` (reparasjon_sko_klar): Mangler nettsted.; Mangler actor_repair_services.
+- `skinsation-grimstad` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `dressmann-grimstad` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `dekkis-as-tvedestrand` (reparasjon_sko_klar): Mangler nettsted.; Mangler actor_repair_services.
+- `dekkis-as-meca-tvedestrand` (reparasjon_sko_klar): Facebook eller sosial profil brukes som hovednettsted.; Mangler actor_repair_services.
+- `amtmannsvingen-motorsenter-as-tvedestrand` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `kenneth-hansen-risor` (reparasjon_sko_klar): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `brd-ellefsens-eftf-meca-risor` (reparasjon_sko_klar): Mangler actor_repair_services.
+- `tvedestrand-bilverksted-ans-tvedestrand` (reparasjon_sko_klar): Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `mobeltapetsererverkstedet-as-arendal` (mobelreparasjon): Mangler actor_repair_services.
+- `fagmobler-arendal-arendal` (mobelreparasjon): Mangler actor_repair_services.
+- `mobelringen-arendal-arendal` (mobelreparasjon): Mangler actor_repair_services.
+- `grimstad-mobelrestaurering-og-forgylling-grimstad` (mobelreparasjon): Mangler actor_repair_services.
+- `risor-som-og-mobelverksted-grete-hagen-risor` (mobelreparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `risor-snekkeri-as-risor` (mobelreparasjon): Mangler actor_repair_services.
+- `stopp-hos-meg-anita-jul-larsen-mobeltapetserer-risor` (mobelreparasjon): Mangler nettsted.; Mangler actor_repair_services.
+- `byggmester-sommerfelt-as-risor` (mobelreparasjon): Mangler actor_repair_services.
+- `bo-mobler-lillesand` (mobelreparasjon): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `fagmobler-grimstad-grimstad` (mobelreparasjon): Mangler actor_repair_services.
+- `bohus-arendal-arendal` (mobelreparasjon): Mangler actor_repair_services.
+- `laerdoktor-sogne-sogne` (mobelreparasjon): Facebook eller sosial profil brukes som hovednettsted.; Mangler actor_repair_services.
+- `gjeving-trevarefabrikk-as-tvedestrand` (mobelreparasjon): Mangler actor_repair_services.
+- `sykkelsport-as-arendal` (sykkelverksted): Mangler actor_repair_services.
+- `sykkelsport-grimstad-grimstad` (sykkelverksted): Mangler actor_repair_services.
+- `blom-sykkelservice-grimstad` (sykkelverksted): Mangler nettsted.; Mangler actor_repair_services.
+- `sykkel-bent-grimstad` (sykkelverksted): Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `sport-1-grimstad-grimstad` (sykkelverksted): Mangler actor_repair_services.
+- `respons-norway-nedenes` (sykkelverksted): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.; Kommunefeltet ser ut til a bruke et tettsted eller delomrade og bor sjekkes manuelt.
+- `tvedestrand-sykkelverksted-as-tvedestrand` (sykkelverksted): Mangler actor_repair_services.
+- `sport-1-risor-risor` (sykkelverksted): Mangler actor_repair_services.
+- `sport-1-vennesla-vennesla` (sykkelverksted): Mangler actor_repair_services.
+- `brekke-sport-stoa-arendal` (sykkelverksted): Mangler actor_repair_services.
+- `stisykkelbyen-arendal-arendal` (sykkelverksted): Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `sport-1-arendal-arendal` (sykkelverksted): Mangler actor_repair_services.
+- `xxl-arendal-arendal` (sykkelverksted): Mangler actor_repair_services.
+- `sport-outlet-evje-evje` (sykkelverksted): Mangler actor_repair_services.
+- `intersport-evje` (sykkelverksted): Mangler actor_repair_services.
+- `etappe-lillesand` (sykkelverksted): Mangler actor_repair_services.
+- `norsk-hagebruksmuseum-grimstad` (ombruksverksted): Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `grimstad-bys-museer-grimstad` (ombruksverksted): Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `carfix-arendal-arendal` (ombruksverksted): Mangler actor_repair_services.
+- `fs-auto-as-mekonomen-arendal` (ombruksverksted): Mangler actor_repair_services.
+- `frameworks-as-arendal` (ombruksverksted): Mangler actor_repair_services.
+- `arendal-batskade-service-as-arendal` (ombruksverksted): Mangler actor_repair_services.
+- `jorkjen-mc-arendal` (ombruksverksted): Mangler nettsted.; Mangler actor_repair_services.
+- `mekonomen-butikk-arendal-arendal` (ombruksverksted): Mangler actor_repair_services.
+- `bilxtra-arendal-arendal` (ombruksverksted): Mangler actor_repair_services.
+- `bileko-car-parts-norway-as-avd-arendal-bcp-arendal` (ombruksverksted): Mangler actor_repair_services.
+- `romnes-arendal-as-arendal` (ombruksverksted): Mangler actor_repair_services.
+- `arendal-badsenter-as-arendal` (ombruksverksted): Mangler actor_repair_services.
+- `bathuset-arendal-as-arendal` (ombruksverksted): Mangler actor_repair_services.
+- `lovdal-auto-as-mekonomen-bilverksted-nedenes` (ombruksverksted): Mangler nettsted.; Mangler actor_repair_services.; Kommunefeltet ser ut til a bruke et tettsted eller delomrade og bor sjekkes manuelt.
+- `fahrrad-reparaturstation-grimstad` (ombruksverksted): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `agder-karosseri-as-grimstad` (ombruksverksted): Mangler actor_repair_services.
+- `auto-rep-as-grimstad` (ombruksverksted): Mangler actor_repair_services.
+- `agder-teknikk-grimstad` (ombruksverksted): Mangler actor_repair_services.
+- `grimstad-badsenter-deler-verksted-opplag-grimstad` (ombruksverksted): Mangler actor_repair_services.
+- `komposittservice-as-grimstad` (ombruksverksted): Mangler actor_repair_services.
+- `sb-verksted-og-transport-as-grimstad` (ombruksverksted): Mangler actor_repair_services.
+- `dekkskift-tvedestrand-tvedestrand` (ombruksverksted): Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `bilinstrument-service-tvedestrand` (ombruksverksted): Mangler nettsted.; Mangler actor_repair_services.
+- `cafeen-arendal-arendal` (ombruksverksted): Mangler actor_repair_services.
+- `koselig-cafe-arendal` (ombruksverksted): Mangler nettsted.; Mangler actor_repair_services.
+- `cafe-victor-arendal` (ombruksverksted): Mangler actor_repair_services.
+- `kopano-cafe-arendal` (ombruksverksted): Mangler nettsted.; Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `fokussenteret-grimstad` (ombruksverksted): Mangler actor_repair_services.
+- `chr-repstads-sonner-as-grimstad` (ombruksverksted): Mangler actor_repair_services.
+- `grosle-rekvisita-roresand` (ombruksverksted): Mangler actor_repair_services.; Kommunefeltet ser ut til a bruke et tettsted eller delomrade og bor sjekkes manuelt.
+- `universitetet-i-agder-campus-grimstad-grimstad` (ombruksverksted): Mangler actor_repair_services.
+- `jernia-odden-grimstad` (ombruksverksted): Mangler actor_repair_services.
+- `radhusgata-spiseri-mer-risor` (ombruksverksted): Mangler actor_repair_services.
+- `brygga-restaurant-bar-risor` (ombruksverksted): Mangler actor_repair_services.
+- `risorflekken-risor` (ombruksverksted): Mangler opening_hours_osm.; Mangler actor_repair_services.
+- `risor-fiskemottak-as-risor` (ombruksverksted): Mangler actor_repair_services.
+- `tvedestrand-fjordhotell-tvedestrand` (ombruksverksted): Mangler nettsted.; Mangler actor_repair_services.
+- `stoga-a-s-bygland` (ombruksverksted): Facebook eller sosial profil brukes som hovednettsted.; Mangler actor_repair_services.
+- `arnas-grimstad` (mottak_ombruk): Mangler opening_hours_osm.
+- `ta-mer-mer-arendal` (baerekraftig_mat): Facebook eller sosial profil brukes som hovednettsted.
+- `gorr-go-mad-arendal` (baerekraftig_mat): Mangler opening_hours_osm.
+- `prestegarden-i-froland-froland` (baerekraftig_mat): Mangler nettsted.
+- `br-tellefsen-gronnsaksutsalg-grimstad` (baerekraftig_mat): Mangler nettsted.; Mangler opening_hours_osm.
+- `grimstad-kiosk-grill-as-grimstad` (baerekraftig_mat): Mangler nettsted.
+- `hesnes-gartneri-kjokken-grimstad` (baerekraftig_mat): Facebook eller sosial profil brukes som hovednettsted.
+- `oliven-verden-norge-as-risor` (baerekraftig_mat): Mangler nettsted.
+- `uppistog-gard-valle` (baerekraftig_mat): Facebook eller sosial profil brukes som hovednettsted.
+- `brokkestoylen-rysstad` (baerekraftig_mat): Mangler opening_hours_osm.
+- `odden-klaer-as-grimstad` (baerekraftig_mat): Mangler nettsted.
+- `asian-pa-torvet-grimstad` (baerekraftig_mat): Mangler nettsted.
+- `stranden-risor-a-s-risor` (baerekraftig_mat): Mangler nettsted.
+- `mango-market-arendal-arendal` (baerekraftig_mat): Facebook eller sosial profil brukes som hovednettsted.
+- `asia-arendal` (baerekraftig_mat): Mangler nettsted.
+- `mango-market-stoa-arendal` (baerekraftig_mat): Facebook eller sosial profil brukes som hovednettsted.
+- `tykkas-gjenvinningsstasjon-bykle` (gjenvinning): Mangler nettsted.; Mangler opening_hours_osm.
+
+## Repair Follow-up
+
+- `phonefix-arendal-arendal`: Mangler actor_repair_services.
+- `iphonemannen-as-arendal`: Mangler actor_repair_services.
+- `arendal-mobil-arendal`: Mangler actor_repair_services.
+- `mobit-arendal`: Mangler actor_repair_services.
+- `elektroverkstedet-as-arendal`: Mangler actor_repair_services.
+- `mobile-arendal-as-arendal`: Mangler actor_repair_services.
+- `elesco-agder-as-grimstad`: Mangler actor_repair_services.
+- `greenphones-as-tvedestrand`: Mangler actor_repair_services.
+- `databutikken-evje-as-evje`: Mangler actor_repair_services.
+- `datahjelp-nedenes`: Mangler actor_repair_services.
+- `elon-arendal-arendal`: Mangler actor_repair_services.
+- `elkjop-arendal-arendal`: Mangler actor_repair_services.
+- `elkjop-phonehouse-arendal-arendal`: Mangler actor_repair_services.
+- `alti-arendal-arendal`: Mangler actor_repair_services.
+- `agder-industrielektronikk-as-arendal`: Mangler actor_repair_services.
+- `godata-as-grimstad`: Mangler actor_repair_services.
+- `jp-thygesen-as-sjekkpunkt-bilverksted-grimstad`: Mangler actor_repair_services.
+- `grimstad-chiptuning-as-grimstad`: Mangler actor_repair_services.
+- `hauglid-data-as-tvedestrand`: Mangler actor_repair_services.
+- `pcsalg-as-tvedestrand`: Mangler actor_repair_services.
+- `elkjop-tvedestrand-tvedestrand`: Mangler actor_repair_services.
+- `goon-cave-67-risor`: Mangler actor_repair_services.
+- `elesco-tvedestrand-tvedestrand`: Mangler actor_repair_services.
+- `sjosenteret-risor-as-risor`: Mangler actor_repair_services.
+- `hr-bildeler-risor-sjekkpunkt-bilverksted-risor`: Mangler actor_repair_services.
+- `reinertsen-dataservice-as-hamresanden`: Mangler actor_repair_services.
+- `nilsen-tv-service-arendal`: Mangler actor_repair_services.
+- `terjesen-elektronikk-arendal`: Mangler actor_repair_services.
+- `elektroimportoren-arendal-arendal`: Mangler actor_repair_services.
+- `centrum-elektro-as-arendal`: Mangler actor_repair_services.
+- `bravida-arendal-elektro-service-arendal`: Mangler actor_repair_services.
+- `richard-andersen-elektro-arendal-arendal`: Mangler actor_repair_services.
+- `arendal-sound-arendal`: Mangler actor_repair_services.
+- `batteri-elektro-as-mekonomen-arendal`: Mangler actor_repair_services.
+- `agder-el-installasjon-arendal-arendal`: Mangler actor_repair_services.
+- `elon-grimstad-grimstad`: Mangler actor_repair_services.
+- `agder-el-installasjon-as-grimstad`: Mangler actor_repair_services.
+- `asen-elektroservice-as-grimstad`: Mangler actor_repair_services.
+- `grimstad-elektro-as-roresand`: Mangler actor_repair_services.
+- `ingeman-stad-agder-musikk-grimstad`: Mangler actor_repair_services.
+- `grimstad-lyd-og-bildeservice-ans-grimstad`: Mangler actor_repair_services.
+- `elektrofiks-as-vennesla`: Mangler actor_repair_services.
+- `rhe-risor-heis-og-elektroservice-risor`: Mangler actor_repair_services.
+- `tvedestrand-elektro-as-downlights-el-bil-lader-el-bil-lader-elektrisk-bil-lader-tvedestrand`: Mangler actor_repair_services.
+- `rta-as-risor`: Mangler actor_repair_services.
+- `fagelektro-as-tvedestrand`: Mangler actor_repair_services.
+- `staerk-elektro-as-tvedestrand`: Mangler actor_repair_services.
+- `tempe-as-risor`: Mangler actor_repair_services.
+- `elektro-skagerrak-as-risor`: Mangler actor_repair_services.
+- `macdonald-it-tjenester-risor`: Mangler actor_repair_services.
+- `safe-control-fdv-as-tvedestrand`: Mangler actor_repair_services.
+- `bademiljo-risor-paulsen-sonn-as-risor`: Mangler actor_repair_services.
+- `bvs-klima-ror-tvedestrand`: Mangler actor_repair_services.
+- `jakt-og-fritid-as-tvedestrand`: Mangler actor_repair_services.
+- `brodrene-vatne-tvedestrand-tvedestrand`: Mangler actor_repair_services.
+- `sundebru-sundebru`: Mangler actor_repair_services.
+- `rorleggermester-kjetil-bringsverd-vvs-as-avd-tvedestrand-tvedestrand`: Mangler actor_repair_services.
+- `autoblikk-staubo`: Mangler actor_repair_services.
+- `rorleggerfirma-erling-olsen-as-tvedestrand`: Mangler actor_repair_services.
+- `risor-taxi-ans-risor`: Mangler actor_repair_services.
+- `sb-vvs-tvedestrand`: Mangler actor_repair_services.
+- `stoa-elektronikk-as-fevik`: Mangler actor_repair_services.
+- `hydron-as-arendal`: Mangler actor_repair_services.
+- `grisen-storsenter-tvedestrand`: Mangler actor_repair_services.
+- `stemningsfullt-tvedestrand`: Mangler actor_repair_services.
+- `sourceit-risor`: Mangler actor_repair_services.
+- `haefashion-tvedestrand`: Mangler actor_repair_services.
+- `a-ventilasjon-as-songe`: Mangler actor_repair_services.
+- `rorlegger-jensen-as-staubo`: Mangler actor_repair_services.
+- `sorlandet-vvs-as-froland`: Mangler actor_repair_services.
+- `sondeled-rorhandel-as-sondeled`: Mangler actor_repair_services.
+- `pm-elektro-as-arendal`: Mangler actor_repair_services.
+- `setesdal-elektro-as-bykle`: Mangler actor_repair_services.
+- `lyd-og-bilde-john-andersen-evje`: Mangler actor_repair_services.
+- `setesdalnet-bykle`: Mangler actor_repair_services.
+- `ks-service-as-evje`: Mangler actor_repair_services.
+- `knut-hovet-installasjonar-rysstad-rysstad`: Mangler actor_repair_services.
+- `mjaland-automatikk-evje`: Mangler actor_repair_services.
+- `evtek-as-evje-evje`: Mangler actor_repair_services.
+- `brokke-vvs-as-rorlegger-og-vvs-i-rysstad-rysstad`: Mangler actor_repair_services.
+- `troll-mountain-data-center-evje`: Mangler actor_repair_services.
+- `erv-teknikk-evje-as-evje`: Mangler actor_repair_services.
+- `altidata-as-evje`: Mangler actor_repair_services.
+- `knut-hovet-installasjonar-hovden-hovden-i-setesdal`: Mangler actor_repair_services.
+- `den-lekende-skomaker-as-arendal`: Mangler actor_repair_services.
+- `grimstad-sko-kalesjeservice-grimstad`: Mangler actor_repair_services.
+- `eurosko-tvedestrand`: Mangler actor_repair_services.
+- `esmaili-dame-og-herreskredderi-arendal`: Mangler actor_repair_services.
+- `arendal-souvenirs-klespleie-arendal`: Mangler actor_repair_services.
+- `meretes-atelier-lysthuset-grimstad`: Mangler actor_repair_services.
+- `husflidstua-grimstad`: Mangler actor_repair_services.
+- `stitch-bunadsom-manufaktur-staubo`: Mangler actor_repair_services.
+- `l-rolland-som-iveland`: Mangler actor_repair_services.
+- `kalesjeservice-batputer-tveit`: Mangler actor_repair_services.
+- `norsk-flid-husfliden-arendal-arendal`: Mangler actor_repair_services.
+- `garn-og-sybutikken-arendal`: Mangler actor_repair_services.
+- `oddensenteret-grimstad`: Mangler actor_repair_services.
+- `linda-i-floistads-systue-saltrod`: Mangler actor_repair_services.
+- `brandpark-as-avd-syralt-brekkesto`: Mangler actor_repair_services.
+- `arnhilds-systue-asland-finsland`: Mangler actor_repair_services.
+- `industrisom-as-arendal`: Mangler actor_repair_services.
+- `c-la-vie-klaer-interior-as-arendal`: Mangler actor_repair_services.
+- `kompanii-arendal`: Mangler actor_repair_services.
+- `hos-solvi-arendal`: Mangler actor_repair_services.
+- `resolve-arendal`: Mangler actor_repair_services.
+- `kappahl-arendal`: Mangler actor_repair_services.
+- `rens-pa-flekken-as-arendal`: Mangler actor_repair_services.
+- `agder-renovasjon-iks-arendal`: Mangler actor_repair_services.
+- `gitmark-arendal-arendal`: Mangler actor_repair_services.
+- `alti-harebakken-arendal`: Mangler actor_repair_services.
+- `gina-tricot-arendal`: Mangler actor_repair_services.
+- `dressmann-arendal`: Mangler actor_repair_services.
+- `veslas-boutique-grimstad-as-grimstad`: Mangler actor_repair_services.
+- `hoyer-grimstad-as-grimstad`: Mangler actor_repair_services.
+- `lithe-as-grimstad`: Mangler actor_repair_services.
+- `skinsation-grimstad`: Mangler actor_repair_services.
+- `dressmann-grimstad`: Mangler actor_repair_services.
+- `dekkis-as-tvedestrand`: Mangler actor_repair_services.
+- `dekkis-as-meca-tvedestrand`: Mangler actor_repair_services.
+- `amtmannsvingen-motorsenter-as-tvedestrand`: Mangler actor_repair_services.
+- `kenneth-hansen-risor`: Mangler actor_repair_services.
+- `brd-ellefsens-eftf-meca-risor`: Mangler actor_repair_services.
+- `tvedestrand-bilverksted-ans-tvedestrand`: Mangler actor_repair_services.
+- `mobeltapetsererverkstedet-as-arendal`: Mangler actor_repair_services.
+- `fagmobler-arendal-arendal`: Mangler actor_repair_services.
+- `mobelringen-arendal-arendal`: Mangler actor_repair_services.
+- `grimstad-mobelrestaurering-og-forgylling-grimstad`: Mangler actor_repair_services.
+- `risor-som-og-mobelverksted-grete-hagen-risor`: Mangler actor_repair_services.
+- `risor-snekkeri-as-risor`: Mangler actor_repair_services.
+- `stopp-hos-meg-anita-jul-larsen-mobeltapetserer-risor`: Mangler actor_repair_services.
+- `byggmester-sommerfelt-as-risor`: Mangler actor_repair_services.
+- `bo-mobler-lillesand`: Mangler actor_repair_services.
+- `fagmobler-grimstad-grimstad`: Mangler actor_repair_services.
+- `bohus-arendal-arendal`: Mangler actor_repair_services.
+- `laerdoktor-sogne-sogne`: Mangler actor_repair_services.
+- `gjeving-trevarefabrikk-as-tvedestrand`: Mangler actor_repair_services.
+- `sykkelsport-as-arendal`: Mangler actor_repair_services.
+- `sykkelsport-grimstad-grimstad`: Mangler actor_repair_services.
+- `blom-sykkelservice-grimstad`: Mangler actor_repair_services.
+- `sykkel-bent-grimstad`: Mangler actor_repair_services.
+- `sport-1-grimstad-grimstad`: Mangler actor_repair_services.
+- `respons-norway-nedenes`: Mangler actor_repair_services.
+- `tvedestrand-sykkelverksted-as-tvedestrand`: Mangler actor_repair_services.
+- `sport-1-risor-risor`: Mangler actor_repair_services.
+- `sport-1-vennesla-vennesla`: Mangler actor_repair_services.
+- `brekke-sport-stoa-arendal`: Mangler actor_repair_services.
+- `stisykkelbyen-arendal-arendal`: Mangler actor_repair_services.
+- `sport-1-arendal-arendal`: Mangler actor_repair_services.
+- `xxl-arendal-arendal`: Mangler actor_repair_services.
+- `sport-outlet-evje-evje`: Mangler actor_repair_services.
+- `intersport-evje`: Mangler actor_repair_services.
+- `etappe-lillesand`: Mangler actor_repair_services.
+- `norsk-hagebruksmuseum-grimstad`: Mangler actor_repair_services.
+- `grimstad-bys-museer-grimstad`: Mangler actor_repair_services.
+- `carfix-arendal-arendal`: Mangler actor_repair_services.
+- `fs-auto-as-mekonomen-arendal`: Mangler actor_repair_services.
+- `frameworks-as-arendal`: Mangler actor_repair_services.
+- `arendal-batskade-service-as-arendal`: Mangler actor_repair_services.
+- `jorkjen-mc-arendal`: Mangler actor_repair_services.
+- `mekonomen-butikk-arendal-arendal`: Mangler actor_repair_services.
+- `bilxtra-arendal-arendal`: Mangler actor_repair_services.
+- `bileko-car-parts-norway-as-avd-arendal-bcp-arendal`: Mangler actor_repair_services.
+- `romnes-arendal-as-arendal`: Mangler actor_repair_services.
+- `arendal-badsenter-as-arendal`: Mangler actor_repair_services.
+- `bathuset-arendal-as-arendal`: Mangler actor_repair_services.
+- `lovdal-auto-as-mekonomen-bilverksted-nedenes`: Mangler actor_repair_services.
+- `fahrrad-reparaturstation-grimstad`: Mangler actor_repair_services.
+- `agder-karosseri-as-grimstad`: Mangler actor_repair_services.
+- `auto-rep-as-grimstad`: Mangler actor_repair_services.
+- `agder-teknikk-grimstad`: Mangler actor_repair_services.
+- `grimstad-badsenter-deler-verksted-opplag-grimstad`: Mangler actor_repair_services.
+- `komposittservice-as-grimstad`: Mangler actor_repair_services.
+- `sb-verksted-og-transport-as-grimstad`: Mangler actor_repair_services.
+- `dekkskift-tvedestrand-tvedestrand`: Mangler actor_repair_services.
+- `bilinstrument-service-tvedestrand`: Mangler actor_repair_services.
+- `cafeen-arendal-arendal`: Mangler actor_repair_services.
+- `koselig-cafe-arendal`: Mangler actor_repair_services.
+- `cafe-victor-arendal`: Mangler actor_repair_services.
+- `kopano-cafe-arendal`: Mangler actor_repair_services.
+- `fokussenteret-grimstad`: Mangler actor_repair_services.
+- `chr-repstads-sonner-as-grimstad`: Mangler actor_repair_services.
+- `grosle-rekvisita-roresand`: Mangler actor_repair_services.
+- `universitetet-i-agder-campus-grimstad-grimstad`: Mangler actor_repair_services.
+- `jernia-odden-grimstad`: Mangler actor_repair_services.
+- `radhusgata-spiseri-mer-risor`: Mangler actor_repair_services.
+- `brygga-restaurant-bar-risor`: Mangler actor_repair_services.
+- `risorflekken-risor`: Mangler actor_repair_services.
+- `risor-fiskemottak-as-risor`: Mangler actor_repair_services.
+- `tvedestrand-fjordhotell-tvedestrand`: Mangler actor_repair_services.
+- `stoga-a-s-bygland`: Mangler actor_repair_services.
