@@ -6,6 +6,7 @@
     "db:guardrails": "prisma db execute --file prisma/migrations/20260329_actor_repair_guardrails.sql",
     "postinstall": "prisma generate",
     "build": "next build",
+    "backfill:actor-browse": "tsx scripts/backfill-actor-browse-index.ts",
     "backfill:geo": "tsx scripts/backfill-geo-taxonomy.ts",
     "dev": "next dev",
     "generate:prisma-enums": "node scripts/generate-prisma-enums.js",
@@ -15,7 +16,8 @@
     "lint": "eslint .",
     "seed:articles": "tsx scripts/seed-editorial-articles.ts",
     "start": "next start",
-    "seed": "prisma db seed"
+    "seed": "prisma db seed",
+    "test": "vitest run"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -91,12 +93,14 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/supercluster": "^7.1.3",
     "baseline-browser-mapping": "^2.10.12",
     "postcss": "^8.5",
     "prisma": "^7.2.0",
     "tailwindcss": "^4.1.9",
     "tsx": "^4.20.2",
     "tw-animate-css": "1.3.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.4"
   }
 }

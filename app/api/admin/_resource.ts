@@ -11,6 +11,7 @@ import {
   assertActorCategorySupportsExistingRepairServices,
   assertActorRepairServicesMatchCategory,
   prepareActorPersistData,
+  replaceActorBrowseScopes,
   replaceActorServiceAreas,
 } from "@/lib/actor-write"
 import { prepareArticlePersistData } from "@/lib/article-write"
@@ -128,6 +129,7 @@ export const createAdminResource = async (resource: string, request: Request) =>
         })
 
         await replaceActorServiceAreas(tx, actor.id, preparedActor.serviceAreaLinks)
+        await replaceActorBrowseScopes(tx, actor.id, preparedActor.browseScopes)
 
         if (nested.repairServices.length > 0) {
           await tx.actorRepairService.createMany({
@@ -211,6 +213,7 @@ export const updateAdminResource = async (resource: string, id: string, request:
     let data = sanitizePayload(body)
     const affectedActorIds = new Set<string>()
     const affectedCountySlugs = new Set<string>()
+    let preparedActorUpdate: Awaited<ReturnType<typeof prepareActorPersistData>> | null = null
 
     if (resource === "actors") {
       const existingActor = await prisma.actor.findUnique({ where: { id } })
@@ -224,11 +227,13 @@ export const updateAdminResource = async (resource: string, id: string, request:
       }
       await assertActorCategorySupportsExistingRepairServices(prisma, id, mergedActor.category)
       await assertActorRepairServicesMatchCategory(prisma, id, mergedActor.category as ActorCategory)
-      const prepared = await prepareActorPersistData(prisma, mergedActor as never)
-      data = prepared.actorData
+      preparedActorUpdate = await prepareActorPersistData(prisma, mergedActor as never)
+      data = preparedActorUpdate.actorData
       affectedActorIds.add(id)
       if (existingActor.countySlug) affectedCountySlugs.add(existingActor.countySlug)
-      if (typeof prepared.actorData.countySlug === "string") affectedCountySlugs.add(prepared.actorData.countySlug)
+      if (typeof preparedActorUpdate.actorData.countySlug === "string") {
+        affectedCountySlugs.add(preparedActorUpdate.actorData.countySlug)
+      }
     }
 
     if (resource === "articles") {
@@ -280,10 +285,21 @@ export const updateAdminResource = async (resource: string, id: string, request:
     }
 
     const model = (prisma as Record<string, any>)[config.model]
-    const updated = await model.update({
-      where: { id },
-      data,
-    })
+    const updated =
+      resource === "actors" && preparedActorUpdate
+        ? await prisma.$transaction(async (tx) => {
+            const actor = await tx.actor.update({
+              where: { id },
+              data: preparedActorUpdate.actorData,
+            })
+            await replaceActorServiceAreas(tx, actor.id, preparedActorUpdate.serviceAreaLinks)
+            await replaceActorBrowseScopes(tx, actor.id, preparedActorUpdate.browseScopes)
+            return actor
+          })
+        : await model.update({
+            where: { id },
+            data,
+          })
     if (resource === "actors") {
       if (updated.countySlug) {
         affectedCountySlugs.add(updated.countySlug)

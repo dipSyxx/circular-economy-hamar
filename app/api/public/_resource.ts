@@ -7,6 +7,8 @@ import {
   assertActorCanAcceptRepairServices,
   assertActorCategorySupportsExistingRepairServices,
   prepareActorPersistData,
+  replaceActorBrowseScopes,
+  replaceActorServiceAreas,
 } from "@/lib/actor-write"
 
 type PublicConfig = (typeof publicResourceConfig)[string]
@@ -117,10 +119,21 @@ export const createPublicResource = async (resource: string, request: Request) =
 
     if (resource === "actors") {
       const prepared = await prepareActorPersistData(prisma, createdData as never)
-      createdData = {
-        ...createdData,
-        ...prepared.actorData,
-      }
+      const created = await prisma.$transaction(async (tx) => {
+        const actor = await tx.actor.create({
+          data: {
+            ...createdData,
+            ...prepared.actorData,
+          },
+        })
+
+        await replaceActorServiceAreas(tx, actor.id, prepared.serviceAreaLinks)
+        await replaceActorBrowseScopes(tx, actor.id, prepared.browseScopes)
+        return actor
+      })
+
+      revalidatePublicResource(resource)
+      return NextResponse.json(created, { status: 201 })
     }
 
     if (resource === "actor-repair-services") {
@@ -182,10 +195,22 @@ export const updatePublicResource = async (resource: string, id: string, request
       }
       await assertActorCategorySupportsExistingRepairServices(prisma, id, mergedActor.category)
       const prepared = await prepareActorPersistData(prisma, mergedActor as never)
-      updateData = {
-        ...updateData,
-        ...prepared.actorData,
-      }
+      const updated = await prisma.$transaction(async (tx) => {
+        const actor = await tx.actor.update({
+          where: { id },
+          data: {
+            ...updateData,
+            ...prepared.actorData,
+          },
+        })
+
+        await replaceActorServiceAreas(tx, actor.id, prepared.serviceAreaLinks)
+        await replaceActorBrowseScopes(tx, actor.id, prepared.browseScopes)
+        return actor
+      })
+
+      revalidatePublicResource(resource)
+      return NextResponse.json(updated)
     }
 
     if (resource === "actor-repair-services") {

@@ -6,6 +6,8 @@ import { RelatedArticlesSection } from "@/components/editorial/related-articles-
 import { RelatedGuidesSection } from "@/components/guides/related-guides-section"
 import { Badge } from "@/components/ui/badge"
 import { actorCopy } from "@/content/no"
+import { getBrowseResponse } from "@/lib/actors/browse-query"
+import { parseActorBrowseFilters, searchParamsFromObject } from "@/lib/actors/search-params"
 import { categoryOrder } from "@/lib/categories"
 import { getArticlesForCategory } from "@/lib/editorial"
 import { getGuidesForCategory } from "@/lib/guides"
@@ -15,6 +17,7 @@ import { getSiteUrl } from "@/lib/seo"
 
 type MunicipalityCategoryPageProps = {
   params: Promise<{ county: string; municipality: string; category: string }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
 export async function generateStaticParams() {
@@ -60,12 +63,13 @@ export async function generateMetadata({ params }: MunicipalityCategoryPageProps
   }
 }
 
-export default async function MunicipalityCategoryPage({ params }: MunicipalityCategoryPageProps) {
+export default async function MunicipalityCategoryPage({ params, searchParams }: MunicipalityCategoryPageProps) {
   const { county, municipality, category } = await params
   const countyMeta = getCountyBySlug(county)
   if (!countyMeta || !categoryOrder.includes(category as (typeof categoryOrder)[number])) {
     notFound()
   }
+  const resolvedSearchParams = await searchParams
 
   const municipalityMeta = getMunicipalityBySlug(municipality, countyMeta.slug)
   const actors = await getActorsByMunicipalityAndCategory(
@@ -73,6 +77,13 @@ export default async function MunicipalityCategoryPage({ params }: MunicipalityC
     municipality,
     category as (typeof categoryOrder)[number],
   )
+  const initialFilters = {
+    ...parseActorBrowseFilters(searchParamsFromObject(resolvedSearchParams ?? {}), { pageSize: 24 }),
+    county: countyMeta.slug,
+    municipality,
+    categories: [category as (typeof categoryOrder)[number]],
+  }
+  const initialData = await getBrowseResponse(initialFilters)
 
   if (!municipalityMeta && actors.length === 0) {
     notFound()
@@ -120,7 +131,15 @@ export default async function MunicipalityCategoryPage({ params }: MunicipalityC
         articles={relatedArticles}
       />
 
-      <ActorsExplorer actors={actors} />
+      <ActorsExplorer
+        initialData={initialData}
+        initialFilters={initialFilters}
+        syncToUrl
+        enableGeographyFilters
+        lockedCounty={countyMeta.slug}
+        lockedMunicipality={municipality}
+        lockedCategories={[category as (typeof categoryOrder)[number]]}
+      />
     </div>
   )
 }

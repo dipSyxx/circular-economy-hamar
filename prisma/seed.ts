@@ -1,7 +1,7 @@
 import "dotenv/config"
 import { PrismaClient, QuizLevel } from "@prisma/client"
 import { PrismaNeon } from "@prisma/adapter-neon"
-import { prepareActorPersistData } from "../lib/actor-write"
+import { prepareActorPersistData, replaceActorBrowseScopes, replaceActorServiceAreas } from "../lib/actor-write"
 import { loadBootstrapActorFixtures } from "../lib/bootstrap-actors"
 import { upsertBootstrapArticles } from "../lib/bootstrap-articles"
 import { seedCanonicalGeoTaxonomy } from "../lib/geo-taxonomy"
@@ -76,16 +76,8 @@ async function seedActors() {
       },
     })
 
-    await prisma.actorServiceArea.deleteMany({ where: { actorId: actorRecord.id } })
-    if (prepared.serviceAreaLinks.length > 0) {
-      await prisma.actorServiceArea.createMany({
-        data: prepared.serviceAreaLinks.map((serviceArea) => ({
-          actorId: actorRecord.id,
-          countyId: serviceArea.countyId,
-          municipalityId: serviceArea.municipalityId,
-        })),
-      })
-    }
+    await replaceActorServiceAreas(prisma, actorRecord.id, prepared.serviceAreaLinks)
+    await replaceActorBrowseScopes(prisma, actorRecord.id, prepared.browseScopes)
 
     await prisma.actorRepairService.deleteMany({ where: { actorId: actorRecord.id } })
     if (fixture.repairServices.length) {

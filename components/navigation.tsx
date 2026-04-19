@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/sheet"
 import { navigation, navigationCopy } from "@/content/no"
 import { authClient } from "@/lib/auth/client"
+import { HEADER_LAYER_CLASS, HEADER_MENU_LAYER_CLASS } from "@/lib/ui/layers"
 import { cn } from "@/lib/utils"
 import {
   BookOpen,
@@ -145,7 +146,7 @@ function DesktopAccountMenu({
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
+      <DropdownMenuContent align="end" className={cn("w-64", HEADER_MENU_LAYER_CLASS)}>
         <DropdownMenuLabel className="p-3">
           <div className="flex items-center gap-3">
             <Avatar className="size-9 border border-border/60">
@@ -272,7 +273,12 @@ export function Navigation() {
     href === "/" ? pathname === "/" : pathname.startsWith(href)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header
+      className={cn(
+        "sticky top-0 isolate w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        HEADER_LAYER_CLASS,
+      )}
+    >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <BrandLogo priority imageClassName="h-9 md:h-10" className="shrink-0" />
 

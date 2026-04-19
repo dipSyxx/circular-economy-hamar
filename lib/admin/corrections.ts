@@ -2,7 +2,7 @@ import "server-only"
 
 import { ActorCorrectionStatus, type VerificationStatus } from "@prisma/client"
 import { buildActorCorrectionPatch, buildCorrectionDiff, type ActorCorrectionPayload } from "@/lib/actor-corrections"
-import { prepareActorPersistData } from "@/lib/actor-write"
+import { prepareActorPersistData, replaceActorBrowseScopes } from "@/lib/actor-write"
 import { prisma } from "@/lib/prisma"
 import { canonicalizeSourceUrl } from "@/lib/source-quality"
 import { refreshAutomationStateForActors } from "@/lib/admin/automation"
@@ -194,7 +194,16 @@ export const reviewActorCorrectionSuggestion = async (id: string, input: ReviewC
   const existing = await prisma.actorCorrectionSuggestion.findUnique({
     where: { id },
     include: {
-      actor: true,
+      actor: {
+        include: {
+          serviceAreas: {
+            include: {
+              county: { select: { slug: true } },
+              municipality: { select: { slug: true } },
+            },
+          },
+        },
+      },
     },
   })
 
@@ -211,58 +220,52 @@ export const reviewActorCorrectionSuggestion = async (id: string, input: ReviewC
   await prisma.$transaction(async (tx) => {
     if (input.status === "accepted") {
       const patch = buildActorCorrectionPatch(existing.actor, (existing.payload as ActorCorrectionPayload | null) ?? {})
-      const prepared =
-        patch.address !== undefined ||
-        patch.postalCode !== undefined ||
-        patch.county !== undefined ||
-        patch.municipality !== undefined ||
-        patch.city !== undefined ||
-        patch.area !== undefined
-          ? await prepareActorPersistData(
-              tx,
-              {
-                name: String(patch.name ?? existing.actor.name),
-                slug: existing.actor.slug,
-                category: existing.actor.category,
-                description: String(patch.description ?? existing.actor.description),
-                longDescription: String(patch.longDescription ?? existing.actor.longDescription),
-                address: String(patch.address ?? existing.actor.address),
-                postalCode: (patch.postalCode as string | null) ?? existing.actor.postalCode,
-                county: (patch.county as string | null) ?? existing.actor.county,
-                countySlug: existing.actor.countySlug,
-                municipality: (patch.municipality as string | null) ?? existing.actor.municipality,
-                municipalitySlug: existing.actor.municipalitySlug,
-                city: (patch.city as string | null) ?? existing.actor.city,
-                area: (patch.area as string | null) ?? existing.actor.area,
-                lat: typeof patch.lat === "number" ? patch.lat : existing.actor.lat,
-                lng: typeof patch.lng === "number" ? patch.lng : existing.actor.lng,
-                phone: (patch.phone as string | null) ?? existing.actor.phone,
-                email: (patch.email as string | null) ?? existing.actor.email,
-                website: (patch.website as string | null) ?? existing.actor.website,
-                instagram: (patch.instagram as string | null) ?? existing.actor.instagram,
-                openingHours: existing.actor.openingHours,
-                openingHoursOsm:
-                  (patch.openingHoursOsm as string | null) ?? existing.actor.openingHoursOsm,
-                tags: existing.actor.tags,
-                benefits: existing.actor.benefits,
-                howToUse: existing.actor.howToUse,
-                image: existing.actor.image,
-                nationwide:
-                  typeof patch.nationwide === "boolean" ? patch.nationwide : existing.actor.nationwide,
-              },
-            )
-          : null
-      await tx.actor.update({
+      const prepared = await prepareActorPersistData(tx, {
+        name: String(patch.name ?? existing.actor.name),
+        slug: existing.actor.slug,
+        category: existing.actor.category,
+        description: String(patch.description ?? existing.actor.description),
+        longDescription: String(patch.longDescription ?? existing.actor.longDescription),
+        address: String(patch.address ?? existing.actor.address),
+        postalCode: (patch.postalCode as string | null) ?? existing.actor.postalCode,
+        county: (patch.county as string | null) ?? existing.actor.county,
+        countySlug: existing.actor.countySlug,
+        municipality: (patch.municipality as string | null) ?? existing.actor.municipality,
+        municipalitySlug: existing.actor.municipalitySlug,
+        city: (patch.city as string | null) ?? existing.actor.city,
+        area: (patch.area as string | null) ?? existing.actor.area,
+        lat: typeof patch.lat === "number" ? patch.lat : existing.actor.lat,
+        lng: typeof patch.lng === "number" ? patch.lng : existing.actor.lng,
+        phone: (patch.phone as string | null) ?? existing.actor.phone,
+        email: (patch.email as string | null) ?? existing.actor.email,
+        website: (patch.website as string | null) ?? existing.actor.website,
+        instagram: (patch.instagram as string | null) ?? existing.actor.instagram,
+        openingHours: existing.actor.openingHours,
+        openingHoursOsm: (patch.openingHoursOsm as string | null) ?? existing.actor.openingHoursOsm,
+        tags: existing.actor.tags,
+        benefits: existing.actor.benefits,
+        howToUse: existing.actor.howToUse,
+        image: existing.actor.image,
+        nationwide: typeof patch.nationwide === "boolean" ? patch.nationwide : existing.actor.nationwide,
+        serviceAreaCountySlugs: existing.actor.serviceAreas.flatMap((entry) =>
+          entry.county?.slug ? [entry.county.slug] : [],
+        ),
+        serviceAreaMunicipalitySlugs: existing.actor.serviceAreas.flatMap((entry) =>
+          entry.municipality?.slug ? [entry.municipality.slug] : [],
+        ),
+      })
+      const actor = await tx.actor.update({
         where: { id: existing.actorId },
         data: {
           ...patch,
-          ...(prepared?.actorData ?? {}),
+          ...prepared.actorData,
           verificationStatus: "editorial_verified",
           verifiedAt: reviewedAt,
           reviewedById: input.reviewedById ?? null,
           reviewedAt,
         },
       })
+      await replaceActorBrowseScopes(tx, actor.id, prepared.browseScopes)
 
       if (existing.sourceUrl) {
         const correctionCanonicalUrl = canonicalizeSourceUrl(existing.sourceUrl).canonicalUrl

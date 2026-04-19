@@ -13,6 +13,7 @@ import { ExternalLink, Heart, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Actor } from "@/lib/data";
+import type { ActorListItem } from "@/lib/actors/types";
 import { actorCopy } from "@/content/no";
 import { ActorTrustBadges } from "@/components/actor-trust-badges";
 import { formatActorGeoLabel } from "@/lib/geo";
@@ -21,7 +22,27 @@ import { categoryConfig } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 
 interface ActorCardProps {
-  actor: Actor;
+  actor: Pick<
+    Actor,
+    | "id"
+    | "slug"
+    | "name"
+    | "category"
+    | "description"
+    | "address"
+    | "image"
+    | "website"
+    | "tags"
+    | "city"
+    | "municipality"
+    | "county"
+    | "area"
+    | "nationwide"
+    | "verificationStatus"
+    | "freshnessStatus"
+    | "isTrusted"
+    | "sourceCount"
+  > | ActorListItem;
   isFavorite?: boolean;
   showFavorite?: boolean;
   onToggleFavorite?: (actorId: string) => void;
@@ -101,7 +122,7 @@ export function ActorCard({
         <ActorTrustBadges actor={actor} />
 
         <div className="flex flex-wrap gap-1.5">
-          {actor.tags.slice(0, 3).map((tag) => (
+          {("tagsPreview" in actor ? actor.tagsPreview : actor.tags.slice(0, 3)).map((tag) => (
             <Badge key={tag} variant="secondary" className="text-xs">
               {tag}
             </Badge>

@@ -7,6 +7,8 @@ import { RelatedGuidesSection } from "@/components/guides/related-guides-section
 import { PilotRolloutNote } from "@/components/pilot-rollout-note"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { getBrowseResponse } from "@/lib/actors/browse-query"
+import { parseActorBrowseFilters, searchParamsFromObject } from "@/lib/actors/search-params"
 import { getArticlesForCounty } from "@/lib/editorial"
 import { getActorGeographyMatchPriority, getAvailableMunicipalityOptions } from "@/lib/actor-scope"
 import { categoryOrder } from "@/lib/categories"
@@ -19,6 +21,7 @@ import { getSiteUrl } from "@/lib/seo"
 
 type CountyPageProps = {
   params: Promise<{ county: string }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
 export async function generateStaticParams() {
@@ -39,12 +42,18 @@ export async function generateMetadata({ params }: CountyPageProps): Promise<Met
   }
 }
 
-export default async function CountyPage({ params }: CountyPageProps) {
+export default async function CountyPage({ params, searchParams }: CountyPageProps) {
   const { county } = await params
   const countyMeta = getCountyBySlug(county)
   if (!countyMeta) notFound()
+  const resolvedSearchParams = await searchParams
 
   const actors = await getActorsByCounty(countyMeta.slug)
+  const initialFilters = {
+    ...parseActorBrowseFilters(searchParamsFromObject(resolvedSearchParams ?? {}), { pageSize: 24 }),
+    county: countyMeta.slug,
+  }
+  const initialData = await getBrowseResponse(initialFilters)
   const rolloutMode = getPilotRolloutMode(
     countyMeta.slug,
     actors.map((actor) => ({
@@ -157,7 +166,13 @@ export default async function CountyPage({ params }: CountyPageProps) {
           <h2 className="text-2xl font-semibold">Aktører i {countyMeta.name}</h2>
           <p className="text-muted-foreground">Filtrer på kategori, tagger og søk direkte i fylkets katalog.</p>
         </div>
-        <ActorsExplorer actors={actors} />
+        <ActorsExplorer
+          initialData={initialData}
+          initialFilters={initialFilters}
+          syncToUrl
+          enableGeographyFilters
+          lockedCounty={countyMeta.slug}
+        />
       </section>
     </div>
   )

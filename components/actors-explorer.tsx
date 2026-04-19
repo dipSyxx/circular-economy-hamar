@@ -1,58 +1,50 @@
-"use client"
+'use client'
 
-import { startTransition, useEffect, useMemo, useState } from "react"
-import { usePathname, useRouter } from "next/navigation"
-import { AnimatePresence, motion } from "framer-motion"
-import { Crosshair, Search, SlidersHorizontal, X } from "lucide-react"
-import type { Actor, ActorCategory } from "@/lib/data"
-import { ActorCard } from "@/components/actor-card"
-import { authClient } from "@/lib/auth/client"
-import { actorCopy, mapCopy } from "@/content/no"
-import {
-  getActorGeographyMatchPriority,
-  getAvailableCountyOptions,
-  getAvailableMunicipalityOptions,
-} from "@/lib/actor-scope"
-import { categoryConfig, categoryOrder } from "@/lib/categories"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { cn } from "@/lib/utils"
+import { ActorCard } from '@/components/actor-card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import { actorCopy } from '@/content/no'
+import { buildActorBrowseSearchParams } from '@/lib/actors/search-params'
+import type { ActorBrowseFilters, ActorBrowseResponse, ActorListItem, ActorSortKey } from '@/lib/actors/types'
+import { authClient } from '@/lib/auth/client'
+import type { ActorCategory } from '@/lib/data'
+import { cn } from '@/lib/utils'
+import { Crosshair, Search, SlidersHorizontal, X } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { startTransition, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 
-type SortKey = "default" | "favorite" | "distance" | "name_asc" | "name_desc" | "category"
-type TagOption = { tag: string; count: number }
 type ActorsExplorerProps = {
-  actors: Actor[]
-  enableGeographyFilters?: boolean
+  initialData: ActorBrowseResponse
+  initialFilters: ActorBrowseFilters
   syncToUrl?: boolean
-  initialQuery?: string
-  initialCategory?: ActorCategory | null
-  initialCounty?: string | null
-  initialMunicipality?: string | null
+  enableGeographyFilters?: boolean
+  lockedCounty?: string | null
+  lockedMunicipality?: string | null
+  lockedCategories?: ActorCategory[]
 }
 
-const sortOptions: Array<{ value: SortKey; label: string }> = [
-  { value: "default", label: "Standard" },
-  { value: "favorite", label: "Favoritter først" },
-  { value: "distance", label: "Nærmest meg" },
-  { value: "name_asc", label: "Navn A-Z" },
-  { value: "name_desc", label: "Navn Z-A" },
-  { value: "category", label: "Kategori" },
+const sortOptions: Array<{ value: ActorSortKey; label: string }> = [
+  { value: 'default', label: 'Standard' },
+  { value: 'favorite', label: 'Favoritter først' },
+  { value: 'distance', label: 'Nærmest meg' },
+  { value: 'name_asc', label: 'Navn A-Z' },
+  { value: 'name_desc', label: 'Navn Z-A' },
+  { value: 'category', label: 'Kategori' },
 ]
 
-const STORAGE_KEY = "actors-explorer-state"
-const LOCATION_TTL_MS = 1000 * 60 * 60 * 24
-const ALL_COUNTIES = "__all_counties__"
-const ALL_MUNICIPALITIES = "__all_municipalities__"
+const ALL_COUNTIES = '__all_counties__'
+const ALL_MUNICIPALITIES = '__all_municipalities__'
 
 const normalizeText = (value: string) =>
-  value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
 
 const getDistanceKm = (from: [number, number], to: [number, number]) => {
   const [lat1, lon1] = from
@@ -67,573 +59,302 @@ const getDistanceKm = (from: [number, number], to: [number, number]) => {
   return 6371 * c
 }
 
-const formatCategoryLabel = (category: ActorCategory) => actorCopy.categoryLabels[category] ?? category
-
 export function ActorsExplorer({
-  actors,
-  enableGeographyFilters = false,
+  initialData,
+  initialFilters,
   syncToUrl = false,
-  initialQuery = "",
-  initialCategory = null,
-  initialCounty = null,
-  initialMunicipality = null,
+  enableGeographyFilters = false,
+  lockedCounty = null,
+  lockedMunicipality = null,
+  lockedCategories = [],
 }: ActorsExplorerProps) {
-  const { data } = authClient.useSession()
   const router = useRouter()
   const pathname = usePathname()
+  const { data } = authClient.useSession()
   const isSignedIn = Boolean(data?.session)
-  const [query, setQuery] = useState(initialQuery)
-  const [sortKey, setSortKey] = useState<SortKey>("default")
-  const [categoryFilters, setCategoryFilters] = useState<ActorCategory[]>(initialCategory ? [initialCategory] : [])
-  const [countyFilter, setCountyFilter] = useState(enableGeographyFilters ? (initialCounty ?? "") : "")
-  const [municipalityFilter, setMunicipalityFilter] = useState(
-    enableGeographyFilters ? (initialMunicipality ?? "") : "",
+
+  const [query, setQuery] = useState(initialFilters.q)
+  const deferredQuery = useDeferredValue(query)
+  const [sort, setSort] = useState<ActorSortKey>(initialFilters.sort)
+  const [categories, setCategories] = useState<ActorCategory[]>(initialFilters.categories)
+  const [county, setCounty] = useState(initialFilters.county ?? lockedCounty ?? null)
+  const [municipality, setMunicipality] = useState(initialFilters.municipality ?? lockedMunicipality ?? null)
+  const [tags, setTags] = useState<string[]>(initialFilters.tags)
+  const [favoriteOnly, setFavoriteOnly] = useState(initialFilters.favoriteOnly)
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(
+    typeof initialFilters.lat === 'number' && typeof initialFilters.lng === 'number'
+      ? [initialFilters.lat, initialFilters.lng]
+      : null,
   )
-  const [tagFilters, setTagFilters] = useState<string[]>([])
-  const [tagQuery, setTagQuery] = useState("")
-  const [favoriteOnly, setFavoriteOnly] = useState(false)
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
-  const [favoritesLoaded, setFavoritesLoaded] = useState(false)
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
   const [locationError, setLocationError] = useState<string | null>(null)
-  const [locationUpdatedAt, setLocationUpdatedAt] = useState<number | null>(null)
-  const [hasRestoredState, setHasRestoredState] = useState(false)
-  const [visibleCount, setVisibleCount] = useState(24)
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
-
-  const categoryIndex = useMemo(() => new Map(categoryOrder.map((category, index) => [category, index])), [])
-
-  const countyOptions = useMemo(() => getAvailableCountyOptions(actors), [actors])
-
-  const safeCountyFilter = useMemo(() => {
-    if (!enableGeographyFilters || !countyFilter) return ""
-    return countyOptions.some((option) => option.slug === countyFilter) ? countyFilter : ""
-  }, [countyFilter, countyOptions, enableGeographyFilters])
-
-  const municipalityOptions = useMemo(
-    () => (enableGeographyFilters && safeCountyFilter ? getAvailableMunicipalityOptions(actors, safeCountyFilter) : []),
-    [actors, enableGeographyFilters, safeCountyFilter],
-  )
-
-  const safeMunicipalityFilter = useMemo(() => {
-    if (!enableGeographyFilters || !safeCountyFilter || !municipalityFilter) return ""
-    return municipalityOptions.some((option) => option.slug === municipalityFilter) ? municipalityFilter : ""
-  }, [enableGeographyFilters, municipalityFilter, municipalityOptions, safeCountyFilter])
-
-  const baseActors = useMemo(() => {
-    if (!favoriteOnly) return actors
-    return actors.filter((actor) => favoriteIds.has(actor.id))
-  }, [actors, favoriteIds, favoriteOnly])
-
-  const geographyScopedActors = useMemo(() => {
-    if (!enableGeographyFilters || !safeCountyFilter) return baseActors
-    return baseActors.filter(
-      (actor) => getActorGeographyMatchPriority(actor, safeCountyFilter, safeMunicipalityFilter) !== null,
-    )
-  }, [baseActors, enableGeographyFilters, safeCountyFilter, safeMunicipalityFilter])
-
-  const availableCategories = useMemo(() => {
-    const set = new Set(geographyScopedActors.map((actor) => actor.category))
-    return categoryOrder.filter((category) => set.has(category))
-  }, [geographyScopedActors])
-
-  const tagOptions = useMemo<TagOption[]>(() => {
-    const counts = new Map<string, number>()
-    geographyScopedActors.forEach((actor) => {
-      actor.tags.forEach((tag) => counts.set(tag, (counts.get(tag) ?? 0) + 1))
-    })
-    return Array.from(counts.entries())
-      .map(([tag, count]) => ({ tag, count }))
-      .sort((a, b) => a.tag.localeCompare(b.tag, "no", { sensitivity: "base", numeric: true }))
-  }, [geographyScopedActors])
-
-  const filteredTagOptions = useMemo(() => {
-    const normalized = normalizeText(tagQuery.trim())
-    if (!normalized) return tagOptions
-    return tagOptions.filter((option) => normalizeText(option.tag).includes(normalized))
-  }, [tagOptions, tagQuery])
-
-  const normalizedQuery = normalizeText(query.trim())
-
-  const filteredActors = useMemo(() => {
-    return geographyScopedActors.filter((actor) => {
-      if (categoryFilters.length > 0 && !categoryFilters.includes(actor.category)) return false
-      if (tagFilters.length > 0 && !tagFilters.some((tag) => (actor.tags ?? []).includes(tag))) return false
-      if (!normalizedQuery) return true
-      const searchText = normalizeText(
-        [
-          actor.name,
-          actor.description,
-          actor.longDescription,
-          actor.address,
-          actor.county,
-          actor.municipality,
-          actor.city,
-          actor.tags.join(" "),
-          formatCategoryLabel(actor.category),
-        ]
-          .filter(Boolean)
-          .join(" "),
-      )
-      return searchText.includes(normalizedQuery)
-    })
-  }, [categoryFilters, geographyScopedActors, normalizedQuery, tagFilters])
-
-  const sortedActors = useMemo(() => {
-    const sorted = [...filteredActors]
-    const geographyPriority = (actor: Actor) =>
-      safeCountyFilter
-        ? (getActorGeographyMatchPriority(actor, safeCountyFilter, safeMunicipalityFilter) ?? 99)
-        : 0
-    if (sortKey === "favorite") {
-      sorted.sort((a, b) => {
-        const geographyDelta = geographyPriority(a) - geographyPriority(b)
-        if (geographyDelta !== 0) return geographyDelta
-        const left = favoriteIds.has(a.id) ? 1 : 0
-        const right = favoriteIds.has(b.id) ? 1 : 0
-        if (left !== right) return right - left
-        return a.name.localeCompare(b.name, "no", { sensitivity: "base", numeric: true })
-      })
-      return sorted
-    }
-    if (sortKey === "distance") {
-      if (!userLocation) return sorted
-      return sorted.sort((a, b) => {
-        const geographyDelta = geographyPriority(a) - geographyPriority(b)
-        if (geographyDelta !== 0) return geographyDelta
-        return getDistanceKm(userLocation, [a.lat, a.lng]) - getDistanceKm(userLocation, [b.lat, b.lng])
-      })
-    }
-    if (sortKey === "name_asc") {
-      sorted.sort((a, b) => {
-        const geographyDelta = geographyPriority(a) - geographyPriority(b)
-        if (geographyDelta !== 0) return geographyDelta
-        return a.name.localeCompare(b.name, "no", { sensitivity: "base", numeric: true })
-      })
-      return sorted
-    }
-    if (sortKey === "name_desc") {
-      sorted.sort((a, b) => {
-        const geographyDelta = geographyPriority(a) - geographyPriority(b)
-        if (geographyDelta !== 0) return geographyDelta
-        return b.name.localeCompare(a.name, "no", { sensitivity: "base", numeric: true })
-      })
-      return sorted
-    }
-    if (sortKey === "category") {
-      sorted.sort((a, b) => {
-        const geographyDelta = geographyPriority(a) - geographyPriority(b)
-        if (geographyDelta !== 0) return geographyDelta
-        const left = categoryIndex.get(a.category) ?? 999
-        const right = categoryIndex.get(b.category) ?? 999
-        if (left !== right) return left - right
-        return a.name.localeCompare(b.name, "no", { sensitivity: "base", numeric: true })
-      })
-      return sorted
-    }
-    if (!userLocation) return sorted
-    return sorted.sort((a, b) => {
-      const geographyDelta = geographyPriority(a) - geographyPriority(b)
-      if (geographyDelta !== 0) return geographyDelta
-      return getDistanceKm(userLocation, [a.lat, a.lng]) - getDistanceKm(userLocation, [b.lat, b.lng])
-    })
-  }, [categoryIndex, favoriteIds, filteredActors, safeCountyFilter, safeMunicipalityFilter, sortKey, userLocation])
+  const [tagQuery, setTagQuery] = useState('')
+  const [items, setItems] = useState<ActorListItem[]>(initialData.items)
+  const [total, setTotal] = useState(initialData.total)
+  const [hasMore, setHasMore] = useState(initialData.hasMore)
+  const [page, setPage] = useState(initialData.page)
+  const [facets, setFacets] = useState(initialData.facets)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
+  const lastRequestKeyRef = useRef<string>(buildActorBrowseSearchParams(initialFilters).toString())
 
   useEffect(() => {
-    setVisibleCount(24)
-  }, [sortedActors.length, query, categoryFilters, tagFilters, safeCountyFilter, safeMunicipalityFilter, favoriteOnly])
-
-  const visibleActors = sortedActors.slice(0, visibleCount)
-  const hiddenCount = sortedActors.length - visibleCount
-
-  const activeFilterCount =
-    categoryFilters.length +
-    tagFilters.length +
-    (favoriteOnly ? 1 : 0) +
-    (safeCountyFilter ? 1 : 0) +
-    (safeMunicipalityFilter ? 1 : 0)
-  const hasAnyFilter = activeFilterCount > 0 || Boolean(query.trim())
-
-  const toggleCategory = (category: ActorCategory) => {
-    setCategoryFilters((prev) =>
-      prev.includes(category) ? prev.filter((item) => item !== category) : [...prev, category],
-    )
-  }
-
-  const toggleTag = (tag: string) => {
-    setTagFilters((prev) => (prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]))
-  }
-
-  const clearFilterSelections = () => {
-    setCategoryFilters([])
-    setTagFilters([])
-    setTagQuery("")
-    setFavoriteOnly(false)
-    setCountyFilter("")
-    setMunicipalityFilter("")
-  }
-
-  const clearAllFilters = () => {
-    setQuery("")
-    clearFilterSelections()
-  }
-
-  const requestLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationError(mapCopy.locationError)
-      return
+    if (!isSignedIn && favoriteOnly) {
+      setFavoriteOnly(false)
+      setPage(1)
     }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation([position.coords.latitude, position.coords.longitude])
-        setLocationUpdatedAt(Date.now())
-        setLocationError(null)
-      },
-      () => setLocationError(mapCopy.locationError),
-      { enableHighAccuracy: true, timeout: 10000 },
-    )
-  }
+  }, [favoriteOnly, isSignedIn])
 
-  useEffect(() => {
-    if (safeCountyFilter !== countyFilter) setCountyFilter(safeCountyFilter)
-  }, [countyFilter, safeCountyFilter])
-
-  useEffect(() => {
-    if (!enableGeographyFilters) return
-    if (!safeCountyFilter && municipalityFilter) {
-      setMunicipalityFilter("")
-      return
-    }
-    if (safeMunicipalityFilter !== municipalityFilter) setMunicipalityFilter(safeMunicipalityFilter)
-  }, [enableGeographyFilters, municipalityFilter, safeCountyFilter, safeMunicipalityFilter])
-
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      try {
-        const stored = JSON.parse(raw) as {
-          query?: string
-          sortKey?: SortKey
-          categoryFilters?: ActorCategory[]
-          countyFilter?: string
-          municipalityFilter?: string
-          tagFilters?: string[]
-          tagQuery?: string
-          favoriteOnly?: boolean
-          userLocation?: [number, number]
-          locationUpdatedAt?: number
-        }
-        if (!syncToUrl && typeof stored.query === "string") setQuery(stored.query)
-        if (sortOptions.some((option) => option.value === stored.sortKey)) setSortKey(stored.sortKey as SortKey)
-        if (!syncToUrl && Array.isArray(stored.categoryFilters)) {
-          setCategoryFilters(stored.categoryFilters.filter((category) => categoryOrder.includes(category)))
-        }
-        if (!syncToUrl && enableGeographyFilters) {
-          if (typeof stored.countyFilter === "string") setCountyFilter(stored.countyFilter)
-          if (typeof stored.municipalityFilter === "string") setMunicipalityFilter(stored.municipalityFilter)
-        }
-        if (Array.isArray(stored.tagFilters)) setTagFilters(stored.tagFilters.filter((tag) => typeof tag === "string"))
-        if (typeof stored.tagQuery === "string") setTagQuery(stored.tagQuery)
-        if (typeof stored.favoriteOnly === "boolean") setFavoriteOnly(stored.favoriteOnly)
-        if (
-          Array.isArray(stored.userLocation) &&
-          stored.userLocation.length === 2 &&
-          typeof stored.userLocation[0] === "number" &&
-          typeof stored.userLocation[1] === "number" &&
-          Number.isFinite(stored.locationUpdatedAt) &&
-          Date.now() - (stored.locationUpdatedAt as number) < LOCATION_TTL_MS
-        ) {
-          setUserLocation([stored.userLocation[0], stored.userLocation[1]])
-          setLocationUpdatedAt(stored.locationUpdatedAt as number)
-        }
-      } catch {
-        // ignore storage errors
-      }
-    }
-    setHasRestoredState(true)
-  }, [enableGeographyFilters, syncToUrl])
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !hasRestoredState) return
-    const payload = {
-      query,
-      sortKey,
-      categoryFilters,
-      countyFilter: safeCountyFilter,
-      municipalityFilter: safeMunicipalityFilter,
-      tagFilters,
-      tagQuery,
+  const effectiveFilters = useMemo<ActorBrowseFilters>(() => {
+    const nextCounty = lockedCounty ?? county
+    const nextMunicipality = lockedMunicipality ?? municipality
+    const nextCategories = lockedCategories.length > 0 ? lockedCategories : categories
+    return {
+      q: deferredQuery.trim(),
+      categories: nextCategories,
+      county: nextCounty,
+      municipality: nextCounty ? nextMunicipality : null,
+      tags,
       favoriteOnly,
-      userLocation,
-      locationUpdatedAt,
+      sort,
+      page,
+      pageSize: 24,
+      lat: userLocation?.[0] ?? null,
+      lng: userLocation?.[1] ?? null,
+      zoom: null,
+      bounds: null,
     }
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
   }, [
-    categoryFilters,
+    categories,
+    county,
+    deferredQuery,
     favoriteOnly,
-    hasRestoredState,
-    locationUpdatedAt,
-    query,
-    safeCountyFilter,
-    safeMunicipalityFilter,
-    sortKey,
-    tagFilters,
-    tagQuery,
+    lockedCategories,
+    lockedCounty,
+    lockedMunicipality,
+    municipality,
+    page,
+    sort,
+    tags,
     userLocation,
   ])
 
+  const requestKey = useMemo(() => buildActorBrowseSearchParams(effectiveFilters).toString(), [effectiveFilters])
+
   useEffect(() => {
-    if (!syncToUrl || !hasRestoredState) return
-    const params = new URLSearchParams()
-    const trimmedQuery = query.trim()
-    if (trimmedQuery) params.set("q", trimmedQuery)
-    if (categoryFilters.length === 1) params.set("category", categoryFilters[0])
-    if (safeCountyFilter) params.set("county", safeCountyFilter)
-    if (safeCountyFilter && safeMunicipalityFilter) params.set("municipality", safeMunicipalityFilter)
-    if (typeof window === "undefined") return
-    const nextQuery = params.toString()
-    const currentQuery = window.location.search.startsWith("?")
-      ? window.location.search.slice(1)
-      : window.location.search
-    if (currentQuery === nextQuery) return
-    const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname
+    if (!syncToUrl) return
+    const params = buildActorBrowseSearchParams({
+      ...effectiveFilters,
+      categories: lockedCategories.length > 0 ? [] : effectiveFilters.categories,
+      county: lockedCounty ? null : effectiveFilters.county,
+      municipality: lockedMunicipality ? null : effectiveFilters.municipality,
+      page: 1,
+    })
+    const nextUrl = params.size > 0 ? `${pathname}?${params.toString()}` : pathname
     startTransition(() => {
       router.replace(nextUrl, { scroll: false })
     })
   }, [
-    categoryFilters,
-    hasRestoredState,
+    effectiveFilters.categories,
+    effectiveFilters.county,
+    effectiveFilters.favoriteOnly,
+    effectiveFilters.municipality,
+    effectiveFilters.q,
+    effectiveFilters.sort,
+    effectiveFilters.tags,
+    lockedCategories.length,
+    lockedCounty,
+    lockedMunicipality,
     pathname,
-    query,
     router,
-    safeCountyFilter,
-    safeMunicipalityFilter,
     syncToUrl,
   ])
 
   useEffect(() => {
-    if (!isSignedIn) {
-      setFavoriteIds(new Set())
-      setFavoritesLoaded(true)
-      return
-    }
-    let active = true
-    const loadFavorites = async () => {
+    if (requestKey === lastRequestKeyRef.current) return
+    lastRequestKeyRef.current = requestKey
+
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+    setLoading(true)
+    setError(null)
+
+    const load = async () => {
       try {
-        const response = await fetch("/api/public/favorites")
-        if (!response.ok) return
-        const data = (await response.json()) as Array<{ actorId: string }>
-        if (!active) return
-        setFavoriteIds(new Set(data.map((item) => item.actorId)))
+        const response = await fetch(`/api/browse/actors?${requestKey}`, {
+          signal: controller.signal,
+        })
+        if (!response.ok) {
+          const payload = (await response.json().catch(() => null)) as { error?: string } | null
+          throw new Error(payload?.error ?? 'Kunne ikke hente aktører.')
+        }
+
+        const payload = (await response.json()) as ActorBrowseResponse
+        setItems((current) => (effectiveFilters.page > 1 ? [...current, ...payload.items] : payload.items))
+        setTotal(payload.total)
+        setHasMore(payload.hasMore)
+        setPage(payload.page)
+        setFacets(payload.facets)
+      } catch (fetchError) {
+        if (controller.signal.aborted) return
+        setError(fetchError instanceof Error ? fetchError.message : 'Kunne ikke hente aktører.')
       } finally {
-        if (active) setFavoritesLoaded(true)
+        if (!controller.signal.aborted) {
+          setLoading(false)
+        }
       }
     }
-    void loadFavorites()
-    return () => {
-      active = false
-    }
-  }, [isSignedIn])
 
-  const toggleFavorite = async (actorId: string) => {
-    if (!isSignedIn) {
-      window.location.href = "/auth/sign-in"
+    void load()
+
+    return () => {
+      controller.abort()
+    }
+  }, [effectiveFilters.page, requestKey])
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort()
+    }
+  }, [])
+
+  const filteredTagOptions = useMemo(() => {
+    const normalizedQuery = normalizeText(tagQuery.trim())
+    if (!normalizedQuery) return facets.tags
+    return facets.tags.filter((option) => normalizeText(option.tag).includes(normalizedQuery))
+  }, [facets.tags, tagQuery])
+
+  const activeFilterCount =
+    categories.length + tags.length + (favoriteOnly ? 1 : 0) + (county ? 1 : 0) + (municipality ? 1 : 0)
+
+  const hasAnyFilter = activeFilterCount > 0 || Boolean(query.trim())
+  const canSelectCounty = enableGeographyFilters && !lockedCounty
+  const canSelectMunicipality = enableGeographyFilters && !lockedMunicipality && Boolean(lockedCounty ?? county)
+  const canSelectCategories = lockedCategories.length === 0
+
+  const setFiltersAndResetPage = (updater: () => void) => {
+    updater()
+    setPage(1)
+  }
+
+  const requestLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('Geolokasjon er ikke tilgjengelig.')
       return
     }
-    const isFavorite = favoriteIds.has(actorId)
-    setFavoriteIds((prev) => {
-      const next = new Set(prev)
-      if (isFavorite) next.delete(actorId)
-      else next.add(actorId)
-      return next
-    })
-    const response = isFavorite
-      ? await fetch(`/api/public/favorites/${actorId}`, { method: "DELETE" })
-      : await fetch("/api/public/favorites", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ actorId }),
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocationError(null)
+        setFiltersAndResetPage(() => {
+          setUserLocation([position.coords.latitude, position.coords.longitude])
         })
-    if (!response.ok) {
-      setFavoriteIds((prev) => {
-        const next = new Set(prev)
-        if (isFavorite) next.add(actorId)
-        else next.delete(actorId)
-        return next
-      })
+      },
+      () => {
+        setLocationError('Kunne ikke hente posisjon.')
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    )
+  }
+
+  const toggleCategory = (category: ActorCategory) => {
+    setFiltersAndResetPage(() => {
+      setCategories((current) =>
+        current.includes(category) ? current.filter((entry) => entry !== category) : [...current, category],
+      )
+    })
+  }
+
+  const toggleTag = (tag: string) => {
+    setFiltersAndResetPage(() => {
+      setTags((current) => (current.includes(tag) ? current.filter((entry) => entry !== tag) : [...current, tag]))
+    })
+  }
+
+  const clearFilters = () => {
+    setQuery('')
+    setSort('default')
+    setCategories(lockedCategories.length > 0 ? lockedCategories : [])
+    setCounty(lockedCounty)
+    setMunicipality(lockedMunicipality)
+    setTags([])
+    setFavoriteOnly(false)
+    setPage(1)
+  }
+
+  const toggleFavorite = async (actorId: string) => {
+    const actor = items.find((item) => item.id === actorId)
+    if (!actor || !isSignedIn) return
+
+    const nextFavorite = !actor.isFavorite
+    setItems((current) =>
+      current
+        .map((item) => (item.id === actorId ? { ...item, isFavorite: nextFavorite } : item))
+        .filter((item) => !(favoriteOnly && item.id === actorId && !nextFavorite)),
+    )
+    if (favoriteOnly && !nextFavorite) {
+      setTotal((current) => Math.max(0, current - 1))
+    }
+
+    try {
+      const response = await fetch(
+        nextFavorite ? '/api/public/favorites' : `/api/public/favorites/${actorId}`,
+        nextFavorite
+          ? {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ actorId }),
+            }
+          : {
+              method: 'DELETE',
+            },
+      )
+
+      if (!response.ok) {
+        throw new Error('Kunne ikke oppdatere favoritt.')
+      }
+    } catch {
+      setItems((current) =>
+        current.map((item) => (item.id === actorId ? { ...item, isFavorite: !nextFavorite } : item)),
+      )
     }
   }
 
-  const desktopGridClassName = enableGeographyFilters
-    ? "hidden gap-3 md:grid xl:grid-cols-[minmax(0,1fr)_180px_180px_180px_auto_auto] xl:items-center"
-    : "hidden gap-3 md:grid lg:grid-cols-[minmax(0,1fr)_180px_auto_auto] lg:items-center"
-
-  const searchField = (
-    <div className="relative">
-      <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-      <Input
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Søk etter aktører, tagger eller adresse"
-        className="h-10 rounded-[18px] border-border/70 bg-background pl-9 pr-10 shadow-none md:h-11 md:rounded-xl"
-      />
-      {query && (
-        <button
-          type="button"
-          onClick={() => setQuery("")}
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition hover:text-foreground"
-          aria-label="Fjern søk"
-        >
-          <X className="size-3" />
-        </button>
-      )}
-    </div>
-  )
-
-  const filterSections = (showGeographyInPanel: boolean) => (
-    <div className="space-y-4">
-      {showGeographyInPanel && enableGeographyFilters ? (
-        <>
-          <div className="space-y-3">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Geografi</p>
-              <Select
-                value={safeCountyFilter || ALL_COUNTIES}
-                onValueChange={(value) => {
-                  setCountyFilter(value === ALL_COUNTIES ? "" : value)
-                  setMunicipalityFilter("")
-                }}
-              >
-                <SelectTrigger className="mt-2 h-11 w-full rounded-xl">
-                  <SelectValue placeholder="Fylke" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={ALL_COUNTIES}>Alle fylker</SelectItem>
-                  {countyOptions.map((option) => (
-                    <SelectItem key={option.slug} value={option.slug}>
-                      {option.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Select
-                value={safeMunicipalityFilter || ALL_MUNICIPALITIES}
-                onValueChange={(value) => setMunicipalityFilter(value === ALL_MUNICIPALITIES ? "" : value)}
-                disabled={!safeCountyFilter || municipalityOptions.length === 0}
-              >
-                <SelectTrigger className="h-11 w-full rounded-xl">
-                  <SelectValue placeholder="Kommune/by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={ALL_MUNICIPALITIES}>Alle kommuner/byer</SelectItem>
-                  {municipalityOptions.map((option) => (
-                    <SelectItem key={option.slug} value={option.slug}>
-                      {option.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <Separator />
-        </>
-      ) : null}
-
-      <div>
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Favoritter</p>
-        <label
-          className={cn(
-            "mt-2 flex items-center gap-2 rounded-xl border px-3 py-3 text-sm transition",
-            favoriteOnly && "border-primary/40 bg-primary/5",
-            !isSignedIn && "opacity-60",
-          )}
-        >
-          <Checkbox
-            checked={favoriteOnly}
-            onCheckedChange={(next) => setFavoriteOnly(Boolean(next))}
-            disabled={!isSignedIn}
-          />
-          <span>Vis bare favoritter</span>
-        </label>
-        {!isSignedIn ? (
-          <p className="mt-2 text-xs text-muted-foreground">Logg inn for å bruke favoritter.</p>
-        ) : null}
-      </div>
-
-      <Separator />
-
-      <div>
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Kategori</p>
-        <div className="mt-2 grid gap-2">
-          {availableCategories.map((category) => {
-            const isChecked = categoryFilters.includes(category)
-            const color = categoryConfig[category]?.color ?? "#64748b"
-            return (
-              <label
-                key={category}
-                className={cn(
-                  "flex items-center gap-2 rounded-xl border px-3 py-3 text-sm transition",
-                  isChecked && "border-primary/40 bg-primary/5",
-                )}
-              >
-                <Checkbox checked={isChecked} onCheckedChange={() => toggleCategory(category)} />
-                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
-                <span className="truncate">{formatCategoryLabel(category)}</span>
-              </label>
-            )
-          })}
-        </div>
-      </div>
-
-      <Separator />
-
-      <div>
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Tagger</p>
-        <Input
-          value={tagQuery}
-          onChange={(event) => setTagQuery(event.target.value)}
-          placeholder="Søk tagger"
-          className="mt-2 h-11 rounded-xl"
-        />
-        <ScrollArea className="mt-2 h-48 pr-3">
-          <div className="grid gap-2">
-            {filteredTagOptions.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Ingen tagger.</p>
-            ) : (
-              filteredTagOptions.map((option) => {
-                const isChecked = tagFilters.includes(option.tag)
-                return (
-                  <label
-                    key={option.tag}
-                    className={cn(
-                      "flex items-center gap-2 rounded-xl border px-3 py-3 text-sm transition",
-                      isChecked && "border-primary/40 bg-primary/5",
-                    )}
-                  >
-                    <Checkbox checked={isChecked} onCheckedChange={() => toggleTag(option.tag)} />
-                    <span className="truncate">{option.tag}</span>
-                    <span className="ml-auto text-xs text-muted-foreground">{option.count}</span>
-                  </label>
-                )
-              })
-            )}
-          </div>
-        </ScrollArea>
-      </div>
-    </div>
-  )
+  const displayedItems = useMemo(() => {
+    if (!userLocation || effectiveFilters.sort !== 'distance') return items
+    return [...items].sort(
+      (left, right) =>
+        getDistanceKm(userLocation, [left.lat, left.lng]) - getDistanceKm(userLocation, [right.lat, right.lng]),
+    )
+  }, [effectiveFilters.sort, items, userLocation])
 
   return (
-    <div className="space-y-5 md:space-y-6">
-      <div className="rounded-[26px] border border-border/60 bg-card/80 p-2.5 shadow-sm md:hidden">
-        <div className="space-y-2.5">
-          {searchField}
-          <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
-            <SelectTrigger className="h-10 w-full rounded-[18px]">
-              <SelectValue placeholder="Sorter" />
+    <div className='grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start'>
+      <aside className='space-y-4 rounded-2xl border border-border/60 bg-card/40 p-4 lg:sticky lg:top-20 lg:self-start'>
+        <div className='space-y-2'>
+          <div className='relative'>
+            <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+            <Input
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value)
+                setPage(1)
+              }}
+              placeholder='Søk etter navn, sted eller kategori'
+              className='pl-9'
+            />
+          </div>
+          <Select
+            value={sort}
+            onValueChange={(value) =>
+              setFiltersAndResetPage(() => {
+                setSort(value as ActorSortKey)
+              })
+            }
+          >
+            <SelectTrigger className='w-full'>
+              <SelectValue placeholder='Sorter' />
             </SelectTrigger>
             <SelectContent>
               {sortOptions.map((option) => (
@@ -643,395 +364,213 @@ export function ActorsExplorer({
               ))}
             </SelectContent>
           </Select>
-
-          <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" className="h-10 gap-2 rounded-[18px] text-sm" onClick={requestLocation}>
-              <Crosshair className="size-4" />
-              {mapCopy.nearMeLabel}
+          {sort === 'distance' && !userLocation ? (
+            <Button type='button' variant='outline' className='w-full justify-start gap-2' onClick={requestLocation}>
+              <Crosshair className='h-4 w-4' />
+              Bruk posisjonen min
             </Button>
+          ) : null}
+          {locationError ? <p className='text-xs text-destructive'>{locationError}</p> : null}
+        </div>
 
-            <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="h-10 justify-between gap-2 rounded-[18px] text-sm">
-                  <span className="inline-flex items-center gap-2">
-                    <SlidersHorizontal className="size-4" />
-                    Filtre
-                  </span>
-                  {activeFilterCount > 0 ? (
-                    <Badge variant="secondary" className="rounded-full px-2 py-0 text-xs">
-                      {activeFilterCount}
-                    </Badge>
-                  ) : null}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[86dvh] rounded-t-[28px] border-x-0 border-b-0 p-0">
-                <SheetHeader className="border-b px-5 pb-4 pt-5 text-left">
-                  <SheetTitle>Filtrer aktører</SheetTitle>
-                  <SheetDescription>
-                    Bruk geografi, kategorier, tagger og favoritter for å snevre inn resultatene.
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] pt-4">
-                  <div className="mb-4 flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{activeFilterCount} aktive filtre</span>
-                    {activeFilterCount > 0 ? (
-                      <Button variant="ghost" size="sm" onClick={clearFilterSelections}>
-                        Nullstill
-                      </Button>
-                    ) : null}
-                  </div>
-                  {filterSections(true)}
-                </div>
-              </SheetContent>
-            </Sheet>
+        <Separator />
+
+        <div className='space-y-3'>
+          <div className='flex items-center justify-between'>
+            <h2 className='text-sm font-semibold'>Filtre</h2>
+            {hasAnyFilter ? (
+              <Button type='button' variant='ghost' size='sm' onClick={clearFilters}>
+                Nullstill
+              </Button>
+            ) : null}
           </div>
-        </div>
-      </div>
 
-      <div className={desktopGridClassName}>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Søk etter aktører, tagger eller adresse"
-            className="pl-9 pr-10"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition hover:text-foreground"
-              aria-label="Fjern søk"
+          {canSelectCounty ? (
+            <Select
+              value={county ?? ALL_COUNTIES}
+              onValueChange={(value) =>
+                setFiltersAndResetPage(() => {
+                  setCounty(value === ALL_COUNTIES ? null : value)
+                  setMunicipality(null)
+                })
+              }
             >
-              <X className="size-3" />
-            </button>
-          )}
-        </div>
+              <SelectTrigger className='w-full'>
+                <SelectValue placeholder='Hele Norge' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_COUNTIES}>Hele Norge</SelectItem>
+                {facets.counties.map((option) => (
+                  <SelectItem key={option.slug} value={option.slug}>
+                    {option.name} ({option.count})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
 
-        {enableGeographyFilters ? (
-          <Select
-            value={safeCountyFilter || ALL_COUNTIES}
-            onValueChange={(value) => {
-              setCountyFilter(value === ALL_COUNTIES ? "" : value)
-              setMunicipalityFilter("")
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Fylke" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL_COUNTIES}>Alle fylker</SelectItem>
-              {countyOptions.map((option) => (
-                <SelectItem key={option.slug} value={option.slug}>
-                  {option.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : null}
+          {canSelectMunicipality ? (
+            <Select
+              value={municipality ?? ALL_MUNICIPALITIES}
+              onValueChange={(value) =>
+                setFiltersAndResetPage(() => {
+                  setMunicipality(value === ALL_MUNICIPALITIES ? null : value)
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder='Alle kommuner/byer' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_MUNICIPALITIES}>Alle kommuner/byer</SelectItem>
+                {facets.municipalities.map((option) => (
+                  <SelectItem key={option.slug} value={option.slug}>
+                    {option.name} ({option.count})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
 
-        {enableGeographyFilters ? (
-          <Select
-            value={safeMunicipalityFilter || ALL_MUNICIPALITIES}
-            onValueChange={(value) => setMunicipalityFilter(value === ALL_MUNICIPALITIES ? "" : value)}
-            disabled={!safeCountyFilter || municipalityOptions.length === 0}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Kommune/by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL_MUNICIPALITIES}>Alle kommuner/byer</SelectItem>
-              {municipalityOptions.map((option) => (
-                <SelectItem key={option.slug} value={option.slug}>
-                  {option.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : null}
-
-        <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Sorter" />
-          </SelectTrigger>
-          <SelectContent>
-            {sortOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Button variant="outline" className="w-full gap-2 xl:w-auto" onClick={requestLocation}>
-          <Crosshair className="size-4" />
-          {mapCopy.nearMeLabel}
-        </Button>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-full justify-between gap-2 xl:w-auto">
-              <span className="inline-flex items-center gap-2">
-                <SlidersHorizontal className="size-4" />
-                Filtre
-              </span>
-              {activeFilterCount > 0 ? (
-                <Badge variant="secondary" className="rounded-full px-2 py-0 text-xs">
-                  {activeFilterCount}
-                </Badge>
-              ) : null}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[320px] p-4" align="end">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Filtre</span>
-              {activeFilterCount > 0 ? (
-                <Button variant="ghost" size="sm" onClick={clearFilterSelections}>
-                  Nullstill
-                </Button>
-              ) : null}
-            </div>
-
-            <div className="mt-4 space-y-4">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Favoritter</p>
-                <label
-                  className={cn(
-                    "mt-2 flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition",
-                    favoriteOnly && "border-primary/40 bg-primary/5",
-                    !isSignedIn && "opacity-60",
-                  )}
-                >
-                  <Checkbox
-                    checked={favoriteOnly}
-                    onCheckedChange={(next) => setFavoriteOnly(Boolean(next))}
-                    disabled={!isSignedIn}
-                  />
-                  <span>Vis bare favoritter</span>
-                </label>
-                {!isSignedIn ? (
-                  <p className="mt-2 text-xs text-muted-foreground">Logg inn for å bruke favoritter.</p>
-                ) : null}
+          {canSelectCategories ? (
+            <div className='space-y-2'>
+              <div className='flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+                <SlidersHorizontal className='h-3.5 w-3.5' />
+                Kategorier
               </div>
-
-              <Separator />
-
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Kategori</p>
-                <div className="mt-2 grid gap-2">
-                  {availableCategories.map((category) => {
-                    const isChecked = categoryFilters.includes(category)
-                    const color = categoryConfig[category]?.color ?? "#64748b"
-                    return (
-                      <label
-                        key={category}
-                        className={cn(
-                          "flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition",
-                          isChecked && "border-primary/40 bg-primary/5",
-                        )}
-                      >
-                        <Checkbox checked={isChecked} onCheckedChange={() => toggleCategory(category)} />
-                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
-                        <span className="truncate">{formatCategoryLabel(category)}</span>
-                      </label>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Tagger</p>
-                <Input
-                  value={tagQuery}
-                  onChange={(event) => setTagQuery(event.target.value)}
-                  placeholder="Søk tagger"
-                  className="mt-2"
-                />
-                <ScrollArea className="mt-2 h-40 pr-3">
-                  <div className="grid gap-2">
-                    {filteredTagOptions.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">Ingen tagger.</p>
-                    ) : (
-                      filteredTagOptions.map((option) => {
-                        const isChecked = tagFilters.includes(option.tag)
-                        return (
-                          <label
-                            key={option.tag}
-                            className={cn(
-                              "flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition",
-                              isChecked && "border-primary/40 bg-primary/5",
-                            )}
-                          >
-                            <Checkbox checked={isChecked} onCheckedChange={() => toggleTag(option.tag)} />
-                            <span className="truncate">{option.tag}</span>
-                            <span className="ml-auto text-xs text-muted-foreground">{option.count}</span>
-                          </label>
-                        )
-                      })
-                    )}
-                  </div>
-                </ScrollArea>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      {locationError ? <p className="text-sm text-destructive">{locationError}</p> : null}
-      {sortKey === "distance" && !userLocation && !locationError ? (
-        <p className="text-sm text-muted-foreground">Aktivér posisjon i nettleseren for å sortere etter avstand.</p>
-      ) : null}
-
-      <div className="flex flex-col gap-1.5 rounded-2xl border border-border/60 bg-muted/20 px-3.5 py-2.5 text-[13px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:py-3 sm:text-sm">
-        <span>
-          Viser {Math.min(visibleCount, sortedActors.length)} av {sortedActors.length} aktører
-          {hasAnyFilter ? ` (filtrert fra ${actors.length})` : ""}
-        </span>
-        {hasAnyFilter ? (
-          <Button variant="ghost" size="sm" onClick={clearAllFilters}>
-            Nullstill alt
-          </Button>
-        ) : null}
-      </div>
-
-      <AnimatePresence>
-        {activeFilterCount > 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            className="flex flex-wrap gap-1.5"
-          >
-            {favoriteOnly ? (
-              <Badge variant="outline" className="gap-1">
-                Favoritter
-                <button
-                  type="button"
-                  onClick={() => setFavoriteOnly(false)}
-                  className="text-muted-foreground hover:text-foreground"
-                  aria-label="Fjern favoritter"
-                >
-                  <X className="size-3" />
-                </button>
-              </Badge>
-            ) : null}
-            {safeCountyFilter ? (
-              <Badge variant="outline" className="gap-1">
-                {countyOptions.find((option) => option.slug === safeCountyFilter)?.name ?? safeCountyFilter}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCountyFilter("")
-                    setMunicipalityFilter("")
-                  }}
-                  className="text-muted-foreground hover:text-foreground"
-                  aria-label="Fjern fylke"
-                >
-                  <X className="size-3" />
-                </button>
-              </Badge>
-            ) : null}
-            {safeMunicipalityFilter ? (
-              <Badge variant="outline" className="gap-1">
-                {municipalityOptions.find((option) => option.slug === safeMunicipalityFilter)?.name ??
-                  safeMunicipalityFilter}
-                <button
-                  type="button"
-                  onClick={() => setMunicipalityFilter("")}
-                  className="text-muted-foreground hover:text-foreground"
-                  aria-label="Fjern kommune"
-                >
-                  <X className="size-3" />
-                </button>
-              </Badge>
-            ) : null}
-            {categoryFilters.map((category) => (
-              <Badge key={category} variant="outline" className="gap-1">
-                {formatCategoryLabel(category)}
-                <button
-                  type="button"
-                  onClick={() => toggleCategory(category)}
-                  className="text-muted-foreground hover:text-foreground"
-                  aria-label={`Fjern ${formatCategoryLabel(category)}`}
-                >
-                  <X className="size-3" />
-                </button>
-              </Badge>
-            ))}
-            {tagFilters.map((tag) => (
-              <Badge key={tag} variant="outline" className="gap-1">
-                {tag}
-                <button
-                  type="button"
-                  onClick={() => toggleTag(tag)}
-                  className="text-muted-foreground hover:text-foreground"
-                  aria-label={`Fjern ${tag}`}
-                >
-                  <X className="size-3" />
-                </button>
-              </Badge>
-            ))}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-
-      <AnimatePresence mode="wait">
-        {sortedActors.length === 0 ? (
-          <motion.div
-            key="empty"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground"
-          >
-            Ingen aktører matcher valgene dine.
-          </motion.div>
-        ) : (
-          <div className="space-y-5 md:space-y-6">
-            <div className="grid gap-3.5 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
-              <AnimatePresence mode="popLayout">
-                {visibleActors.map((actor) => {
-                  const distanceLabel =
-                    userLocation &&
-                    `${getDistanceKm(userLocation, [actor.lat, actor.lng]).toFixed(1)} ${mapCopy.distanceUnit}`
+              <div className='flex flex-wrap gap-2'>
+                {facets.categories.map((entry) => {
+                  const active = categories.includes(entry.category)
                   return (
-                    <motion.div
-                      key={actor.id}
-                      layout
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -12 }}
-                      transition={{ duration: 0.2 }}
+                    <Button
+                      key={entry.category}
+                      type='button'
+                      variant={active ? 'default' : 'outline'}
+                      size='sm'
+                      onClick={() => toggleCategory(entry.category)}
                     >
-                      <ActorCard
-                        actor={actor}
-                        showFavorite={favoritesLoaded}
-                        isFavorite={favoriteIds.has(actor.id)}
-                        onToggleFavorite={toggleFavorite}
-                        distanceLabel={distanceLabel || undefined}
-                      />
-                    </motion.div>
+                      {actorCopy.categoryLabels[entry.category]} ({entry.count})
+                    </Button>
                   )
                 })}
-              </AnimatePresence>
-            </div>
-            {hiddenCount > 0 ? (
-              <div className="flex justify-center">
-                <Button
-                  variant="outline"
-                  className="w-full sm:w-auto"
-                  onClick={() => setVisibleCount((prev) => prev + 24)}
-                >
-                  Vis {Math.min(24, hiddenCount)} til
-                </Button>
               </div>
-            ) : null}
+            </div>
+          ) : null}
+
+          <div className='space-y-2'>
+            <div className='text-xs font-medium uppercase tracking-wide text-muted-foreground'>Tagger</div>
+            <Input value={tagQuery} onChange={(event) => setTagQuery(event.target.value)} placeholder='Søk tagger' />
+            <ScrollArea className='h-48 pr-4'>
+              <div className='grid gap-2'>
+                {filteredTagOptions.length === 0 ? (
+                  <p className='text-sm text-muted-foreground'>Ingen tagger.</p>
+                ) : (
+                  filteredTagOptions.map((option) => {
+                    const checked = tags.includes(option.tag)
+                    return (
+                      <label
+                        key={option.tag}
+                        className={cn(
+                          'flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition',
+                          checked && 'border-primary/40 bg-primary/5',
+                        )}
+                      >
+                        <Checkbox checked={checked} onCheckedChange={() => toggleTag(option.tag)} />
+                        <span className='truncate'>{option.tag}</span>
+                        <span className='ml-auto text-xs text-muted-foreground'>{option.count}</span>
+                      </label>
+                    )
+                  })
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+
+          <label
+            className={cn(
+              'flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition',
+              favoriteOnly && 'border-primary/40 bg-primary/5',
+              !isSignedIn && 'opacity-60',
+            )}
+          >
+            <Checkbox
+              checked={favoriteOnly}
+              onCheckedChange={(next) =>
+                setFiltersAndResetPage(() => {
+                  setFavoriteOnly(Boolean(next))
+                })
+              }
+              disabled={!isSignedIn}
+            />
+            <span>Vis bare favoritter</span>
+          </label>
+          {!isSignedIn ? <p className='text-xs text-muted-foreground'>Logg inn for å bruke favoritter.</p> : null}
+        </div>
+      </aside>
+
+      <section className='space-y-4'>
+        <div className='flex flex-wrap items-center justify-between gap-3'>
+          <div>
+            <h2 className='text-xl font-semibold'>Aktører</h2>
+            <p className='text-sm text-muted-foreground'>
+              {loading && page === 1 ? 'Oppdaterer resultatene...' : `${total} treff`}
+            </p>
+          </div>
+          <div className='flex flex-wrap gap-2'>
+            {county ? <Badge variant='outline'>{county}</Badge> : null}
+            {municipality ? <Badge variant='outline'>{municipality}</Badge> : null}
+            {favoriteOnly ? <Badge variant='outline'>Favoritter</Badge> : null}
+            {tags.map((tag) => (
+              <Badge key={tag} variant='outline' className='gap-1'>
+                {tag}
+                <button type='button' onClick={() => toggleTag(tag)} aria-label={`Fjern ${tag}`}>
+                  <X className='h-3 w-3' />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        {error ? (
+          <div className='rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive'>
+            {error}
+          </div>
+        ) : null}
+
+        {displayedItems.length === 0 && !loading ? (
+          <div className='rounded-2xl border border-dashed border-border/60 bg-muted/20 p-8 text-center text-sm text-muted-foreground'>
+            Ingen aktører matcher søket ditt.
+          </div>
+        ) : (
+          <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3 [content-visibility:auto]'>
+            {displayedItems.map((actor) => {
+              const distanceLabel =
+                userLocation && sort === 'distance'
+                  ? `${getDistanceKm(userLocation, [actor.lat, actor.lng]).toFixed(1)} km`
+                  : undefined
+
+              return (
+                <ActorCard
+                  key={actor.id}
+                  actor={actor}
+                  showFavorite={isSignedIn}
+                  isFavorite={actor.isFavorite}
+                  onToggleFavorite={toggleFavorite}
+                  distanceLabel={distanceLabel}
+                />
+              )
+            })}
           </div>
         )}
-      </AnimatePresence>
+
+        {hasMore ? (
+          <div className='flex justify-center pt-2'>
+            <Button type='button' size='lg' onClick={() => setPage((current) => current + 1)} disabled={loading}>
+              {loading && page > 1 ? 'Laster flere...' : 'Vis til'}
+            </Button>
+          </div>
+        ) : null}
+      </section>
     </div>
   )
 }

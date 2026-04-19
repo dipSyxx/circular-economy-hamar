@@ -1,7 +1,7 @@
 import { revalidateTag } from "next/cache"
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { prepareActorPersistData } from "@/lib/actor-write"
+import { prepareActorPersistData, replaceActorBrowseScopes, replaceActorServiceAreas } from "@/lib/actor-write"
 import { validateActorSubmission, type SubmissionPayload } from "@/lib/actor-submissions"
 import { getPublicUser, jsonError } from "@/app/api/public/_helpers"
 
@@ -55,15 +55,8 @@ export async function POST(request: Request) {
         })
       }
 
-      if (prepared.serviceAreaLinks.length > 0) {
-        await tx.actorServiceArea.createMany({
-          data: prepared.serviceAreaLinks.map((serviceArea) => ({
-            actorId: actor.id,
-            countyId: serviceArea.countyId,
-            municipalityId: serviceArea.municipalityId,
-          })),
-        })
-      }
+      await replaceActorServiceAreas(tx, actor.id, prepared.serviceAreaLinks)
+      await replaceActorBrowseScopes(tx, actor.id, prepared.browseScopes)
 
       await tx.actorSource.createMany({
         data: validated.value.sources.map((source) => ({

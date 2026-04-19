@@ -6,6 +6,8 @@ import { RelatedGuidesSection } from "@/components/guides/related-guides-section
 import { PilotRolloutNote } from "@/components/pilot-rollout-note"
 import { Badge } from "@/components/ui/badge"
 import { actorCopy } from "@/content/no"
+import { getBrowseResponse } from "@/lib/actors/browse-query"
+import { parseActorBrowseFilters, searchParamsFromObject } from "@/lib/actors/search-params"
 import { categoryOrder } from "@/lib/categories"
 import { getArticlesForCategory } from "@/lib/editorial"
 import { getGuidesForCategory } from "@/lib/guides"
@@ -14,6 +16,7 @@ import { getSiteUrl } from "@/lib/seo"
 
 type CategoryPageProps = {
   params: Promise<{ category: string }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
 export async function generateStaticParams() {
@@ -32,11 +35,17 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   }
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const { category } = await params
   if (!categoryOrder.includes(category as (typeof categoryOrder)[number])) notFound()
+  const resolvedSearchParams = await searchParams
 
   const actors = await getActorsByCategory(category as (typeof categoryOrder)[number])
+  const initialFilters = {
+    ...parseActorBrowseFilters(searchParamsFromObject(resolvedSearchParams ?? {}), { pageSize: 24 }),
+    categories: [category as (typeof categoryOrder)[number]],
+  }
+  const initialData = await getBrowseResponse(initialFilters)
   const label = actorCopy.categoryLongLabels[category as keyof typeof actorCopy.categoryLongLabels] ?? category
   const relatedGuides = getGuidesForCategory(category as (typeof categoryOrder)[number])
   const relatedArticles = await getArticlesForCategory(category as (typeof categoryOrder)[number])
@@ -61,7 +70,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         description="Redaksjonelle artikler som utdyper hvordan denne kategorien fungerer lokalt og nasjonalt."
         articles={relatedArticles}
       />
-      <ActorsExplorer actors={actors} />
+      <ActorsExplorer
+        initialData={initialData}
+        initialFilters={initialFilters}
+        syncToUrl
+        lockedCategories={[category as (typeof categoryOrder)[number]]}
+      />
     </div>
   )
 }

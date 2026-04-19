@@ -4,6 +4,7 @@ import * as SheetPrimitive from '@radix-ui/react-dialog'
 import { XIcon } from 'lucide-react'
 import * as React from 'react'
 
+import { MODAL_LAYER_CLASS } from '@/lib/ui/layers'
 import { cn } from '@/lib/utils'
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
@@ -27,7 +28,8 @@ function SheetOverlay({ className, ...props }: React.ComponentProps<typeof Sheet
     <SheetPrimitive.Overlay
       data-slot='sheet-overlay'
       className={cn(
-        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50',
+        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 bg-black/50',
+        MODAL_LAYER_CLASS,
         className,
       )}
       {...props}
@@ -48,7 +50,8 @@ const SheetContent = React.forwardRef<
         ref={ref}
         data-slot='sheet-content'
         className={cn(
-          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex max-h-[calc(100dvh-1rem)] flex-col gap-4 overflow-hidden shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 [&>[data-slot=sheet-header]]:shrink-0 [&>[data-slot=sheet-footer]]:shrink-0 [&>:not([data-slot=sheet-header]):not([data-slot=sheet-footer]):not([data-slot=sheet-close])]:min-h-0 [&>[data-slot=sheet-header]+:not([data-slot=sheet-footer]):not([data-slot=sheet-close])]:overflow-y-auto [&>:first-child:not([data-slot=sheet-header]):not([data-slot=sheet-footer]):not([data-slot=sheet-close])]:overflow-y-auto',
+          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed flex max-h-[calc(100dvh-1rem)] flex-col gap-4 overflow-hidden shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 [&>[data-slot=sheet-header]]:shrink-0 [&>[data-slot=sheet-footer]]:shrink-0 [&>:not([data-slot=sheet-header]):not([data-slot=sheet-footer]):not([data-slot=sheet-close])]:min-h-0 [&>[data-slot=sheet-header]+:not([data-slot=sheet-footer]):not([data-slot=sheet-close])]:overflow-y-auto [&>:first-child:not([data-slot=sheet-header]):not([data-slot=sheet-footer]):not([data-slot=sheet-close])]:overflow-y-auto',
+          MODAL_LAYER_CLASS,
           side === 'right' &&
             'data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm',
           side === 'left' &&

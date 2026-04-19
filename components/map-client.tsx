@@ -1,16 +1,17 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import type { Actor } from "@/lib/data"
+import type { ActorBrowseFilters, ActorMapSummary } from "@/lib/actors/types"
 
 const MapComponent = dynamic(() => import("@/components/map-component").then((mod) => mod.MapComponent), {
   ssr: false,
 })
 
 interface MapClientProps {
-  actors: Actor[]
+  initialSummary: ActorMapSummary
+  initialFilters: ActorBrowseFilters
 }
 
-export function MapClient({ actors }: MapClientProps) {
-  return <MapComponent actors={actors} />
+export function MapClient({ initialSummary, initialFilters }: MapClientProps) {
+  return <MapComponent initialSummary={initialSummary} initialFilters={initialFilters} />
 }

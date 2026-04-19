@@ -2,9 +2,8 @@ import { ActorSubmissionDialog } from "@/components/actor-submission-dialog"
 import { ActorsExplorer } from "@/components/actors-explorer"
 import { Badge } from "@/components/ui/badge"
 import { pageCopy } from "@/content/no"
-import { getAvailableCountyOptions, getAvailableMunicipalityOptions } from "@/lib/actor-scope"
-import { categoryOrder } from "@/lib/categories"
-import { getActors } from "@/lib/public-data"
+import { getBrowseResponse } from "@/lib/actors/browse-query"
+import { parseActorBrowseFilters, searchParamsFromObject } from "@/lib/actors/search-params"
 
 type ActorsPageProps = {
   searchParams: Promise<{
@@ -15,32 +14,10 @@ type ActorsPageProps = {
   }>
 }
 
-const pickParam = (value?: string | string[]) => {
-  if (Array.isArray(value)) return value[0] ?? ""
-  return value ?? ""
-}
-
 export default async function ActorsPage({ searchParams }: ActorsPageProps) {
   const resolvedSearchParams = await searchParams
-  const actors = await getActors()
-  const initialQuery = pickParam(resolvedSearchParams.q).trim()
-  const requestedCategory = pickParam(resolvedSearchParams.category).trim()
-  const requestedCounty = pickParam(resolvedSearchParams.county).trim()
-  const requestedMunicipality = pickParam(resolvedSearchParams.municipality).trim()
-
-  const initialCategory = categoryOrder.includes(requestedCategory as (typeof categoryOrder)[number])
-    ? (requestedCategory as (typeof categoryOrder)[number])
-    : null
-  const initialCounty = getAvailableCountyOptions(actors).some((county) => county.slug === requestedCounty)
-    ? requestedCounty
-    : null
-  const initialMunicipality =
-    initialCounty &&
-    getAvailableMunicipalityOptions(actors, initialCounty).some(
-      (municipality) => municipality.slug === requestedMunicipality,
-    )
-      ? requestedMunicipality
-      : null
+  const initialFilters = parseActorBrowseFilters(searchParamsFromObject(resolvedSearchParams), { pageSize: 24 })
+  const initialData = await getBrowseResponse(initialFilters)
 
   return (
     <div>
@@ -85,13 +62,10 @@ export default async function ActorsPage({ searchParams }: ActorsPageProps) {
       <section className="py-5 md:py-12">
         <div className="container mx-auto px-4">
           <ActorsExplorer
-            actors={actors}
+            initialData={initialData}
+            initialFilters={initialFilters}
             enableGeographyFilters
             syncToUrl
-            initialQuery={initialQuery}
-            initialCategory={initialCategory}
-            initialCounty={initialCounty}
-            initialMunicipality={initialMunicipality}
           />
         </div>
       </section>

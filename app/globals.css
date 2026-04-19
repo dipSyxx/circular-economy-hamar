@@ -120,6 +120,7 @@
 @layer base {
   html {
     overflow-x: clip;
+    scrollbar-gutter: stable;
   }
   * {
     @apply border-border outline-ring/50;
@@ -127,9 +128,15 @@
   body {
     min-height: 100dvh;
     overflow-x: clip;
+    scrollbar-gutter: stable;
     -webkit-tap-highlight-color: transparent;
     @apply bg-background text-foreground;
   }
+  html body[data-scroll-locked][data-scroll-locked] {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
+  [data-slot='select-content'],
   [data-slot='dialog-content'],
   [data-slot='sheet-content'],
   [data-slot='popover-content'] {

@@ -2,14 +2,20 @@ import { ListChecks, MapPin, Route } from "lucide-react"
 import { pageCopy } from "@/content/no"
 import { MapClient } from "@/components/map-client"
 import { Badge } from "@/components/ui/badge"
-import { getActors } from "@/lib/public-data"
+import { getActorMapSummary } from "@/lib/actors/map-query"
+import { parseActorBrowseFilters, searchParamsFromObject } from "@/lib/actors/search-params"
 
-export default async function MapPage() {
-  const actors = await getActors()
-  const plottedCount = actors.filter(
-    (a) => Number.isFinite(a.lat) && Number.isFinite(a.lng),
-  ).length
-  const statsText = pageCopy.map.statsTemplate.replace("{count}", String(plottedCount))
+type MapPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}
+
+export default async function MapPage({ searchParams }: MapPageProps) {
+  const summary = await getActorMapSummary()
+  const resolvedSearchParams = await searchParams
+  const initialFilters = parseActorBrowseFilters(searchParamsFromObject(resolvedSearchParams ?? {}), {
+    pageSize: 20,
+  })
+  const statsText = pageCopy.map.statsTemplate.replace("{count}", String(summary.plottedCount))
   const hintItems = [
     { icon: ListChecks, text: pageCopy.map.hintFilters },
     { icon: MapPin, text: pageCopy.map.hintMarkers },
@@ -63,7 +69,7 @@ export default async function MapPage() {
 
       <section className="py-3 md:py-8">
         <div className="container mx-auto px-4">
-          <MapClient actors={actors} />
+          <MapClient initialSummary={summary} initialFilters={initialFilters} />
         </div>
       </section>
     </div>

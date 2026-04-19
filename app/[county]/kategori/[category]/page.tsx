@@ -6,6 +6,8 @@ import { RelatedGuidesSection } from "@/components/guides/related-guides-section
 import { PilotRolloutNote } from "@/components/pilot-rollout-note"
 import { Badge } from "@/components/ui/badge"
 import { actorCopy } from "@/content/no"
+import { getBrowseResponse } from "@/lib/actors/browse-query"
+import { parseActorBrowseFilters, searchParamsFromObject } from "@/lib/actors/search-params"
 import { categoryOrder } from "@/lib/categories"
 import { getArticlesForCategory } from "@/lib/editorial"
 import { getGuidesForCategory } from "@/lib/guides"
@@ -16,6 +18,7 @@ import { getSiteUrl } from "@/lib/seo"
 
 type CountyCategoryPageProps = {
   params: Promise<{ county: string; category: string }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
 export async function generateStaticParams() {
@@ -46,15 +49,22 @@ export async function generateMetadata({ params }: CountyCategoryPageProps): Pro
   }
 }
 
-export default async function CountyCategoryPage({ params }: CountyCategoryPageProps) {
+export default async function CountyCategoryPage({ params, searchParams }: CountyCategoryPageProps) {
   const { county, category } = await params
   const countyMeta = getCountyBySlug(county)
   if (!countyMeta || !categoryOrder.includes(category as (typeof categoryOrder)[number])) notFound()
+  const resolvedSearchParams = await searchParams
 
   const [countyActors, actors] = await Promise.all([
     getActorsByCounty(countyMeta.slug),
     getActorsByCountyAndCategory(countyMeta.slug, category as (typeof categoryOrder)[number]),
   ])
+  const initialFilters = {
+    ...parseActorBrowseFilters(searchParamsFromObject(resolvedSearchParams ?? {}), { pageSize: 24 }),
+    county: countyMeta.slug,
+    categories: [category as (typeof categoryOrder)[number]],
+  }
+  const initialData = await getBrowseResponse(initialFilters)
   const label = actorCopy.categoryLongLabels[category as keyof typeof actorCopy.categoryLongLabels] ?? category
   const relatedGuides = getGuidesForCategory(
     category as (typeof categoryOrder)[number],
@@ -102,7 +112,14 @@ export default async function CountyCategoryPage({ params }: CountyCategoryPageP
         description="Artiklene under prioriterer denne kategorien først og bruker fylket som lokal kontekst."
         articles={relatedArticles}
       />
-      <ActorsExplorer actors={actors} />
+      <ActorsExplorer
+        initialData={initialData}
+        initialFilters={initialFilters}
+        syncToUrl
+        enableGeographyFilters
+        lockedCounty={countyMeta.slug}
+        lockedCategories={[category as (typeof categoryOrder)[number]]}
+      />
     </div>
   )
 }

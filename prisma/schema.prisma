@@ -370,6 +370,7 @@ model Actor {
   category        ActorCategory
   description     String
   longDescription String       @map("long_description")
+  searchText      String       @default("") @map("search_text")
   address         String
   postalCode      String?      @map("postal_code")
   country         String       @default("Norway")
@@ -413,6 +414,7 @@ model Actor {
   sources        ActorSource[]
   favorites      ActorFavorite[]
   serviceAreas   ActorServiceArea[]
+  browseScopes   ActorBrowseScope[]
   correctionSuggestions ActorCorrectionSuggestion[]
   matchedImportRows     ActorImportRow[]
   verificationTasks     ActorVerificationTask[]
@@ -422,6 +424,7 @@ model Actor {
   @@index([status, baseCountyId, baseMunicipalityId, category])
   @@index([status, city, category])
   @@index([status, nationwide])
+  @@index([status, lat, lng])
   @@index([createdById, createdAt])
   @@map("actors")
 }
@@ -489,6 +492,22 @@ model ActorServiceArea {
   @@index([countyId])
   @@index([municipalityId])
   @@map("actor_service_areas")
+}
+
+model ActorBrowseScope {
+  id               String   @id @default(cuid())
+  actorId          String   @map("actor_id")
+  countySlug       String   @map("county_slug")
+  municipalitySlug String?  @map("municipality_slug")
+  priority         Int
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  actor Actor @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId])
+  @@index([countySlug, municipalitySlug, priority])
+  @@map("actor_browse_scopes")
 }
 
 model ActorImportBatch {

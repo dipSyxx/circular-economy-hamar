@@ -7,6 +7,8 @@ import { PilotRolloutNote } from "@/components/pilot-rollout-note"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { actorCopy } from "@/content/no"
+import { getBrowseResponse } from "@/lib/actors/browse-query"
+import { parseActorBrowseFilters, searchParamsFromObject } from "@/lib/actors/search-params"
 import { categoryOrder } from "@/lib/categories"
 import { getArticlesForMunicipality } from "@/lib/editorial"
 import { getGuidesForMunicipality } from "@/lib/guides"
@@ -17,6 +19,7 @@ import { getSiteUrl } from "@/lib/seo"
 
 type MunicipalityPageProps = {
   params: Promise<{ county: string; municipality: string }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
 export async function generateStaticParams() {
@@ -58,16 +61,23 @@ export async function generateMetadata({ params }: MunicipalityPageProps): Promi
   }
 }
 
-export default async function MunicipalityPage({ params }: MunicipalityPageProps) {
+export default async function MunicipalityPage({ params, searchParams }: MunicipalityPageProps) {
   const { county, municipality } = await params
   const countyMeta = getCountyBySlug(county)
   if (!countyMeta) notFound()
   const municipalityMeta = getMunicipalityBySlug(municipality, countyMeta.slug)
+  const resolvedSearchParams = await searchParams
 
   const [countyActors, actors] = await Promise.all([
     getActorsByCounty(countyMeta.slug),
     getActorsByMunicipality(countyMeta.slug, municipality),
   ])
+  const initialFilters = {
+    ...parseActorBrowseFilters(searchParamsFromObject(resolvedSearchParams ?? {}), { pageSize: 24 }),
+    county: countyMeta.slug,
+    municipality,
+  }
+  const initialData = await getBrowseResponse(initialFilters)
   if (!municipalityMeta && actors.length === 0) notFound()
 
   const municipalityName = municipalityMeta?.name ?? actors[0]?.municipality ?? actors[0]?.city ?? municipality
@@ -137,7 +147,14 @@ export default async function MunicipalityPage({ params }: MunicipalityPageProps
         articles={relatedArticles}
       />
 
-      <ActorsExplorer actors={actors} />
+      <ActorsExplorer
+        initialData={initialData}
+        initialFilters={initialFilters}
+        syncToUrl
+        enableGeographyFilters
+        lockedCounty={countyMeta.slug}
+        lockedMunicipality={municipality}
+      />
     </div>
   )
 }

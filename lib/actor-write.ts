@@ -2,6 +2,7 @@ import { Prisma, type ActorCategory, type ItemType, type ProblemType } from "@pr
 import { prisma } from "@/lib/prisma"
 import { validateRepairServiceAgainstScope } from "@/lib/category-repair-scope"
 import { categoryRules, supportsRepairServices } from "@/lib/categories"
+import { buildActorBrowseScopes, buildActorSearchText, type ActorBrowseScopeRow } from "@/lib/actors/indexing"
 import { type ActorGeoInput } from "@/lib/geo"
 import {
   resolveCanonicalActorGeo,
@@ -164,6 +165,38 @@ export const prepareActorPersistData = async (
       .filter((municipality) => municipality.id !== municipalityRecord.id)
       .map((municipality) => ({ countyId: null, municipalityId: municipality.id })),
   ]
+  const serviceAreaCountySlugs = serviceAreaCountyRecords.map((county) => county.slug)
+  const serviceAreaMunicipalitySlugs = serviceAreaMunicipalityRecords.map((municipality) => municipality.slug)
+  const searchText = buildActorSearchText({
+    name: input.name.trim(),
+    category: input.category,
+    description: input.description.trim(),
+    address: input.address?.trim() ?? "",
+    county: normalizedGeo.county,
+    countySlug: normalizedGeo.countySlug,
+    municipality: normalizedGeo.municipality,
+    municipalitySlug: normalizedGeo.municipalitySlug,
+    city: normalizedGeo.city,
+    tags: toStringArray(input.tags),
+    nationwide: Boolean(input.nationwide),
+    serviceAreaCountySlugs,
+    serviceAreaMunicipalitySlugs,
+  })
+  const browseScopes = buildActorBrowseScopes({
+    name: input.name.trim(),
+    category: input.category,
+    description: input.description.trim(),
+    address: input.address?.trim() ?? "",
+    county: normalizedGeo.county,
+    countySlug: normalizedGeo.countySlug,
+    municipality: normalizedGeo.municipality,
+    municipalitySlug: normalizedGeo.municipalitySlug,
+    city: normalizedGeo.city,
+    tags: toStringArray(input.tags),
+    nationwide: Boolean(input.nationwide),
+    serviceAreaCountySlugs,
+    serviceAreaMunicipalitySlugs,
+  })
 
   return {
     actorData: {
@@ -173,6 +206,7 @@ export const prepareActorPersistData = async (
       description: input.description.trim(),
       longDescription: input.longDescription.trim(),
       address: input.address?.trim() ?? "",
+      searchText,
       postalCode: normalizedGeo.postalCode,
       country: normalizedGeo.country,
       county: normalizedGeo.county,
@@ -198,8 +232,9 @@ export const prepareActorPersistData = async (
       baseMunicipalityId: municipalityRecord.id,
     },
     serviceAreaLinks,
-    serviceAreaCountySlugs: serviceAreaCountyRecords.map((county) => county.slug),
-    serviceAreaMunicipalitySlugs: serviceAreaMunicipalityRecords.map((municipality) => municipality.slug),
+    serviceAreaCountySlugs,
+    serviceAreaMunicipalitySlugs,
+    browseScopes,
   }
 }
 
@@ -221,6 +256,29 @@ export const replaceActorServiceAreas = async (
       actorId,
       countyId: entry.countyId,
       municipalityId: entry.municipalityId,
+    })),
+  })
+}
+
+export const replaceActorBrowseScopes = async (
+  db: GeoDbClient,
+  actorId: string,
+  browseScopes: ActorBrowseScopeRow[],
+) => {
+  await db.actorBrowseScope.deleteMany({
+    where: { actorId },
+  })
+
+  if (!browseScopes.length) {
+    return
+  }
+
+  await db.actorBrowseScope.createMany({
+    data: browseScopes.map((entry) => ({
+      actorId,
+      countySlug: entry.countySlug,
+      municipalitySlug: entry.municipalitySlug,
+      priority: entry.priority,
     })),
   })
 }

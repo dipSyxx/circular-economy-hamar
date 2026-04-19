@@ -3,6 +3,7 @@ import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu'
 import { cva } from 'class-variance-authority'
 import { ChevronDownIcon } from 'lucide-react'
 
+import { FLOATING_LAYER_CLASS } from '@/lib/ui/layers'
 import { cn } from '@/lib/utils'
 
 function NavigationMenu({
@@ -105,7 +106,7 @@ function NavigationMenuViewport({
 }: React.ComponentProps<typeof NavigationMenuPrimitive.Viewport>) {
   return (
     <div
-      className={'absolute top-full left-0 isolate z-50 flex justify-center'}
+      className={cn('absolute top-full left-0 isolate flex justify-center', FLOATING_LAYER_CLASS)}
     >
       <NavigationMenuPrimitive.Viewport
         data-slot="navigation-menu-viewport"

@@ -20,6 +20,7 @@ import {
   assertActorCategorySupportsExistingRepairServices,
   assertRepairServicesAllowed,
   prepareActorPersistData,
+  replaceActorBrowseScopes,
   replaceActorServiceAreas,
 } from "@/lib/actor-write"
 import { seedCanonicalGeoTaxonomy } from "@/lib/geo-taxonomy"
@@ -986,6 +987,7 @@ export const applyActorImportBatch = async (batchId: string, reviewerId?: string
         touchedActorIds.add(updated.id)
         actorCategoryBySlug.set(slug, category)
         await replaceActorServiceAreas(tx, updated.id, prepared.serviceAreaLinks)
+        await replaceActorBrowseScopes(tx, updated.id, prepared.browseScopes)
       } else {
         const created = await tx.actor.create({
           data: {
@@ -998,6 +1000,7 @@ export const applyActorImportBatch = async (batchId: string, reviewerId?: string
         touchedActorIds.add(created.id)
         actorCategoryBySlug.set(slug, category)
         await replaceActorServiceAreas(tx, created.id, prepared.serviceAreaLinks)
+        await replaceActorBrowseScopes(tx, created.id, prepared.browseScopes)
       }
     }
 

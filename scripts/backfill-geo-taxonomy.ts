@@ -22,7 +22,7 @@ const runBackfill = async () => {
 
   const { prisma } = await import("../lib/prisma")
   const { seedCanonicalGeoTaxonomy } = await import("../lib/geo-taxonomy")
-  const { prepareActorPersistData, replaceActorServiceAreas } = await import("../lib/actor-write")
+  const { prepareActorPersistData, replaceActorBrowseScopes, replaceActorServiceAreas } = await import("../lib/actor-write")
 
   const actors = await prisma.actor.findMany({
     select: {
@@ -53,6 +53,12 @@ const runBackfill = async () => {
       howToUse: true,
       image: true,
       nationwide: true,
+      serviceAreas: {
+        include: {
+          county: { select: { slug: true } },
+          municipality: { select: { slug: true } },
+        },
+      },
     },
   })
 
@@ -100,6 +106,10 @@ const runBackfill = async () => {
           howToUse: actor.howToUse,
           image: actor.image,
           nationwide: actor.nationwide,
+          serviceAreaCountySlugs: actor.serviceAreas.flatMap((entry) => (entry.county?.slug ? [entry.county.slug] : [])),
+          serviceAreaMunicipalitySlugs: actor.serviceAreas.flatMap((entry) =>
+            entry.municipality?.slug ? [entry.municipality.slug] : [],
+          ),
         },
         { createMissingMunicipality: true },
       )
@@ -109,6 +119,7 @@ const runBackfill = async () => {
         data: prepared.actorData,
       })
       await replaceActorServiceAreas(prisma, actor.id, prepared.serviceAreaLinks)
+      await replaceActorBrowseScopes(prisma, actor.id, prepared.browseScopes)
       updated += 1
     } catch (error) {
       unresolved.push({

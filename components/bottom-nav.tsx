@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { HEADER_LAYER_CLASS } from "@/lib/ui/layers"
 import { cn } from "@/lib/utils"
 import { Home, Sparkles, MapPin, Trophy, User, type LucideIcon } from "lucide-react"
 import { bottomNavCopy } from "@/content/no"
@@ -18,7 +19,12 @@ export function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border/70 bg-background/95 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur supports-[backdrop-filter]:bg-background/75 md:hidden">
+    <nav
+      className={cn(
+        "fixed inset-x-0 bottom-0 border-t border-border/70 bg-background/95 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur supports-[backdrop-filter]:bg-background/75 md:hidden",
+        HEADER_LAYER_CLASS,
+      )}
+    >
       <div className="mx-auto flex max-w-md items-end justify-between gap-1 px-3 pt-2">
         {bottomNavCopy.items.map((item) => {
           const isProfile = item.key === "profile"
