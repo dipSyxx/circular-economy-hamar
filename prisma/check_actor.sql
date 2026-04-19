@@ -1,1 +1,0 @@
-SELECT a.id, a.slug, a.category, COUNT(rs.id) as repair_count FROM actors a LEFT JOIN actor_repair_services rs ON rs.actor_id = a.id WHERE a.slug = 'maxis-kjopesenter-arendal' GROUP BY a.id, a.slug, a.category;
