@@ -450,7 +450,7 @@ model ActorRepairService {
   problemType ProblemType @map("problem_type")
   itemTypes   ItemType[]  @map("item_types")
   priceMin    Int         @map("price_min")
-  priceMax    Int         @map("price_max")
+  priceMax    Int?        @map("price_max")
   etaDays     Int?        @map("eta_days")
 
   actor Actor @relation(fields: [actorId], references: [id], onDelete: Cascade)

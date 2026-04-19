@@ -4,5 +4,5 @@ eksempel-aktor,Eksempel Aktør,brukt,Kort beskrivelse,Lang beskrivelse,Gate 1 00
   actor_sources: `actor_slug,type,title,url,captured_at,note
 eksempel-aktor,website,Offisiell nettside,https://example.no,2026-03-29,Primærkilde for åpningstider og kontaktinfo`,
   actor_repair_services: `actor_slug,problem_type,item_types,price_min,price_max,eta_days
-eksempel-aktor,screen,phone|laptop,900,1800,2`,
+eksempel-aktor,screen,phone|laptop,900,,2`,
 } as const

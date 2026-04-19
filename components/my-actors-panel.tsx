@@ -38,7 +38,7 @@ type ActorRepairService = {
   problemType: string
   itemTypes: string[]
   priceMin: number
-  priceMax: number
+  priceMax: number | null
   etaDays: number | null
 }
 

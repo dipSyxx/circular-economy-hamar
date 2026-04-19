@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { actorCopy } from "@/content/no"
 import { formatEnumLabel, formatItemTypeLabel, formatProblemTypeLabel } from "@/lib/enum-labels"
+import { formatRepairServicePriceLabel } from "@/lib/repair-price-format"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,7 +17,7 @@ type ActorRepairService = {
   problemType: string
   itemTypes: string[]
   priceMin: number
-  priceMax: number
+  priceMax: number | null
   etaDays: number | null
 }
 
@@ -435,7 +436,7 @@ export function PendingActorsPanel({ initialActors, reviewerId }: PendingActorsP
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <p className="text-sm font-medium">{formatProblemTypeLabel(service.problemType)}</p>
                           <Badge variant="outline">
-                            {service.priceMin}–{service.priceMax} kr
+                            {formatRepairServicePriceLabel(service)}
                           </Badge>
                         </div>
                         <div className="text-xs text-muted-foreground">

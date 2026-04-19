@@ -420,16 +420,16 @@ export function ActorSubmissionForm({
     repairEntries.forEach((service, index) => {
       if (!service.problemType) errors.push(`Tjeneste #${index + 1}: problemtype mangler.`)
       if (!service.itemTypes.length) errors.push(`Tjeneste #${index + 1}: velg minst en type.`)
-      if (!service.priceMin.trim() || !service.priceMax.trim()) {
+      if (!service.priceMin.trim()) {
         errors.push(`Tjeneste #${index + 1}: pris må fylles ut.`)
         return
       }
 
       const min = Number(service.priceMin)
-      const max = Number(service.priceMax)
-      if (!Number.isFinite(min) || !Number.isFinite(max)) {
+      const max = service.priceMax.trim() ? Number(service.priceMax) : null
+      if (!Number.isFinite(min) || (max !== null && !Number.isFinite(max))) {
         errors.push(`Tjeneste #${index + 1}: pris må fylles ut.`)
-      } else if (min > max) {
+      } else if (max !== null && min > max) {
         errors.push(`Tjeneste #${index + 1}: pris min kan ikke være høyere enn max.`)
       }
     })
@@ -476,7 +476,7 @@ export function ActorSubmissionForm({
           problemType: service.problemType,
           itemTypes: service.itemTypes,
           priceMin: Number(service.priceMin),
-          priceMax: Number(service.priceMax),
+          priceMax: service.priceMax ? Number(service.priceMax) : null,
           etaDays: service.etaDays ? Number(service.etaDays) : null,
         }))
 
@@ -650,7 +650,7 @@ export function ActorSubmissionForm({
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <Label>Pris fra (NOK)</Label>
+                    <Label>Fra-pris (NOK)</Label>
                     <Input
                       type="number"
                       min="0"
@@ -662,7 +662,7 @@ export function ActorSubmissionForm({
                   </div>
 
                   <div>
-                    <Label>Pris til (NOK)</Label>
+                    <Label>Makspris (NOK, valgfri)</Label>
                     <Input
                       type="number"
                       min="0"

@@ -374,7 +374,7 @@ export interface RepairService {
   problemType: ProblemType
   itemTypes?: ItemType[]
   priceMin: number
-  priceMax: number
+  priceMax: number | null
   etaDays?: number
 }
 

@@ -43,7 +43,7 @@ export type ValidatedActorSubmission = {
     problemType: ProblemType
     itemTypes: ItemType[]
     priceMin: number
-    priceMax: number
+    priceMax: number | null
     etaDays: number | null
   }>
   sources: Array<{
@@ -139,10 +139,10 @@ export const validateActorSubmission = (payload: SubmissionPayload) => {
       if (!itemTypes.length) {
         throw new Error(`Tjeneste #${index + 1} ma ha minst en varetype.`)
       }
-      if (priceMin === null || priceMax === null) {
+      if (priceMin === null) {
         throw new Error(`Tjeneste #${index + 1} må ha prisområde.`)
       }
-      if (priceMin > priceMax) {
+      if (priceMax !== null && priceMin > priceMax) {
         throw new Error(`Tjeneste #${index + 1} har ugyldig prisområde.`)
       }
 
